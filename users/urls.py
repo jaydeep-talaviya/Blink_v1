@@ -1,5 +1,5 @@
 from django.urls import path,include
-from . views import home,registration,loginpage,logoutuser,change_password,profilesave,profileshow,set_user_order_place
+from . views import home,registration,loginpage,logoutuser,change_password,profilesave,profileshow
 from django.contrib.auth import views as auth_views
 
 
@@ -7,7 +7,6 @@ urlpatterns = [
     path('',home,name='home'),
     path('registration',registration,name='registration'),
     path('login/',loginpage,name='login'),
-    path('set/place',set_user_order_place,name='set_place'),
     path('logout',logoutuser,name='logout'),
     
     path('profile/update',profilesave,name='profilesave'),

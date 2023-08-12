@@ -50,55 +50,35 @@ def registration(request):
     form=UserRegistrationForm()
     return render(request,'users/register.html',{'form':form})
 
-def set_user_order_place(request):
-    if request.method=='POST':
-        select_place=request.POST.get('select_place')
-        request.user.order_place_city=select_place
-        request.user.save()
-        return redirect('home')
-    else:
-        places=Store.objects.all().values('owner_id__city')
-        return render(request,'users/set_user_order_place.html',{'places':places})
 
 def loginpage(request):
     if request.method == 'POST':
         next_url=request.GET.get("next", None)
-
         form=UserLoginForm(request.POST)
         if form.is_valid():
             username_or_email=form.cleaned_data.get('usernameoremail')
             password=form.cleaned_data.get('password')
-            username=User.objects.all().filter(Q(username=username_or_email) | Q(email=username_or_email))
+            username=User.objects.filter(Q(username=username_or_email) | Q(email=username_or_email))
+            user = None
             if len(username)!=0 and len(username)==1:
                 username=username[0].username
                 user = auth.authenticate(username=username, password=password)
-                # messages.success(request, 'You are now logged in')
-            else:
-                user=None
-            # print(username,password,user)
             if user is not None:
                 auth.login(request, user)
-                # messages.success(request, f"Welcome Back {username}")
-
                 messages.success(request, 'You are now logged in')
-                if user.order_place_city != None:
-                    if next_url:
-                        return redirect(next_url)
-                    return redirect('home')
-                else:
-                    return redirect('set_place')
+                if next_url:
+                    return redirect(next_url)
+                return redirect('home')
             else:
                 messages.error(request, 'Invalid username or password')
                 form=UserLoginForm()
                 return render(request,'users/login.html',{'form':form})
-    else:
-        form=UserLoginForm()
-        return render(request,'users/login.html',{'form':form})
+    form=UserLoginForm()
+    return render(request,'users/login.html',{'form':form})
 
 def logoutuser(request):
     auth.logout(request)
     messages.warning(request, 'You Are Logged Out Successfully')
-
     return redirect('home')
 
 @login_required

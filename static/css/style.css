@@ -58,3 +58,15 @@ ul.pagination li a{
     width: 100%;
     overflow-x: scroll;
 }
+#carouselExampleControls{
+    position: relative;
+
+}
+
+#carouselExampleControls { background-color: black;}
+#carouselExampleControls img { opacity: 0.5; }
+
+.carousel-item .w-100{
+    max-height:70vh;
+
+}

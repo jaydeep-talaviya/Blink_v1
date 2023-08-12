@@ -39,7 +39,7 @@
   <link href="{% static 'plugins/jquery-nice-select/css/nice-select.css' %}" rel="stylesheet">
   <!-- CUSTOM CSS -->
   <link href="{% static 'css/mystyle.css' %}" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/city_changer.css' %}">
+<!--  <link rel="stylesheet" href="{% static 'css/city_changer.css' %}">-->
 
 
     <title>KH | {% block title %} {% endblock title %} </title>
@@ -66,22 +66,10 @@
              
                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                   {% for i in category %}
-
                    <li><a class="dropdown-item" href="{% url 'productlist' i.category_name %}">{{i.category_name}}</a></li>
-
                    {% endfor %}
-
                   </ul>
-
-
-              <!-- </div> -->
             </li>
-            {% if user.is_authenticated %}
-            <li class="nav-item ml-4 mt-2">
-              <a class="btn-sm btn-light text-decoration-none" aria-current="page" href="{% url 'set_place' %}">Order Place</a>
-            </li>
-            {% endif %}
-
 
          </ul>
          <form name="myform" method="GET" class="d-flex" action="{% url 'search' %}">
@@ -212,7 +200,7 @@
       }
     </script>
     {% include './messages.html' %}
-    {% include './city_changer.html' %}
+<!--    {% include './city_changer.html' %}-->
 
     {% block banner_slider %} {% endblock banner_slider %}
     {% block livesale %} {% endblock livesale %}
@@ -230,7 +218,7 @@
         <div class="col-md-4 ">
           <div class="row ">
             <div class="d-flex justify-content-center">
-              <img src="{% static 'images/food.jpeg' %}" alt="..." width="200px" height="150px">
+              <img src="{% static 'images/food.png' %}" alt="..." width="200px" height="150px">
             </div>
             <!-- <div>
               <p class="alt-color text-center">When you eat food with your family and friends, it always tastes better!</p>
@@ -255,7 +243,7 @@
                   <a class="text-white text-decoration-none" href="#!">Sitemap</a>
                 </li>
               </ul> -->
-              <h4 class="alt-color text-center">When you eat food with your family and friends, it always tastes better!</h4>
+              <h4 class="alt-color text-center">Wood is a versatile and timeless material that bridges the gap between nature and design, embodying both strength and beauty in its grain</h4>
 
             </div>
             </div>
