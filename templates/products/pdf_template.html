@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Receipt For {{order.orderid}}</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+		<style>
+			.invoice-box {
+				max-width: 800px;
+				margin: auto;
+				padding: 30px;
+				border: 1px solid #eee;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+				font-size: 16px;
+				line-height: 24px;
+				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+				color: #555;
+			}
+
+			.invoice-box table {
+				width: 100%;
+				line-height: inherit;
+				text-align: left;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<div class="invoice-box">
+					<div class="row">
+							<div class="col">
+								<div class="title">
+									<img src="https://static.wikia.nocookie.net/blinks/images/5/53/Black-pink_1484414135_af_org.jpg/revision/latest?cb=20170424010306" style="width: 150px; height: 100px;" />
+								</div>
+							</div>
+							<div class="col">
+								<div class="order_details">
+									<p>OrderID #: {{order.orderid}}</p>
+									Created At: {{order.created_at}}<br />
+									
+								</div>
+							</div>
+					</div>
+							
+
+					<div class="py-5">
+						<table>
+							<tr>
+								<td>
+									{{order.checkout.address1}},{% if order.checkout.address2 %} {{order.checkout.address2}} {% endif %} <br/>{{order.checkout.city}},{{order.checkout.zip}}<br/>{{order.checkout.state}},{{order.checkout.country}}
+								</td>
+                                <td> To:
+									{{order.checkout.first_name}} {{order.checkout.last_name}}
+                                    <br/>
+                                    {% if order.user.email != None %} {{order.user.email}}<br/> {% endif %} {% if order.user.phone_number != None %} {{order.user.phone_number}}<br/> {% endif %} 
+								</td>
+								
+							</tr>
+						</table>
+					</div>
+					<div>
+						<h5>Payment Status</h5>
+						<table class="table">
+							<thead class="bg-light">
+							  <tr>
+								<th scope="col">Payment Method </th>
+								<th scope="col">Total Amount Paid</th>
+								<th scope="col">Payment Status</th>
+							  </tr>
+							</thead>
+							<tbody>
+							  <tr>
+								<td class="text-center">{{order.payment_set.last.payment_method}}</td>
+								<td  class="text-center">{{order.amount}} RS.</td>
+								<td  class="text-center">{{order.payment_set.last.status}}</td>
+							  </tr>
+							  
+							  
+							</tbody>
+						  </table>
+					</div>
+					<div>
+						<h5>Order Details</h5>
+						<table class="table">
+							<thead class="bg-light">
+							  <tr>
+								<th scope="col">Product </th>
+								<th scope="col">QTY</th>
+								<th scope="col">Unit Price</th>
+								<th scope="col">Sub Total</th>
+							  </tr>
+							</thead>
+							<tbody>
+								{% for orderline in orderlines %}
+							  <tr>
+								<td class="text-center">{{orderline.product_id}}</td>
+								<td  class="text-center">{{orderline.qty}}</td>
+								<td  class="text-center">{{orderline.price}} RS.</td>
+								<td  class="text-center">{% widthratio orderline.qty 1 orderline.price %} RS.</td>
+							</tr>
+							{% endfor %}
+
+							</tbody>
+						  </table>
+					</div>
+					{% if order.deals_of_day.all %}
+					<div>
+						<h5>Applied Deals Of The Day </h5>
+						<table class="table">
+							<thead class="bg-light">
+							  <tr>
+								<th scope="col">Products Together</th>
+								<th scope="col">Discount Rs.</th>
+							  </tr>
+							</thead>
+							<tbody>
+							  {% for deal in order.deals_of_day.all %}
+							  <tr>
+								<th scope="row">{{forloop.count}}</th>
+								<td>{{deal.p_id.p_name}} with {{deal.with_product.p_name}}</td>
+								<td>{{deal.discount_price}} RS.</td>
+							  </tr>
+							  {% endfor %}
+					
+							</tbody>
+						  </table>
+					</div>
+					{% endif %}
+
+					<div>
+						{% if order.discount %}
+						<h6>On Total {{order.discount.on_above_purchase}} Rs. {{order.discount.percent_off}} % Off </h6>
+
+						{% endif %}
+					</div>
+					<div>
+						<h4 class="text-center">Grand Total: {{order.amount}} RS</h4>
+					</div>
+				
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+	</body>
+
+</html>

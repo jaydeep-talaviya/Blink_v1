@@ -1,0 +1,33 @@
+{% for cmt_rts in product_comments_rate%}
+<div class="media">
+    <!-- Avater -->
+    {% if cmt_rts.user_id.profile_pic %}
+    <img src="{{ cmt_rts.user_id.profile_pic.url}}" alt="{{ cmt_rts.user_id}}">
+    {% endif %}
+    <div class="media-body">
+        <!-- Ratings -->
+        <div class="ratings">
+            <ul class="list-inline">
+                {% for i in cmt_rts.rate %}
+                <li class="list-inline-item" style="color: {{i}};">
+                    <i class="fa fa-star"></i>
+                </li>
+
+                {% endfor %}
+
+            </ul>
+        </div>
+        <div class="name">
+            <h5>{{cmt_rts.user_id.username}}</h5>
+        </div>
+        <div class="date">
+            <p>Mar 20, 2018</p>
+        </div>
+        <div class="review-comment">
+            <p>
+                {{cmt_rts.comment}}
+            </p>
+        </div>
+    </div>
+</div>
+{% endfor %}

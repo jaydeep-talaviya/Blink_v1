@@ -1,0 +1,227 @@
+{% extends '../base.html' %}
+{% load static %}
+<!-- Owl Carousel -->
+
+{% block title %}Checkout{% endblock title %}
+{% block main-content %}
+<div class="container">
+    <div class="row my-3">
+        <div class="col-sm-10 offset-md-1">
+            <h3>Please Enter Your shipping Details</h3>
+            <hr>
+            <form action="" method="POST" novalidate class="shadow p-5">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">First Name</label>
+                            <input type="text" name="first_name" maxlength="100" class="form-control" {% if checkoutform.first_name.value != None %} value="{{checkoutform.first_name.value}}"{% endif %} required id="id_first_name">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">Last Name</label>
+                            <input type="text" name="last_name" maxlength="100" class="form-control" {% if checkoutform.last_name.value != None %} value="{{checkoutform.last_name.value}}"{% endif %} required id="id_last_name">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_address1" class="form-label">Address 1</label>
+                            <textarea name="address1" cols="20" class="form-control" rows="1" required="" id="id_address1">{% if checkoutform.address1.value != None %}{{checkoutform.address1.value}}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_address2" class="form-label">Address 2(optional)</label>
+                            <textarea name="address2" cols="20" class="form-control" rows="1" required="" id="id_address2">{% if checkoutform.address2.value != None %}{{checkoutform.address2.value}}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="row">
+                    
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="id_country">Select Country</label>
+                            <select class="form-control" onchange="selected_conuntry(this.value)" name="country" id="id_country">
+                              {% for i,k in countries %}
+                                <option value="{{i}}-{{k}}">{{k}}</option>
+                                {% endfor %}
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="id_state">select State</label>
+                            <select class="form-control" hidden name="state" id="id_state">
+                                {% for i,k in states %}
+                                <option value="{{k}}">{{k}}</option>
+                                {% endfor %}
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_city" class="form-label">Zip</label>
+                            <input type="number" name="city" class="form-control" id="id_city">
+                        </div>
+                    </div>
+                </div> -->
+
+            <div class="row">
+                <div class="col">
+                  
+                    <div class="mb-3">
+                        <label for="id_country" class="form-label">Country</label>
+                        <input type="text" name="country" class="form-control" {% if checkoutform.country.value != None %} value="{{checkoutform.country.value}}"{% endif %} id="id_country">
+                    </div>
+                </div>
+                <div class="col">
+                    
+                    <div class="mb-3">
+                        <label for="id_state" class="form-label">State</label>
+                        <input type="text" name="state" class="form-control" {% if checkoutform.state.value != None %} value="{{checkoutform.state.value}}"{% endif %} id="id_state">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    
+                    <div class="mb-3">
+                        <label for="id_city" class="form-label">City</label>
+                        <input type="text" name="city" class="form-control" {% if checkoutform.zip.value != None %} value="{{checkoutform.city.value}}"{% endif %} id="id_city">
+                    </div>
+                    </div>
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="id_zip" class="form-label">Zip</label>
+                            <input type="text" name="zip" class="form-control" {% if checkoutform.zip.value != None %} value="{{checkoutform.zip.value}}"{% endif %} id="id_zip">
+                        </div>
+                    </div>
+                   
+                </div>
+
+                <div class="row">
+                    <div class="col-2">
+                        <p><label for="id_payment_type_0">Payment type:</label> </p>
+                    </div>
+                    <div class="col-form-label col-sm-5 pt-0">
+                        <ul id="id_payment_type">
+                            <li class="form-check">
+                                <label for="id_payment_type_0" class="form-check-label">
+                            <input type="radio" name="payment_type" class="form-check-input" checked value="case_on_delivery" {% if checkoutform.payment_type.value != None and checkoutform.payment_type.value == 'case_on_delivery' %} checked {% endif %} required="" id="id_payment_type_0">
+                            Case On Delivery</label>
+    
+                            </li>
+                            <li class="form-check">
+                                <label for="id_payment_type_1" class="form-check-label">
+                                    <input type="radio" name="payment_type" class="form-check-input" value="paytm" {% if checkoutform.payment_type.value != None and checkoutform.payment_type.value == 'paytm' %} checked {% endif %} required="" id="id_payment_type_1">
+                            Using Paytm</label>
+    
+                            </li>
+                            
+                            </ul>
+                    </div>
+<!--                         
+                    <div class="credit_or_debit" style="display: none;">
+                        <div class="container mt-5">
+                            <div class="row justify-content-center">
+                                <div class="col-xs-12 col-md-6 col-md-offset-4 border border-primary pb-3 rounded" style="box-shadow: 1px 19px 56px -1px rgba(0,0,0,0.7);
+                                -webkit-box-shadow: 1px 19px 56px -1px rgba(0,0,0,0.7);
+                                -moz-box-shadow: 1px 19px 56px -1px rgba(0,0,0,0.7);" >
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <div class="row">
+                                                <h3 class="text-center">Payment Details</h3>
+                                                <img class="img-responsive cc-img" src="http://www.prepbootstrap.com/Content/images/shared/misc/creditcardicons.png">
+                                            </div>
+                                        </div>
+                                        <div class="panel-body">
+                                            <form role="form">
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div class="form-group">
+                                                            <label>CARD NUMBER</label>
+                                                            <div class="input-group">
+                                                                <input type="tel" class="form-control" placeholder="Valid Card Number" />
+                                                                <span class="input-group-addon"><span class="fa fa-credit-card"></span></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-7 col-md-7">
+                                                        <div class="form-group">
+                                                            <label><span class="hidden-xs">EXPIRATION</span><span class="visible-xs-inline">EXP</span> DATE</label>
+                                                            <input type="tel" class="form-control" placeholder="MM / YY" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-5 col-md-5 pull-right">
+                                                        <div class="form-group">
+                                                            <label>CV CODE</label>
+                                                            <input type="tel" class="form-control" placeholder="CVC" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div class="form-group">
+                                                            <label>CARD OWNER</label>
+                                                            <input type="text" class="form-control" placeholder="Card Owner Names" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="panel-footer">
+                                            <div class="row">
+                                                <div class="col-xs-12">
+                                                    <button class="btn btn-warning btn-lg btn-block">Process payment</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <style>
+                            .cc-img {
+                                margin: 0 auto;
+                            }
+                        </style>
+                    </div> -->
+
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-danger">Submit</button>
+                    </div>
+                    <br>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script src="//geodata.solutions/includes/countrystatecity.js"></script>
+
+<script type="text/javascript">
+    window.addEventListener('load', (event) => {
+        // var x=document.getElementsByClassName('countries');
+        var x=$('.countries');
+        
+        // var a = JSON.parse("{{checkoutform.country.value|escapejs}}");
+        console.log("a",a);
+        console.log('page is fully loaded');
+        });
+
+</script>
+
+{% endblock main-content %}
+

@@ -1,0 +1,53 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Attribute Name</th>
+                    <th scope="col">Attribute Value</th>
+                    <th scope="col">Product</th>
+                    <th scope="col"> Price </th>
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for product_attribute in product_attributes %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                        <td> {{product_attribute.product_id__productchangepriceattributes__attribute_values__a_name__a_name}}</td>
+                        <td> {{product_attribute.product_id__productchangepriceattributes__attribute_values__a_value}} </td>
+                        <td> {{product_attribute.product_id__p_name}}</td>
+                        <td> {{product_attribute.product_id__productchangepriceattributes__price}} Rs.</td>
+                        
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'product_update_attribute' pid=product_attribute.product_id__id id=product_attribute.product_id__productchangepriceattributes__id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                <button class="btn btn-danger">Delete</button>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+                </tbody>
+              </table>
+          </div>
+    </div>
+    
+</div>
+
+{% endblock main-content %}

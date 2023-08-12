@@ -1,0 +1,95 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %} Orders List {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<section class="">
+    <!-- Container Start -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2 text-center">
+                <!-- Title text -->
+                <h1>Today's Orders List</h1>
+            </div>
+        </div>
+    </div>
+    <!-- Container End -->
+</section>
+<section class=" my-3">
+    <div class="d-flex justify-content-center my-5">
+        <div class="card" style="width: 60rem;">
+            <div class="card-body bg-dark">
+                <div class="row text-center">
+                    <div class="col-sm-3">
+                      <a href="{% url 'orderlists_with_status' status='order_confirm' %}" class="text-decoration-none btn-sm {% if Status == 'order_confirm' %} btn-light {% else %} btn-primary {% endif %}">Order Confirmed</a>
+                    </div>
+                    <div class="col-sm-3">
+                        <a href="{% url 'orderlists_with_status' status='order_cancel' %}" class="text-decoration-none btn-sm {% if Status == 'order_cancel' %} btn-light {% else %} btn-primary {% endif %}">Order canceled</a>
+
+                    </div>
+                    <div class="col-sm-3">
+                        <a href="{% url 'orderlists_with_status' status='order_delivering' %}" class="text-decoration-none btn-sm {% if Status == 'order_delivering' %} btn-light {% else %} btn-primary {% endif %}">Order Delivering</a>
+
+                    </div>
+                    <div class="col-sm-3">
+                        <a href="{% url 'orderlists_with_status' status='order_shipped' %}" class="text-decoration-none btn-sm {% if Status == 'order_shipped' %} btn-light {% else %} btn-primary {% endif %}">Order Shipped</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        {% if orderlist %}
+        {% for order in orderlist %}
+        <div class="d-flex justify-content-center">
+            <div class="card" style="width: 60rem;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Order:</span> {{order.order.first.product_id.p_name}}
+                             {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }}
+                              others 
+                              {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">User :</span> {{order.user.username}}
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Created At:</span> {{order.created_at.time }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Order Total Amount:</span> {{order.amount}} Rs.
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Payment Status:</span> {{order.payment_set.last.status}} 
+                        </div>
+                        <div class="col-sm-4">
+                            <a href="{% url 'single_order' order_id=order.orderid  %}"
+                                class="text-decoration-none btn-sm btn-primary">Check Order</a>
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="mb-5">
+            <h3 class="text-center">There are no any delivery for {{Status}}</h3>
+        </div>
+        {% endif %}
+        
+        
+
+
+</section>
+
+
+
+{% endblock main-content %}

@@ -1,0 +1,54 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Login{% endblock title %}
+{% block main-content %}
+{% load socialaccount %}
+{% providers_media_js %}
+<div class="container">
+  <div class="row my-3">
+   <div class="col-sm-6 offset-sm-3">
+    <h3>Sign Up</h3>
+    <hr>
+
+    {% if form.errors %}
+    <div class="alert alert-error">
+      <h4>Please fix the following errors</h4>
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}
+            {% for error in field.errors %}
+              <li><a href="#id_{{ field.name }}" class="error text-decoration-none">{{ error|escape }}</a></li>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+      {% endif %}
+    </div>
+  {% endif %}
+
+<p>You are about to use your Google account to login to
+Kimchi House. As a final step, please complete the following form:</p>
+<form class="signup shadow p-5" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}" >
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    <label for="id_email" class="form-label">Email</label>
+    <input type="email" name="email" class="form-control" value="{{form.email.value}}" placeholder="E-mail address" autocomplete="email" required id="id_email" />
+   </div>
+   <div class="mb-3">
+    <label for="id_username" class="form-label">Username</label>
+    <input type="text" name="username" placeholder="username" autocomplete="username" minlength="1" maxlength="150" required class="form-control" id="id_username">
+   </div>
+  
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+  <button class="btn btn-danger" type="submit">Sign Up &raquo;</button>
+  </div>
+</form>
+</div>
+</div>
+
+{% endblock main-content %}

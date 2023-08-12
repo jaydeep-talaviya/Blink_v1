@@ -1,0 +1,85 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %} Payment List {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<section class="">
+    <!-- Container Start -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2 text-center">
+                <!-- Title text -->
+                <h1>Today's Payment List</h1>
+            </div>
+        </div>
+    </div>
+    <!-- Container End -->
+</section>
+<section class=" my-3">
+    <div class="d-flex justify-content-center my-5">
+        <div class="card" style="width: 60rem;">
+            <div class="card-body bg-dark">
+                
+                <div class="row text-center">
+                    <div class="col-sm-4">
+                        <a href="{% url 'paymentlists_with_status' status='SUCCESS' %}" class="text-decoration-none btn-sm {% if Status == 'SUCCESS' %} btn-light {% else %} btn-primary {% endif %}">Success</a>
+                    </div>
+                    <div class="col-sm-4">
+                      <a href="{% url 'paymentlists_with_status' status='Pending' %}" class="text-decoration-none btn-sm {% if Status == 'Pending' %} btn-light {% else %} btn-primary {% endif %}">Pending</a>
+                    </div>
+                    
+            
+                    <div class="col-sm-4">
+                        <a href="{% url 'paymentlists_with_status' status='Cancel' %}" class="text-decoration-none btn-sm {% if Status == 'Cancel' %} btn-light {% else %} btn-primary {% endif %}">Cancel</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        {% if paymentlist %}
+        {% for payment in paymentlist %}
+        <div class="d-flex justify-content-center">
+            <div class="card" style="width: 60rem;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Payment Method:</span> {{payment.payment_method}}
+                             
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Order For :</span>  {{payment.order_id.order.first.product_id.p_name}}
+                            {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }}
+                              others 
+                              {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Created At:</span> {{payment.created_at.time }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Payable Amount:</span> {{payment.order_id.amount}} Rs.
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">From :</span> {{payment.order_id.user.username}} 
+                        </div>
+                     
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="mb-5">
+            <h3 class="text-center">There are no any delivery for {{Status}}</h3>
+        </div>
+        {% endif %}
+        
+</section>
+{% endblock main-content %}

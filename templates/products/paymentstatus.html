@@ -1,0 +1,25 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Payment Status{% endblock title %}
+{% block main-content %}
+<div class="container">
+    <div class="row my-3">
+        <div class="col-sm-6 offset-sm-3">
+            <h3>Your Order is Created But Payment Failed!</h3>
+            <hr>
+            <div class="mb-3">
+                <h3>Payment status regarding your order Id {{response.ORDERID}}</h3>
+            </div>
+            {% if response.RESPCODE == '01' %}
+            <p class="text-dark text-center">Your Playment Is Successfully Received!</p>
+            {% endif%}
+            {% if response.RESPCODE == '402' %}
+            <p class="text-dark text-center">Your Playment Is Not Received! Due to {{response.RESPMSG}}</p>
+            {% endif%}
+            <a href="{% url 'orderviews' orderid=response.ORDERID %}" class="btn btn-primary mt-4">See Your Order</a>
+            <br>
+        </div>
+    </div>
+</div>
+
+{% endblock main-content %}

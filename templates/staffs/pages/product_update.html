@@ -1,0 +1,130 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+  {%include '../partials/breadcrumbs.html'%}
+</div>
+{%load crispy_forms_tags %} 
+
+<div class="container mb-5">
+
+            {% load crispy_forms_tags %}
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+              {% if pid %}
+              <h1 class="h3 mb-0 text-gray-800">Update {{forms.p_name.value}}</h1>
+
+              {% else %}
+              <h1 class="h3 mb-0 text-gray-800">Add New Product</h1>
+
+
+              {% endif %}
+            </div>
+            <div class="d-flex justify-content-center pb-2">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- {{ forms|crispy}} -->
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12 mb-0">
+                          {{ forms.p_name|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.p_category|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.p_subcategory|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-12 mb-0">
+                          {{ forms.description|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-12 mb-0">
+                          {{ forms.ingredience|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.price|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row" style="overflow-wrap: break-word;">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.photo_1|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            {{ forms.photo_2|as_crispy_field }}
+                          </div>
+                          <div class="form-group col-md-4 mb-0">
+                            {{ forms.photo_3|as_crispy_field }}
+                          </div>
+                      </div>
+                      <div class="form-row" style="overflow-wrap: break-word;">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.photo_4|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                            {{ forms.photo_5|as_crispy_field }}
+                          </div>
+                          <div class="form-group col-md-4 mb-0">
+                            {{ forms.photo_6|as_crispy_field }}
+                          </div>
+                      </div>
+
+
+                    <button type="submit" class="btn btn-success"> Submit </button>
+                </form>
+            </div>
+            <div>
+              {% if pid %}
+              <div class="my-4">
+                <a href="{% url 'create_product_attribute' pid=pid %}" class="btn btn-primary">Add New Product Attribute</a>
+
+              </div>
+
+              {% endif %}
+              
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Attribute Name</th>
+                    <th scope="col">Attribute Values</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for attrs in p_attrs %}
+                  <tr>
+                    <th scope="row">1</th>
+                    <td>{{attrs.attribute_values__a_name__a_name}}</td>
+                    <td>{{attrs.attribute_values__a_value}}</td>
+                    <td>{{attrs.price}}</td>
+                    <td>
+                      <div class="d-flex justify-content-around">
+                         <div>
+                          <a href="{% url 'product_update_attribute' pid=pid id=attrs.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                         </div>
+                         <div>
+                          <button class="btn btn-danger">Delete</button>
+                         </div>
+                      </div>
+                  </td>
+
+                  </tr>
+                  {% endfor %}
+              
+               
+                </tbody>
+              </table>
+            </div>
+        
+</div>
+
+{% endblock main-content %}

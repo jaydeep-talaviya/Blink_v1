@@ -1,0 +1,33 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Login{% endblock title %}
+{% block main-content %}
+
+
+<div class="container">
+ <div class="row my-3">
+  <div class="col-sm-6 offset-sm-3">
+   <h3>Set Place Of Order</h3>
+   <hr>
+   <form action="" method="post" novalidate class="shadow p-5">
+    {% csrf_token %}
+  <div class="mb-3">
+     <label for="id_select_place" class="form-label">Places</label>
+     <select class="form-control" name="select_place" id="id_select_place">
+        {% for i in places %}
+        <option value="{{i.owner_id__city}}">{{i.owner_id__city}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <input type="submit" class="btn btn-primary mt-4" value="Set">
+    <br>
+    
+   </form>
+   
+   </div>
+  </div>
+ </div>
+</div>
+
+</div>
+{% endblock main-content %}

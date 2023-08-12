@@ -1,0 +1,52 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="p-3 text-center">
+                <a href="{% url 'product_add' %}" class="btn btn-primary text-decoration-none">Add New Product</a>
+            </div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Category</th>
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                        <td> {{product.p_name}}</td>
+                        <td> {{product.price}} Rs.</td>
+                        <td> {{product.p_category}}</td>
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'product_update' id=product.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                <button class="btn btn-danger">Delete</button>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+                </tbody>
+              </table>
+          </div>
+    </div>
+    
+</div>
+
+{% endblock main-content %}

@@ -1,0 +1,287 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Buy Now{% endblock title %}
+{% block main-content %}
+<link href="{% static 'css/slider.css' %}" rel="stylesheet" />
+
+<section class="section-sm">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="search-result bg-gray">
+                    <h2>Results For "{{result_for}}"</h2>
+                    <!-- <p>123 Results on 12 December, 2017</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="category-sidebar">
+                    {% if category %}
+                    <div class="widget category-list">
+                        <h4 class="widget-header">All Category</h4>
+                        <p>All</p>
+                        <ul class="category-list">
+                            
+                            <li><a class="text-decoration-none" href="{% url 'productlist' %}">All Products</a></li>
+                        </ul>
+                        <hr/>
+
+                        {% for i in category %}
+                        <p>{{i.category_name}}</p>
+                        <ul class="category-list">
+                            {% if i.subcategory_set.count != 0 %}
+                            {% for subcateg in i.subcategory_set.values %}
+                            <li><a class="text-decoration-none" href="{% url 'productlist' subcateg.subcategory_name %}">{{subcateg.subcategory_name}}</a></li>
+                            {% endfor %}
+                            {% endif %}
+                        </ul>
+                        <hr/>
+                        {% endfor %}
+
+                    </div>
+                    {% endif %}
+
+                    <div class="widget price-range w-100">
+                        <h4 class="widget-header">By Price</h4>
+                        <div class="d-flex justify-content-center">
+                            <fieldset class="filter-price">
+                                <div class="price-wrap">
+                                    <span class="price-title">Price</span>
+                                    <div class="price-wrap-1">
+                                      <input id="one">
+                                      <label for="one">$</label>
+                                    </div>
+                                    <div class="price-wrap_line">-</div>
+                                    <div class="price-wrap-2">
+                                      <input id="two">
+                                      <label for="two">$</label>
+                                    </div>
+                                  </div>
+                              <div class="price-field">
+                                <input type="range"  min="{{minvalue.price__min}}" max="{{maxvalue.price__max}}" value="{{minvalue.price__min}}" id="lower" >
+                                <input type="range" min="{{minvalue.price__min}}" max="{{maxvalue.price__max}}" value="{{maxvalue.price__max}}" id="upper" >
+                              </div>
+                               
+                            </fieldset>
+                       
+                        </div>
+                        <div class="text-center pt-2">
+                            <button  type="button" class="btn btn-primary text-white" onclick="get_product_pricerange('{{result_for}}')" style="padding:6px;">Apply</button>
+
+                        </div>
+                        
+                      </div>
+
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="category-search-filter">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Sort By</strong>
+                            <select id="selectedIndex" class="form-control" onchange="get_selectd(event,'{{result_for}}')">
+
+                                <option value="popularity">Popularity</option>
+                                <option value="avg_rating">Top rated</option>
+                                <option value="price" selected>Lowest Price</option>
+                                <option value="-price">Highest Price</option>
+                            </select>
+                        </div>
+                        <!-- <div class="col-md-6">
+                             <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Toggle second element</button>
+
+                        </div> -->
+                    </div>
+                </div>
+
+                <div class="product-grid-list">
+                    <div class="row mt-30">
+                        {% if products %}
+                        {% for product in products %}
+                        <div class="col-sm-12 col-lg-4 col-md-6">
+                            <!-- product card -->
+                           
+                            <div class="product-item bg-light">
+                                <div class="card">
+                                    <div class="thumb-content">
+                                            <div class="price">RS,{{product.price}}</div>
+                                            <a class="text-decoration-none" href="{% url 'productdetail' product.id %}">
+                                                <img style=" height:250px;width:100%;" src="{{product.photo_1.url}}"
+                                                    alt="Card image cap">
+                                            </a>
+                                        
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="card-title"><a class="text-decoration-none" href="{% url 'productdetail' product.id %}">{{product.p_name}}</a></h4>
+                                        <ul class="list-inline product-meta">
+                                            <li class="list-inline-item">
+                                                <a class="text-decoration-none" href="#"><i class="fas fa-fire"></i> {{product.ingredience}}</a>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <a class="text-decoration-none" href="#"><i class="fas fa-calendar"></i> {{product.p_created}}</a>
+                                            </li>
+                                        </ul>
+                                        {% if product.left_qty < product.on_alert_qty  %}
+                                        <div class="d-flex justify-item-center">
+                                            <p class="text-center text-danger">Only {{product.left_qty}} left in Stock.</p>
+                                        </div>
+                                        {% endif %}
+                                        <div class="product-ratings">
+                                            {% load custom_tags %}
+                                            
+                                            
+                                            <ul class="list-inline" id="average_rate">
+                                                {% for i in product.rates_set|get_avarage_rate %}
+                                                <li class="list-inline-item" style="color: {{i}};"><i class="fa fa-star"></i></li>
+                                                
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        {% endfor %}
+                            {% else %}
+                            <h1>sorry!! there are no any products</h1>
+                            {% endif %}
+                    </div>
+                </div>
+
+            
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="">
+                        {% if products.has_other_pages %}
+                        <ul class="pagination">
+                
+                            {% if products.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+                                </li>
+                                {% if products.previous_page_number != 1 %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                
+                
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor%}
+                
+                
+                    {% if products.has_next %}
+                        {% if products.next_page_number != paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                        </li>
+                        {% else %}
+                    <li>
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                        </ul>
+                      {% endif %}
+                      </nav>   
+                </div>
+                      
+             </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+    
+//-----JS for Price Range slider-----
+var lowerSlider = document.querySelector('#lower');
+var  upperSlider = document.querySelector('#upper');
+
+document.querySelector('#two').value=upperSlider.value;
+document.querySelector('#one').value=lowerSlider.value;
+
+var  lowerVal = parseInt(lowerSlider.value);
+var upperVal = parseInt(upperSlider.value);
+
+upperSlider.oninput = function () {
+    lowerVal = parseInt(lowerSlider.value);
+    upperVal = parseInt(upperSlider.value);
+
+    if (upperVal < lowerVal + 4) {
+        lowerSlider.value = upperVal - 4;
+        if (lowerVal == lowerSlider.min) {
+        upperSlider.value = 4;
+        }
+    }
+    document.querySelector('#two').value=this.value
+};
+
+lowerSlider.oninput = function () {
+    lowerVal = parseInt(lowerSlider.value);
+    upperVal = parseInt(upperSlider.value);
+    if (lowerVal > upperVal - 4) {
+        upperSlider.value = lowerVal + 4;
+        if (upperVal == upperSlider.max) {
+            lowerSlider.value = parseInt(upperSlider.max) - 4;
+        }
+    }
+    document.querySelector('#one').value=this.value
+};
+   function get_product_pricerange(subcategory)
+    {
+        var minvalue=document.querySelector('#one').value
+        var maxvalue=document.querySelector('#two').value
+
+        $.ajax({
+				type: 'GET',
+				url: "{% url 'productlist_sortby' %}",
+				data: { "minvalue":minvalue,"maxvalue":maxvalue,'subcategory':subcategory},
+				success: function (response) {
+					$('.product-grid-list').replaceWith(response);
+
+				},
+				error: function (response) {
+					console.log(response)
+				},
+			    done:function (response) {
+                $('.product-grid-list').replaceWith(response);
+                }
+			});
+
+    }
+
+
+    function get_selectd(event,result_for){
+       
+        console.log("result_for",result_for);
+        $.ajax({
+				type: 'GET',
+				url: "{% url 'productlist_sortby' %}",
+				data: { "sort_by":event.target.value,'subcategory':result_for},
+				success: function (response) {
+					$('.product-grid-list').replaceWith(response);
+
+				},
+				error: function (response) {
+					console.log(response)
+				},
+			    done:function (response) {
+                $('.product-grid-list').replaceWith(response);
+                }
+			});
+        }
+</script>
+
+{% endblock main-content %}

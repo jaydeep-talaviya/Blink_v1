@@ -1,0 +1,87 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+
+<div class="contain main-er mb-5 mx-5">
+    <div class="row m-3  bg-light">
+        <div class="col-sm-6">
+        <!-- Map Widget -->
+            <div class="widget map" style="padding: 10px;">
+                <div class="map_canvas">
+                    <div id="map_canvas" style="height: 220px;" data-latitude="{{latitude}}" data-longitude="{{longitude}}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div style="padding: 10px;">
+                <h3>{{store.name_of_shop}}</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p style="overflow-wrap: break-word;"> {{store.address}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-0" style="overflow-wrap: break-word;">{{store.owner.username}}</p>
+                        <p class="mb-0" style="overflow-wrap: break-word;">{{store.owner.email}}</p>
+                        <p class="mb-0" style="overflow-wrap: break-word;">{{store.mobile_no}}</p>
+                    </div>
+                    
+                </div>
+                <hr>
+                <div class="row my-3">
+                    <div class="col-md-6">
+                        {% if total_of_day.amount__sum %}
+                        <p class="mb-0" style="overflow-wrap: break-word;">Total Earning of Day: {{total_of_day.amount__sum}}rs</p>
+                        {% endif %}
+                        {% if total_of_month.amount__sum %}
+                        <p class="mb-0" style="overflow-wrap: break-word;">Total Earning of Month: {{total_of_month.amount__sum}}rs</p>
+                        {% endif %}
+
+                    </div>
+                </div>
+                
+            </div>
+          
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <a class="text-decoration-none text-primary" href="{% url 'stock_list' %}">Stocks</a>
+                    </li>
+              <li class="list-group-item">
+                <a class="text-decoration-none text-primary" href="{% url 'product_list' %}">Products</a>
+            </li>
+              <li class="list-group-item">
+                <a class="text-decoration-none text-primary" href="{% url 'product_attribute_list' %}">Product Attributes</a>
+                </li>
+                <li class="list-group-item">
+                    <a class="text-decoration-none text-primary" href="{% url 'deals_of_day_list' %}">Deals Of the Day</a>
+                    </li>
+         
+              
+              <li class="list-group-item">
+                <a class="text-decoration-none text-primary" href="{% url 'orderlists' %}">Orders</a>
+              </li>
+              <li class="list-group-item">
+                <a class="text-decoration-none text-primary" href="{% url 'paymentlists' %}">Payments</a>
+            </li>
+              <li class="list-group-item">
+                <a class="text-decoration-none text-primary" href="{% url 'delivery_list' %}">Delivery</a>
+                </li>
+              
+              
+
+
+            </ul>
+          </div>
+    </div>
+    
+  </div>
+
+{% endblock main-content %}

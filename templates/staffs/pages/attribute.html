@@ -1,0 +1,98 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %} 
+
+<div class="container mb-5">
+ <!-- Modal -->
+ <div class="modal fade" id="create_attribute" tabindex="-1" role="dialog" aria-labelledby="create_attributeLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="create_attributeLabel">Add Attribute Name</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    <input class="form-control" type="text" name="a_name" id="a_name_new" placeholder="e.g. Quantity">
+                </div>
+             </div>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close_new_attribute_name" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="create_new_attribute_name">Save changes</button>
+        </div>
+    </div>
+    </div>
+</div>
+            {% load crispy_forms_tags %}
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Add {{forms.p_name.value}}</h1>
+            </div>
+            <div class="d-flex justify-content-center">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- {{ forms|crispy}} -->
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12 mb-0">
+                          {{ forms.a_value|as_crispy_field }}
+                        </div>
+                     </div>
+                     <div class="form-row">
+                        <div class="form-group col-md-6 mb-0">
+                          {{ forms.a_name|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-6 mt-4 pt-2 pl-4">
+                        
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_attribute"> + </button>
+                        </div>
+                       
+
+                      </div>
+            
+
+                    <button type="submit" class="btn btn-success"> Submit </button>
+                </form>
+            </div>
+        
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"> </script>
+  <script type="text/javascript">
+$(document).ready(function ($) {
+
+        var a_name=document.querySelector( "#a_name_new");
+        var token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+        $('#create_new_attribute_name').click(function () {
+
+        $.ajax({
+				headers: { "X-CSRFToken": token },
+				type: 'POST',
+				url: "{% url 'create_attribute_name' %}",
+				data: { "a_name": a_name.value },
+				success: function (response) {
+					// if not valid user, alert the user
+					console.log("response", response);
+
+				},
+				error: function (response) {
+					console.log(response)
+				}
+			}).done(function (response) {
+                var $option = $('<option></option>').html(response.attribute_name_a_name).attr('value', response.attribute_name_id).prop('selected', true);
+                $('#id_a_name').prepend($option); // Adds the new option as first option
+                $('#close_new_attribute_name').click()
+			});
+
+        })
+    })
+</script>
+
+{% endblock main-content %}

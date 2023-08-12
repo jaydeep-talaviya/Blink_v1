@@ -1,0 +1,84 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %} Delivery List {% endblock title %}
+{% block main-content %}
+<section class="">
+    <!-- Container Start -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2 text-center">
+                <!-- Title text -->
+                <h1>Today's Delivery List</h1>
+            </div>
+        </div>
+    </div>
+    <!-- Container End -->
+</section>
+<section class=" my-3">
+    <div class="d-flex justify-content-center my-5">
+        <div class="card" style="width: 60rem;">
+            <div class="card-body bg-dark">
+                <div class="row text-center">
+                    <div class="col-sm-4">
+                      <a href="{% url 'delivery_list_with_status' status='Confirm' %}" class="text-decoration-none btn-sm {% if Status == 'Confirm' %} btn-light {% else %} btn-primary {% endif %}">Confirmed</a>
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="{% url 'delivery_list_with_status' status='Delivering' %}" class="text-decoration-none btn-sm {% if Status == 'Delivering' %} btn-light {% else %} btn-primary {% endif %}">Delivering</a>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="{% url 'delivery_list_with_status' status='Shipped' %}" class="text-decoration-none btn-sm {% if Status == 'Shipped' %} btn-light {% else %} btn-primary {% endif %}">Shipped</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        {% if deliveries %}
+        {% for delivery in deliveries %}
+        <div class="d-flex justify-content-center">
+            <div class="card" style="width: 60rem;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Order:</span> {{delivery.order.order.first.product_id.p_name}}
+                             {% if delivery.order.order.count != 1 %} + {{delivery.order.order.count |add:"-1" }}
+                              others 
+                              {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">User :</span> {{delivery.order.user.username}}
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Created At:</span> {{delivery.created_at.time }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <span class="fw-bold">Order Total Amount:</span> {{delivery.order.amount}} Rs.
+                        </div>
+
+                        <div class="offset-sm-4 col-sm-4">
+                            <a href="{% url 'single_delivery' delivery_id=delivery.delivery_id  %}"
+                                class="text-decoration-none btn-sm btn-primary">Change Delivery Status</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="mb-5">
+            <h3 class="text-center">There are no any delivery for {{Status}}</h3>
+        </div>
+        {% endif %}
+        
+        
+
+
+</section>
+
+
+
+{% endblock content %}

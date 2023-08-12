@@ -1,0 +1,73 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %} Delivery Detail{% endblock title %}
+{% block main-content %}
+<section class="">
+	<!-- Container Start -->
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-md-8 offset-md-2 text-center">
+				<!-- Title text -->
+				<h1>Delivery</h1>
+			</div>
+		</div>
+	</div>
+	<!-- Container End -->
+</section>
+<section class=" my-3">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 40rem;">
+            <div class="card-body">
+              <div>
+                <h5 class="text-start">Delivery : {{delivery.delivery_id}}</h5>
+              </div>
+
+              <div>
+				<h5 class="text-start">Order for :  {{delivery.order.order.first.product_id.p_name}} {% if delivery.order.order.count != 1 %} + {{delivery.order.order.count |add:"-1" }} others {% endif %}</h5>
+			  </div>
+			  <div>
+				<h6 class="d-flex justify-content-between">
+					<span>Order User :  {{delivery.order.user.username}}
+					</span>
+					<span>Order Created By : {{delivery.order.created_seller.username}}
+					</span>
+				
+				</h6>
+			  </div>
+			  <div>
+				<h6 class="text-start">Created At :  {{delivery.created_at }}</h6>
+			  </div>
+			  <div>
+				<h6 class="text-start">Current Status :  {{delivery.state }}</h6>
+			  </div>
+			  <div class="form-group">
+				<form name="delivery_status_change" action="" method="POST" class="d-flex" >
+						{% csrf_token %}
+						<div class="col-sm-2">
+							<label for="delivery_status">Update Delivery Status</label>
+						</div>
+						<div class="col-sm-3">
+							<select class="form-control-sm" name="delivery_status" id="delivery_status">
+								<option value="Confirm" {% if delivery.state == 'Confirm' %}selected{% endif %}>Confirm</option>
+								<option value="Delivering" {% if delivery.state == 'Delivering' %}selected{% endif %}>Delivering</option>
+								<option value="Shipped" {% if delivery.state == 'Shipped' %}selected{% endif %}>Shipped</option>
+							  </select>
+						</div>
+						<div class="col-sm-2">
+							<button type="submit" class="btn-sm btn-primary">Apply</button>
+
+						</div>
+				</form>
+
+			  </div>
+			  <div>
+				<a href="{% url 'delivery_list' %}" class="text-decoration-none btn-sm btn-primary">Delivery List</a>
+			  </div>
+            </div>
+          </div>
+    </div>
+</section>
+
+
+
+{% endblock main-content %}

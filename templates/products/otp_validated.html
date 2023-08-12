@@ -1,0 +1,92 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}OTP Validation{% endblock title %}
+{% block main-content %}
+<div class="container">
+ <div class="row my-3">
+  <div class="col-sm-6 offset-sm-3">
+   <h3>Your Order is Created</h3>
+   <hr>
+  <div class="mb-3">
+    <p>Your Order is successfully created! Please Cancel it If it was not done by You!</p>
+    </div>
+
+    <div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Product Image</th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Unit Price</th>
+            <th scope="col">Sub Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for orderline in orderlines %}
+          <tr>
+            <th scope="row">{{forloop.count}}</th>
+            <td>
+              <div style="width:70px;height: auto;">
+                <div class="img-prdct"><img style="max-width: 100%;height: inherit;"
+                        src="{{orderline.product_id.photo_1.url}}">
+                </div>
+            </div>
+            
+            </td>
+            <td>{{orderline.product_id.p_name}}</td>
+            <td>{{orderline.qty}}</td>
+            <td>{{orderline.price}}</td>
+            <td>{{orderline.per_order_amount}}</td>
+          </tr>
+          {% endfor %}
+
+          
+        </tbody>
+      </table>
+
+    </div>
+    {% if total_discount %}
+    <div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Products Together</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Discount Rs.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for deal in total_discount %}
+          <tr>
+            <th scope="row">{{forloop.count}}</th>
+            <td>{{deal.p_id.p_name}} with {{deal.with_product.p_name}}</td>
+            <td>{{deal.qty_of_deal.qty__min}}</td>
+            <td>{{deal.deal_price_discount}}</td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+
+    </div>
+    {% endif %}
+    {% if order.discount.percent_off %}
+    <div>
+      <h6 class="text-left">Discount: <span class="text-success">{{order.discount.percent_off}} % Off</span></h6>
+    </div>
+    {% endif %}
+
+    <div>
+      <h5 class="text-center">Grand Total : <span class="text-success">{{grand_total}} RS.</span></h5>
+    </div>
+    
+    
+    <a href="{% url 'orderviews' orderid=order.orderid %}" class="btn-sm btn-primary text-decoration-none my-4 d-flex justify-content-center">Check your Order</a>
+    <br>
+    </div>
+ </div>
+</div>
+{% endblock main-content %}

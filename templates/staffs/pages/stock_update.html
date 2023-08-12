@@ -1,0 +1,64 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Stock Update{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+  {%include '../partials/breadcrumbs.html'%}
+
+</div>
+
+{%load crispy_forms_tags %} 
+
+<div class="container mb-5">
+
+            {% load crispy_forms_tags %}
+            <!-- <div class="d-sm-flex align-items-center justify-content-center mb-4">
+              {% if stock_instance. %}
+              <h1 class="h3 mb-0 text-gray-800">Update {{stock_instance.product_id.p_name}}'s Stock</h1>
+
+              {% else %}
+              <h1 class="h3 mb-0 text-gray-800">Add New Product</h1>
+
+              {% endif %}
+            </div> -->
+            <div class="d-flex justify-content-center pb-2">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- {{ forms|crispy}} -->
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.total_qty|as_crispy_field }}
+                        </div>
+                      
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.left_qty|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.on_alert_qty|as_crispy_field }}
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.product_id|as_crispy_field }}
+                        </div>
+                        </div>
+
+
+                    <button type="submit" class="btn btn-success"> Submit </button>
+                </form>
+            </div>
+            <!-- <div>
+              {% if stock_instance.product_id.id %}
+              <div class="my-4 text-center">
+               <h4>{{stock_instance.product_id.p_name}}</h4> <a href="{% url 'product_update' id=stock_instance.product_id.id %}" class="btn btn-primary text-decoration-none">Update Product</a>
+            </div>
+
+              {% endif %}
+              
+               -->
+            </div>
+        
+</div>
+
+{% endblock main-content %}

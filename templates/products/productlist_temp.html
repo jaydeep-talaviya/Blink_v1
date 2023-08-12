@@ -1,0 +1,101 @@
+<div class="product-grid-list">
+
+<div class="row mt-30">
+    <!-- {% load class_name %} -->
+{% if products %}
+{% for product in products %}
+<div class="col-sm-12 col-lg-4 col-md-6">
+    <!-- product card -->
+   
+    <div class="product-item bg-light">
+        <div class="card">
+            <div class="thumb-content">
+                <div class="price">RS,{{product.price}}</div>
+                <a class="text-decoration-none" href="{% url 'productdetail' product.id %}">
+                    <img style=" height:250px;width:100%;"  src="{{product.photo_1.url}}"
+                        alt="Card image cap">
+                </a>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title"><a class="text-decoration-none" href="{% url 'productdetail' product.id %}">{{product.p_name}}</a></h4>
+                <ul class="list-inline product-meta">
+                    <li class="list-inline-item">
+                        <a class="text-decoration-none" href="{% url 'productlist' product.p_category %}"><i class="fas fa-copyright"></i> {{product.brand}}</a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a class="text-decoration-none" href="#"><i class="fa fa-calendar"></i>{{product.p_created}}</a>
+                    </li>
+                </ul>
+                {% if product.left_qty < product.on_alert_qty  %}
+                <div class="d-flex justify-item-center">
+                    <p class="text-center text-danger">Only {{product.left_qty}} left in Stock.</p>
+                </div>
+                {% endif %}
+                <div class="product-ratings">
+                    {% load custom_tags %}
+
+                    
+                    <ul class="list-inline" id="average_rate">
+                        {% for i in product.rates_set|get_avarage_rate %}
+                        <li class="list-inline-item" style="color: {{i}};"><i class="fa fa-star"></i></li>
+                        
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endfor %}
+    {% else %}
+    <h1>sorry!! there are no any products</h1>
+    {% endif %}
+</div>
+</div>
+<!-- <div class="d-flex justify-content-center">
+    <nav aria-label="">
+        {% if products.has_other_pages %}
+        <ul class="pagination">
+
+            {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+            </li>
+            {% if products.previous_page_number != 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+        {% endif %}
+
+
+    {% for num in products.paginator.page_range %}
+    {% if products.number == num %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+        </li>
+    {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+        </li>
+    {% endif %}
+    {% endfor%}
+
+
+    {% if products.has_next %}
+        {% if products.next_page_number != paginator.num_pages %}
+        <li class="page-item">
+            <a class="page-link" href='?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}'>Next</a>
+        </li>
+        {% else %}
+    <li>
+        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+    </li>
+    {% endif %}
+    {% endif %}
+          
+        </ul>
+      {% endif %}
+      </nav>   
+</div> 

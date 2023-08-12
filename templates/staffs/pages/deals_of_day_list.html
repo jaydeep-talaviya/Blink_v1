@@ -1,0 +1,56 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %} Today's Deals {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Today's Deals </h1>
+              </div>
+            <div class="p-3 text-center">
+                <a href="{% url 'create_deals_of_the_day' %}" class="btn btn-primary text-decoration-none">Add New Deal</a>
+            </div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Main Product</th>
+                    <th scope="col">With Product</th>
+                    <th scope="col">Discount Price</th>
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for deals_of_day in deals_of_days %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                        <td> {{deals_of_day.p_id.p_name}}</td>
+                        <td> {{deals_of_day.with_product.p_name}}</td>
+                        <td> {{deals_of_day.discount_price}}</td>
+
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'update_deals_of_the_day' id=deals_of_day.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                <button class="btn btn-danger">Delete</button>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+                </tbody>
+              </table>
+          </div>
+    </div>
+    
+</div>
+
+{% endblock main-content %}

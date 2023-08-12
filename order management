@@ -1,0 +1,73 @@
+online => order create => success => done
+	  order cancel => done
+offline => order create => success => done
+	payment => done,
+	=> order cancel => done
+	order cancle => done
+	
+
+
+
+###########################
+
+1) cron to remove all the product from all the user's cart at 11:55.  < done
+	if order is not paid then also cancle it.
+
+python3 -m celery -A ecommerce_blink worker
+python -m celery -A django_celery worker -l info
+
+celery -A ecommerce_blink beat -l INFO
+celery -A ecommerce_blink worker -B -l INFO
+
+3) set notification on create delivery  --> done
+
+2) css ,js and condition related pages => 
+	
+4) discount % -< done
+
+
+
+5)
+
+add new notification only to seller of the order ->done
+
+
+6) on delivery shipped => if payment is offline =>  DOne => check not
+			-> change payment success
+			
+7) order list , detail, cancle button in detail  => done
+	list with defferent status as delivery
+	
+8) payments list, detail (with btn to go order)  => done
+	list with different status
+	
+	
+	here two button 
+	
+	online offline
+	
+	status 1 status 2 status 3
+	
+	url =>
+	staff/payment/online/status1
+	
+	
+
+9)
+on order cancle  => payment fail/success
+if pending => fail
+
+
+10)map location
+11) total couter of the day
+	staff/payment/offline/status1
+	
+
+12) total oders. total stocks
+
+
+store => 
+
+
+
+

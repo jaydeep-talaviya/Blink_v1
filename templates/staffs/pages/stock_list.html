@@ -1,0 +1,58 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Stock List{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Today's Stock </h1>
+              </div>
+            <div class="p-3 text-center">
+                <a href="{% url 'stock_create' %}" class="btn btn-primary text-decoration-none">Add New Stock</a>
+            </div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Total Qty</th>
+                    <th scope="col">Left Qty</th>
+                    <th scope="col">Finished</th>
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                        <td> {{stock.product_id}}</td>
+                        <td> {{stock.total_qty}}</td>
+                        <td> {{stock.left_qty}}</td>
+                        <td> {{stock.finished}}</td>
+
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'stock_update' id=stock.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                <button class="btn btn-danger">Delete</button>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+                </tbody>
+              </table>
+          </div>
+    </div>
+    
+</div>
+
+{% endblock main-content %}

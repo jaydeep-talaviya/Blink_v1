@@ -1,0 +1,173 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}OTP Validation{% endblock title %}
+{% block main-content %}
+
+
+
+<div class="container">
+  <div class="show_error">
+
+  </div>
+ <div class="row my-3">
+  <div class="col-sm-6 offset-sm-3">
+   <h3>Create Your Order</h3>
+   <hr>
+   <form method="POST" id="otp_varify" novalidate class="shadow p-5">
+    {% csrf_token %}
+  <div class="mb-3">
+    <p class="text-danger">Please Don't Reload Page!</p>
+    <p class="showerror text-danger"></p>
+
+     <label for="id_otp" class="form-label">OTP</label>
+     <input type="text" name="otp" class="form-control" id="id_otp" />
+     <input type="text" name="times" class="form-control" id="id_times" value="{{times}}" hidden/>
+     
+    </div>
+    <div class="row">
+      <div class="col">
+        <a class="text-decoration-none otpvarify" href="{% url 'send_otp' %}">Send Again</a>
+      </div>
+      <div class="col timesetup">
+        <div>varify within <span class="js-timeout">2:00</span> minutes!</div>
+      </div>
+    </div>
+    <br>
+    <input type="submit" class="btn btn-primary mt-4 varify-btn" value="Varify">
+
+    <br>
+    
+   </form>
+   
+  </div>
+ </div>
+</div>
+<button id="js-startTimer">Start Countdown</button>
+   <button id="js-resetTimer">Stop &amp; Reset</button>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<script type="text/javascript">
+document.getElementsByName('otp')[0].onfocus=function(e){
+  $('.showerror').text("")
+}
+// document.getElementsByName('times')[0].onfocus=function(e){
+//   $('.showerror').text("")
+// }
+
+
+
+var interval;
+
+//  var otp_value=$('#id_otp')
+var counter=0
+
+ $('#otp_varify').submit(function(e){
+  counter+=1
+  var times=$('.id_times').val()
+  var otp_value = document.getElementsByName('otp')[0].value
+  var token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+  if (counter <=3){
+    e.preventDefault();
+   $.ajax({
+      headers: { "X-CSRFToken": token },
+				type: 'POST',
+				url: "{% url 'match_otp' %}",
+				data: { "otp_value":otp_value},
+				success: function (response) {
+          if(response.warning != undefined) {
+          $('.showerror').text(response.warning+`you have ${4-counter} Chance left`)
+          console.log(response.warning)
+          document.getElementsByName('otp')[0].value="";
+          }
+          else{
+            e.preventDefault();
+            window.location.href = '/order-created';
+          }
+        
+				},
+	
+			});
+   
+  }
+  else{
+    console.log("else condition")
+    e.preventDefault();
+    window.location.href = '/order-failed';
+  }
+  
+ })
+
+
+// console.log($('.varify-btn'),"here>>>>>>>>>>",$('#id_times'))
+
+function countdown() {
+  clearInterval(interval);
+  interval = setInterval( function() {
+      var timer = $('.js-timeout').html();
+      timer = timer.split(':');
+      var minutes = timer[0];
+      var seconds = timer[1];
+      seconds -= 1;
+      if (minutes < 0) return;
+      else if (seconds < 0 && minutes != 0) {
+          minutes -= 1;
+          seconds = 59;
+      }
+      else if (seconds < 10 && length.seconds != 2) seconds = '0' + seconds;
+
+      $('.js-timeout').html(minutes + ':' + seconds);
+
+      if (minutes == 0 && seconds == 0){
+        
+        $('.show_error').replaceWith(
+          '<div class="alert alert-danger alert-dismissible" role="alert">'+
+            'Please Try Again, within given time!'+
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+            '<span aria-hidden="true">×</span>'+
+            '</div>'+
+          '</button>'
+            )
+            $('.timesetup').hide();
+            $('.varify-btn').hide();
+            $('.otpvarify').show();
+            
+            $('#id_otp')[0].disabled=true;
+            if (document.getElementsByName('times')[0].value==3){
+              // e.preventDefault();
+            window.location.href = '/order-failed';
+            }
+            clearInterval(interval);
+          
+      }
+      else{
+        $('.otpvarify').hide();
+      }
+  }, 1000);
+};
+
+  $('#js-startTimer').click(function () {
+    $('.js-timeout').text("2:00");
+    countdown();
+  });
+
+  $('#js-resetTimer').click(function () {
+    $('.js-timeout').text("2:00");
+    clearInterval(interval);
+  });
+
+window.onload = function () {
+  var nav=document.getElementsByTagName("nav");
+  nav[0].hidden=true
+
+  var footer=document.getElementsByTagName("footer");
+  footer[0].hidden=true
+  
+  validate_times=0
+  $('#js-startTimer').click();
+  $('#js-startTimer').hide();
+  $('#js-resetTimer').hide();
+  
+};
+
+</script>
+{% endblock main-content %}

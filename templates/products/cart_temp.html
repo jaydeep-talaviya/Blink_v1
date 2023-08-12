@@ -1,0 +1,53 @@
+<div class="table-responsive">
+    {% if cart %}
+    <table id="myTable" class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Product Name</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th class="text-right"><span id="amount" class="amount">Amount</span> </th>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+    {% for product in cart %}
+    <tr>
+        <td>
+            <div class="product-img">
+               <div class="img-prdct"><img style="max-width: 100%;height: inherit;"
+                       src="{{product.product_id.photo_1.url}}">
+               </div>
+           </div>
+       </td>
+        <td>
+            <p>{{product.product_id.p_name}} ( {{product.selected_product_varient}} )</p>
+        </td>
+        <td>
+            <div class="button-container">
+                <button class="cart-qty-plus" type="button" onclick="changeqty('{{product.id}}','plus')" value="+">+</button>
+                <input type="text" name="qty" min="0" class="prdct-qty qty form-control" disabled value="{{product.qty}}" />
+                <button class="cart-qty-minus" type="button" onclick="changeqty('{{product.id}}','minus')" value="-">-</button>
+            </div>
+        </td>
+        <td>
+            <input type="text" value="{{product.price}}" class="price form-control" disabled>
+        </td>
+        <td align="right">$ <span id="amount" class="amount total_amount">
+            {% widthratio product.price 1 product.qty %}
+    
+        </span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4"></td>
+            <td align="right"><strong>TOTAL = $ <span id="total" class="total grandtotal">0</span></strong></td>
+        </tr>
+    </tfoot>
+    </table>
+    {% else %}
+    <h1 class="text-center h1inntertext">Please enter some products</h1>
+    {% endif %}
+</div>
