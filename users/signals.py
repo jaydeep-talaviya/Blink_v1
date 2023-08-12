@@ -13,7 +13,3 @@ def populate_profile(sociallogin, user, **kwargs):
 
     if sociallogin.account.provider == 'google':
         print("user.socialaccount_set>>>>>>>",user.socialaccount_set)
-    # user.profile.avatar_url = picture_url
-    # user.profile.email_address = email
-    # user.profile.first_name = first_name
-    # user.profile.save()         

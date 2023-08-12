@@ -8,15 +8,15 @@ class User(AbstractUser):
     date_of_birth=models.DateField(blank=True,null=True)
     city=models.CharField(max_length=150)
 
-
-
+class State(models.Model):
+    name = models.CharField(max_length=100)
 
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     street=models.CharField(max_length=150)
-    street2=models.CharField(max_length=150)
+    street2=models.CharField(max_length=150,blank=True,null=True)
     city=models.CharField(max_length=150)
-    state=models.CharField(max_length=150)
+    state=models.ForeignKey(State, on_delete=models.PROTECT)
 
 
 

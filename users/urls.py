@@ -1,11 +1,11 @@
 from django.urls import path,include
-from . views import home,registrationpage,loginpage,logoutuser,change_password,profilesave,profileshow,set_user_order_place
+from . views import home,registration,loginpage,logoutuser,change_password,profilesave,profileshow,set_user_order_place
 from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
     path('',home,name='home'),
-    path('registration',registrationpage,name='registration'),
+    path('registration',registration,name='registration'),
     path('login/',loginpage,name='login'),
     path('set/place',set_user_order_place,name='set_place'),
     path('logout',logoutuser,name='logout'),
@@ -22,5 +22,4 @@ urlpatterns = [
 
     # path('accounts/social/login/cancelled/',loginpage,name='cancled_login'),
     # path('accounts/social/signup/',google_form,name='Signup')
-# http://127.0.0.1:8000/accounts/social/signup/
 ]

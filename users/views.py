@@ -1,4 +1,6 @@
 from django.shortcuts import render,redirect
+
+from utils.helper_functions import send_email_with_template
 from .models import User
 from . forms import UserRegistrationForm,UserLoginForm,UpdateForm
 from django.contrib import auth
@@ -13,11 +15,10 @@ from products.models import Store
 
 # Create your views here.
 def home(request):
-    # deals=DealsViaCard.objects.all()
     return render(request,'users/home.html')
 
 
-def registrationpage(request):
+def registration(request):
     if request.method=="POST":
         form=UserRegistrationForm(request.POST)
         if form.is_valid():
@@ -31,6 +32,7 @@ def registrationpage(request):
                     user=User.objects.create(username=username,email=email,password=password2)
                     user.set_password(password2)
                     user.save()
+                    send_email_with_template(username, email)
                     messages.success(request, "User Created Successfully! please Login")
                     return redirect('login')
                 else:
@@ -39,18 +41,14 @@ def registrationpage(request):
                     return render(request,'users/register.html',{'form':form})
             else:
                 messages.warning(request, "Username Already Exist! Please Enter Valid Username!")
-                # print("Username Already Exist! Please Enter Valid Username!")
                 form=UserRegistrationForm()
                 return render(request,'users/register.html',{'form':form})
-            
         else:
             messages.warning(request, "Please Enter Validate Credentials")
-            # print("please enter validare data")
             form=UserRegistrationForm()
             return render(request,'users/register.html',{'form':form})
-    else:
-        form=UserRegistrationForm()
-        return render(request,'users/register.html',{'form':form})
+    form=UserRegistrationForm()
+    return render(request,'users/register.html',{'form':form})
 
 def set_user_order_place(request):
     if request.method=='POST':

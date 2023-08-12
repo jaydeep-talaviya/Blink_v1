@@ -45,14 +45,12 @@ class DualAuthentication(ModelBackend):
 
     def authenticate(self, username=None, password=None):
         UserModel = get_user_model()
-        print(",,,,,,,,,,,,,,,",username,password)
         try:
             if ((am == 'email') or (am == 'both')):
                 if ((cs == 'email') or cs == 'both'):
                     kwargs = {'email': username}
                 else:
                     kwargs = {'email__iexact': username}
-
                 user = UserModel.objects.get(**kwargs)
             else:
                 raise

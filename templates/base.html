@@ -66,11 +66,11 @@
              
                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                   {% for i in category %}
-                
+
                    <li><a class="dropdown-item" href="{% url 'productlist' i.category_name %}">{{i.category_name}}</a></li>
-         
+
                    {% endfor %}
- 
+
                   </ul>
 
 
