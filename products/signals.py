@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from users.models import User
-from .models import OtpModel,Orders,OrderLines,Cart,Products,Stocks,Discount,Payment,Delivery
+from .models import OtpModel,Orders,OrderLines,Cart,Products,Stocks,Payment,Delivery
 from datetime import datetime
 from datetime import date
 import requests

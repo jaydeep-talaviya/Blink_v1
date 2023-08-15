@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from . models import Payment,Deals_of_day,Stocks,Checkout, OrderLines, Orders, Products,Rates,AttributeName,Cart,OtpModel,Discount
+from . models import Payment,Stocks,Checkout, OrderLines, Orders, Products,Rates,AttributeName,Cart,OtpModel
 from django.db.models import Avg,Count,Max,Min
 from users.models import User
 from django.urls import reverse
@@ -163,12 +163,12 @@ def productdetail(request,p_id):
         get_user=User.objects.get(id=i['user_id'])
         i['user_id']=get_user
         i['rate']=['orange' for i in range(int(i['rate']))]+['black' for i in range(5-int(i['rate']))]
-    deals=Deals_of_day.objects.filter(p_id_id=p_id,date__day=today.day,date__month=today.month,date__year=today.year,with_product__in=[i[0] for i in all_products.values_list('id')])
+    # deals=Deals_of_day.objects.filter(p_id_id=p_id,date__day=today.day,date__month=today.month,date__year=today.year,with_product__in=[i[0] for i in all_products.values_list('id')])
     return render(request, 'products/productdetail.html',{'products':products,
                                                             'product_attr_list':product_attr_dict,
                                                             'prdct_varient':prdct_varient,'avg_rate':rate_list,
                                                             'product_comments_rate':product_comments_rate,
-                                                            'deals':deals
+                                                            'deals':None,
                                                             })
 
 @login_required
@@ -273,25 +273,25 @@ def order_failed(request):
 @login_required
 def order_created(request):
     order=Orders.objects.filter(user=request.user).last()
-    deals=Deals_of_day.objects.filter(date__day=today.day,date__month=today.month,date__year=today.year)
+    # deals=Deals_of_day.objects.filter(date__day=today.day,date__month=today.month,date__year=today.year)
     total_discount=[]
     
     orderlines=OrderLines.objects.filter(order_id__orderid=order.orderid)
     discount=0
-    for deal in deals:
-        ol=orderlines.filter(product_id_id__in=[deal.p_id_id,deal.with_product_id])
-        total_discount.append({'product':deal.p_id.p_name,
-        'with_product':deal.with_product.p_name,
-        'deal_price_discount':deal.discount_price,
-        'qty_of_deal':ol.aggregate(Min('qty'))
-        })
-        print(ol.aggregate(Min('qty'))['qty__min'],"\n\n\n\n\n")
-        discount=+(deal.discount_price*ol.aggregate(Min('qty'))['qty__min'])
-        if not order.deals_of_day.filter(id=deal.id):
-            order.deals_of_day.add(deal)
+    # for deal in deals:
+    #     ol=orderlines.filter(product_id_id__in=[deal.p_id_id,deal.with_product_id])
+    #     total_discount.append({'product':deal.p_id.p_name,
+    #     'with_product':deal.with_product.p_name,
+    #     'deal_price_discount':deal.discount_price,
+    #     'qty_of_deal':ol.aggregate(Min('qty'))
+    #     })
+    #     print(ol.aggregate(Min('qty'))['qty__min'],"\n\n\n\n\n")
+    #     discount=+(deal.discount_price*ol.aggregate(Min('qty'))['qty__min'])
+    #     if not order.deals_of_day.filter(id=deal.id):
+    #         order.deals_of_day.add(deal)
     grand_total=order.amount-discount
-    if order.deals_of_day.count ==0:
-        order.amount=grand_total
+    # if order.deals_of_day.count ==0:
+    #     order.amount=grand_total
 
     order.save()
     # print(">>>>",grand_total)

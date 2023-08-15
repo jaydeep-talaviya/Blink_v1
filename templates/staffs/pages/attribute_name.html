@@ -5,7 +5,7 @@
 <div class="my-5">
     {%include '../partials/breadcrumbs.html'%}
   </div>
-{%load crispy_forms_tags %}
+{%load crispy_forms_tags %} 
  <div class="container mt-5">
         <form method="POST">
 		{% csrf_token %}
@@ -15,8 +15,6 @@
                             <thead class="text-center">
                             <tr>
                                 <th>Attribute Name</th>
-                                <th>Attribute Value</th>
-
                                 <th></th>
                             </tr>
                             </thead>
@@ -26,9 +24,7 @@
                                     <td>
                                         {{ form_data.a_name }}
                                     </td>
-                                    <td>
-                                        {{ form_data.a_value }}
-                                    </td>
+
                                     <td>
                                         <button type="button" class="btn-danger btn-sm remove-form-row"
                                                 id="{{ formset.prefix }}">

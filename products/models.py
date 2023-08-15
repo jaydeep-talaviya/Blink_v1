@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User,State
 from django.core.validators import MaxValueValidator, MinValueValidator 
 from datetime import datetime
 from datetime import timedelta
@@ -9,12 +9,12 @@ from django.conf import settings
 # Create your models here.
 import uuid
 
-class Store(models.Model):
+class Warehouse(models.Model):
     owner=models.ForeignKey(User,on_delete=models.CASCADE)
     address=models.TextField()
     created_at=models.DateTimeField()
     mobile_no=models.CharField(max_length=100)
-    name_of_shop=models.CharField(max_length=100)
+    name=models.CharField(max_length=100)
 
 class Category(models.Model):
     category_name=models.CharField(max_length=50)
@@ -24,7 +24,7 @@ class Category(models.Model):
 
 class Subcategory(models.Model):
     subcategory_name=models.CharField(max_length=50)
-    Category=models.ForeignKey(Category, on_delete=models.CASCADE)
+    category=models.ForeignKey(Category, on_delete=models.CASCADE)
     def __str__(self):
         return self.subcategory_name
 
@@ -46,8 +46,6 @@ class Products(models.Model):
     p_category=models.ForeignKey(Category, on_delete=models.CASCADE)
     p_subcategory=models.ForeignKey(Subcategory, on_delete=models.CASCADE)
     p_created=models.DateField(auto_now_add=datetime.now)
-  
-    ingredience=models.CharField(max_length=500)
     price=models.FloatField(validators=[MinValueValidator(1)])
     description=models.TextField()
 
@@ -80,8 +78,6 @@ class Products(models.Model):
             imag3.save(self.photo_3.path)
 
 
-
-
 class ProductChangePriceAttributes(models.Model):
     attribute_values=models.ManyToManyField(AttributeValue)
     p_id= models.ForeignKey(Products,on_delete=models.CASCADE)
@@ -108,12 +104,11 @@ class Rates(models.Model):
         return str(self.rate)+" by "+str(self.user)
 
 class Stocks(models.Model):
-    shop_id=models.ForeignKey(Store,on_delete=models.CASCADE)
+    warehouse_id=models.ForeignKey(Warehouse,on_delete=models.CASCADE)
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)
     total_qty=models.IntegerField(validators=[MinValueValidator(1)])
     left_qty=models.IntegerField(validators=[MinValueValidator(1)])
     on_alert_qty=models.IntegerField(validators=[MinValueValidator(1)])
-    stock_day=models.DateField(auto_now_add=True)
     finished=models.BooleanField(default=False)
 
 class Cart(models.Model):
@@ -121,7 +116,6 @@ class Cart(models.Model):
     user_id=models.ForeignKey(User,on_delete=models.CASCADE)
     qty=models.IntegerField(validators=[MinValueValidator(0)])
     price=models.FloatField(validators=[MinValueValidator(1)])
-    # productvarient=models.ForeignKey(ProductChangePriceAttributes,on_delete=models.CASCADE)
     selected_product_varient=models.CharField(max_length=100)
 
     def __str__(self):
@@ -134,8 +128,7 @@ class Checkout(models.Model):
     last_name=models.CharField(max_length=100)
     address1=models.TextField()
     address2=models.TextField(blank=True,null=True)
-    country=models.CharField(max_length=100)
-    state=models.CharField(max_length=100)
+    state=models.ForeignKey(State,on_delete=models.SET_NULL,null=True)
     city=models.CharField(max_length=100)
     zip=models.CharField(max_length=6)
     payment_type=models.CharField(max_length=50)
@@ -143,15 +136,30 @@ class Checkout(models.Model):
     def __str__(self):
         return str(self.user)+"'s Checkout "
 
-class Discount(models.Model):
-    on_above_purchase=models.FloatField()
-    percent_off=models.IntegerField()
 
-class Deals_of_day(models.Model):
-    p_id= models.ForeignKey(Products,on_delete=models.CASCADE,related_name='main_product')
-    with_product=models.ForeignKey(Products,on_delete=models.CASCADE,related_name='with_product')
-    discount_price=models.FloatField()
-    date=models.DateField()
+class Vouchers(models.Model):
+    choices = (
+        ('on_above_purchase', 'On Above Purchase'),
+        ('deals_of_day','Deals of Day'),
+        ('product_together','Product Together'),
+        ('promocode','Promocode'),
+    )
+    voucher_type = models.CharField(max_length=200)
+    on_above_purchase = models.FloatField(null=True,blank=True) #on_above_purchase
+    off_price = models.FloatField(null=True,blank=True) #on_above_purchase + #product_together +# promocode
+
+    products = models.ManyToManyField(Products,null=True,blank=True,related_name='products') #deals_of_day + #product_together
+    percent_off = models.FloatField(null=True,blank=True) #deals_of_day
+
+    with_product = models.ForeignKey(Products,on_delete=models.DO_NOTHING,null=True,blank=True,related_name='with_product') #product_together
+
+    promocode_name = models.CharField(max_length=100,null=True,blank=True) # promocode
+    users=models.ManyToManyField(User,related_name='new_user_to_promo',null=True,blank=True) # promocode
+    user_who_have_used=models.ManyToManyField(User,related_name='user_who_have_used') # promocode
+    created_at=models.DateTimeField(auto_now_add=datetime.now,null=True,blank=True) # promocode
+    expirable=models.BooleanField(default=True,null=True,blank=True) # promocode
+    expire_at=models.DateTimeField(null=True,blank=True)# promocode
+
 
 class Orders(models.Model):
     
@@ -168,16 +176,16 @@ class Orders(models.Model):
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     user=models.ForeignKey(User,on_delete=models.DO_NOTHING,related_name='buyer')
     payment_failed=models.BooleanField(default=True)
-    amount=models.IntegerField(validators=[MinValueValidator(0)])
-    discount=models.ForeignKey(Discount,on_delete=models.DO_NOTHING,null=True,blank=True)
-    created_seller=models.ForeignKey(User,on_delete=models.DO_NOTHING,related_name='seller')
-    deals_of_day=models.ManyToManyField(Deals_of_day,null=True,blank=True)
+    amount=models.FloatField(validators=[MinValueValidator(0)])
+    total_discount=models.FloatField(validators=[MinValueValidator(0)],default=0)
+    vouchers = models.ForeignKey(Vouchers,on_delete=models.DO_NOTHING)
+
 
 class OrderLines(models.Model):
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)
     qty=models.IntegerField(validators=[MinValueValidator(0)])
-    price=models.FloatField(validators=[MinValueValidator(1)])
-    per_order_amount=models.FloatField(validators=[MinValueValidator(0)])
+    unit_price=models.FloatField(validators=[MinValueValidator(1)])
+    sub_total_amount=models.FloatField(validators=[MinValueValidator(0)])
     order_id=models.ForeignKey(Orders,on_delete=models.CASCADE,related_name='order')
 
 class Delivery(models.Model):
@@ -186,19 +194,6 @@ class Delivery(models.Model):
     state=models.CharField(max_length=100)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
-
-
-
-
-class PromoCode(models.Model):
-    promocode=models.CharField(max_length=50,default=uuid.uuid4)
-    users=models.ManyToManyField(User,related_name='new_user_to_promo')
-    name_of_code=models.CharField(max_length=50)
-    discount_price=models.FloatField()
-    user_who_have_used=models.ManyToManyField(User,related_name='user_who_have_used')
-    created_at=models.DateTimeField(auto_now_add=datetime.now)
-    expirable=models.BooleanField(default=True)
-    expire_at=models.DateTimeField()
 
 class OtpModel(models.Model):
     otp_number=models.CharField(max_length=6)
@@ -213,6 +208,3 @@ class Payment(models.Model):
     payment_method=models.CharField(max_length=100)
     status=models.CharField(max_length=100)
     txnId=models.CharField(max_length=150,null=True,blank=True)
-
-# class Transaction(models.Model):
-#     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)

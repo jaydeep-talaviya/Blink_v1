@@ -11,7 +11,6 @@ from django.contrib import messages
 # from products.models import DealsViaCard
 # from django.contrib.auth.models import User as AllUser
 from django.contrib.auth.decorators import login_required
-from products.models import Store
 
 # Create your views here.
 def home(request):

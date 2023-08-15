@@ -1,10 +1,12 @@
+from django.db import transaction
+from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
-from products.models import (Products,Category,Store,Stocks,
+from products.models import (Products,Category,Stocks,
                             AttributeName,AttributeValue,Payment,
-                            ProductChangePriceAttributes,Deals_of_day,Orders)
+                            ProductChangePriceAttributes,Orders)
 from datetime import date
 from .forms import (ProductForm,ProductChangePriceAttributesForm,
-                    ProductAttributesForm,StocksForm,Deals_of_dayForm)
+                    ProductAttributesForm,StocksForm,AttributeNameForm)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -19,19 +21,7 @@ today = date.today()
 # Create your views here.
 @staff_member_required(login_url='/')
 def home(request):
-    store=Store.objects.get(owner=request.user)
-    location = geolocator.geocode(store.address)
-    # print(">>>>>",location.latitude,location.longitude)
-    latitude=0
-    longitude=0
-    if location is not None:
-        latitude=location.latitude
-        longitude=location.longitude
-    orders_of_the_day=Orders.objects.filter(created_seller=request.user,created_at__year=today.year, created_at__month=today.month, created_at__day=today.day)
-    total_of_day=orders_of_the_day.aggregate(Sum('amount'))
-    orders_of_the_month=Orders.objects.filter(created_seller=request.user,created_at__year=today.year, created_at__month=today.month)
-    total_of_month=orders_of_the_month.aggregate(Sum('amount'))
-    return render(request,'staffs/pages/homepage.html',{'store':store,'latitude':latitude,'longitude':longitude,'total_of_day':total_of_day,'total_of_month':total_of_month})
+    return render(request,'staffs/pages/homepage.html')
 
 @staff_member_required(login_url='/')
 def create_attribute_name(request):
@@ -42,22 +32,53 @@ def create_attribute_name(request):
     else:
         return JsonResponse({"error": "please enter valid"}, status=400)
 
-@staff_member_required(login_url='/')
-##################### AttributeValue ##################3
-def create_attribute(request):
-    if request.method=="POST":
-        forms=ProductAttributesForm(request.POST)
-        if forms.is_valid():
-            obj=forms.save() 
-            messages.success(request, f"Your Attribute is Created")
-            return redirect(update_attribute,id=obj.id)
+
+##################### Attrbiute Names ######3
+
+def create_attribute_names(request):
+    AttributeNameFormset = modelformset_factory(AttributeName, form=AttributeNameForm)
+    formset = AttributeNameFormset(request.POST or None, queryset=AttributeName.objects.none(), prefix='name')
+    if request.method == "POST":
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    for attribute in formset:
+                        attribute.save()
+                    messages.success(request, f"Your Attribute Name is Created")
+            except Exception as e:
+                messages.warning(request, f"Please Check Again.Invalid Data")
+            return redirect('create_attribute')
         else:
             messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/attribute.html',{"forms":forms})
-    else:
-        forms=ProductAttributesForm()
-        return render(request,'staffs/pages/attribute.html',{"forms":forms})
-    return render(request,'staffs/pages/attribute.html',{'forms':forms})
+    context = {
+        'formset': formset,
+    }
+
+    return render(request,'staffs/pages/attribute_name.html',context)
+
+
+##################### AttributeValue ##################3
+
+@staff_member_required(login_url='/')
+def create_attribute(request):
+    AttributeValueFormset = modelformset_factory(AttributeValue, form=ProductAttributesForm)
+    formset = AttributeValueFormset(request.POST or None, queryset=AttributeValue.objects.none(), prefix='name')
+    if request.method == "POST":
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    for attribute in formset:
+                        attribute.save()
+                    messages.success(request, f"Your Attribute Value is Created")
+            except Exception as e:
+                messages.warning(request, f"Please Check Again.Invalid Data")
+            return redirect('product_attribute_list')
+        else:
+            messages.warning(request, f"Please Check Again.Invalid Data")
+    context = {
+        'formset': formset,
+    }
+    return render(request,'staffs/pages/attribute.html',context)
 
 @staff_member_required(login_url='/')
 def update_attribute(request,id):
@@ -80,7 +101,7 @@ def update_attribute(request,id):
 @staff_member_required(login_url='/')
 ##################### ProductAttribute ################
 def product_attribute_list(request):
-    product_attributes=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day).values('product_id__id','product_id__productchangepriceattributes__id','product_id__p_name','product_id__productchangepriceattributes__price','product_id__productchangepriceattributes__attribute_values__a_value','product_id__productchangepriceattributes__attribute_values__a_name__a_name')
+    product_attributes=Stocks.objects.all().values('product_id__id','product_id__productchangepriceattributes__id','product_id__p_name','product_id__productchangepriceattributes__price','product_id__productchangepriceattributes__attribute_values__a_value','product_id__productchangepriceattributes__attribute_values__a_name__a_name')
     return render(request,'staffs/pages/product_attribute_list.html',{'product_attributes':product_attributes})
 
 
@@ -99,11 +120,6 @@ def create_product_attribute(request,pid):
             product_attribute.attribute_values.add(*attribute_values)
             product_attribute.save()
 
-            # [single.id for single in attribute_values.all()]
-            # print(">>>>>>>>obj",product_attribute,,price)
-
-            # obj.p_id_id=pid
-            # obj.save()
             messages.success(request, f"Your Product is Created")
             return redirect(product_update,id=pid)
         else:

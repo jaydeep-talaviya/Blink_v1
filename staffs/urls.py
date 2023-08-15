@@ -4,7 +4,8 @@ from .views import (home,product_list,product_update,
                     create_attribute,update_attribute,create_attribute_name,product_attribute_list,
                     stock_list,stock_update,stock_create,
                     deals_of_day_list,create_deals_of_the_day,update_deals_of_the_day,
-                    orderlists,single_order,paymentlists
+                    orderlists,single_order,paymentlists,
+                    create_attribute_names
                     )
 
 urlpatterns = [
@@ -14,6 +15,8 @@ urlpatterns = [
     path('product/update/<int:id>/',product_update,name='product_update'),
     path('product/update/<int:pid>/attribute/create/',create_product_attribute,name='create_product_attribute'),
     path('product/update/<int:pid>/attribute/update/<int:id>/',product_update_attribute,name='product_update_attribute'),
+
+    path('product/attribute/attribute/name/create/',create_attribute_names,name='create_attribute_names'),
 
     path('product/attribute/attribute/',product_attribute_list,name='product_attribute_list'),
     path('product/attribute/attribute/create/',create_attribute,name='create_attribute'),
