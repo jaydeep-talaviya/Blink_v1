@@ -1,5 +1,5 @@
 from django.urls import path,include
-from . views import home,registration,loginpage,logoutuser,change_password,profilesave,profileshow
+from .views import (home,registration,loginpage,logoutuser,change_password,profilesave,profileshow,profile_delete)
 from django.contrib.auth import views as auth_views
 
 
@@ -11,6 +11,7 @@ urlpatterns = [
     
     path('profile/update',profilesave,name='profilesave'),
     path('profileshow',profileshow,name='profileshow'),
+    path('profile/delete/<int:id>',profile_delete,name='profile_delete'),
 
     path('password-reset/',auth_views.PasswordResetView.as_view(template_name='passwordreset/password_reset.html',subject_template_name='passwordreset/password_reset_subject.txt',email_template_name='passwordreset/password_reset_email.html',),name='password_reset'),
     path('password-reset/done/',auth_views.PasswordResetDoneView.as_view(template_name='passwordreset/password_reset_done.html'),name='password_reset_done'),

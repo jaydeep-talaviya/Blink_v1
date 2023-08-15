@@ -100,11 +100,8 @@ def change_password(request):
 
 @login_required
 def profilesave(request):
-
     if request.method=="POST":
         form2=UpdateForm(request.POST or None,request.FILES or None,instance=request.user)
-   
-
         if form2.is_valid():
             form2.save()
             if form2.has_changed()==True:
@@ -126,3 +123,8 @@ def profilesave(request):
 def profileshow(request):
     form2 = UpdateForm(instance=request.user)
     return render(request, 'users/profile.html',{"form2":form2,'disabled':'disabled'})
+
+def profile_delete(request,id):
+    exist_user = User.objects.filter(id=id)
+    exist_user.delete()
+    return redirect('logout')
