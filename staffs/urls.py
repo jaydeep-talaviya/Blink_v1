@@ -1,11 +1,12 @@
 from django.urls import path
 from .views import (home,product_list,product_update,
                     product_add,create_product_attribute,product_update_attribute,
-                    create_attribute,update_attribute,create_attribute_name,product_attribute_list,
+                    create_attribute,update_attribute,remove_attribute,
+                    create_attribute_name,product_attribute_list,
                     stock_list,stock_update,stock_create,
                     deals_of_day_list,create_deals_of_the_day,update_deals_of_the_day,
                     orderlists,single_order,paymentlists,
-                    create_attribute_names
+                    create_attribute_names,update_attribute_names,remove_attribute_names,list_attribute_name
                     )
 
 urlpatterns = [
@@ -21,8 +22,14 @@ urlpatterns = [
     path('product/attribute/attribute/',product_attribute_list,name='product_attribute_list'),
     path('product/attribute/attribute/create/',create_attribute,name='create_attribute'),
     path('product/attribute/attribute/update/<int:id>/',update_attribute,name='update_attribute'),
+    path('product/attribute/attribute/delete/<int:id>/',remove_attribute,name='remove_attribute'),
 
+    path('product/attribute/name/', list_attribute_name, name='list_attribute_name'),
     path('product/attribute/name/create/',create_attribute_name,name='create_attribute_name'),
+    path('product/attribute/name/update/<int:id>',update_attribute_names,name='update_attribute_names'),
+    path('product/attribute/name/remove/<int:id>',remove_attribute_names,name='remove_attribute_names'),
+
+
 
     path('product/stocks/',stock_list,name='stock_list'),
     path('product/stocks/create/',stock_create,name='stock_create'),

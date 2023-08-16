@@ -7,9 +7,33 @@
   </div>
 {%load crispy_forms_tags %} 
  <div class="container mt-5">
-        <form method="POST">
+         {% if forms %}
+             <form method="POST" class="py-5">
 		{% csrf_token %}
-		{{ form.as_p}}
+
+		<table class="table form-table table-bordered table-sm">
+                            <thead class="text-center">
+                            <tr>
+                                <th>Attribute Name</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="item">
+                                    <td>
+                                        {{ forms.a_name }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+        <div class="text-center">
+            <button class="btn-sm btn-primary" type="submit">Submit</button>
+        </div>
+	</form>
+
+        {% else %}
+        <form method="POST" class="py-5">
+		{% csrf_token %}
 
 		<table class="table form-table table-bordered table-sm">
                             <thead class="text-center">
@@ -44,10 +68,15 @@
                             </tr>
                             </tbody>
                         </table>
-                        {{ formset.management_form }}
-
-		<button class="btn-sm btn-primary" type="submit">Submit</button>
+            {{ formset.management_form }}
+        <div class="text-center">
+            <button class="btn-sm btn-primary" type="submit">Submit</button>
+        </div>
 	</form>
+
+        {% endif %}
+
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

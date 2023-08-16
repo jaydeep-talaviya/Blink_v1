@@ -5,8 +5,8 @@ from products.models import (Products,Category,Stocks,
                             AttributeName,AttributeValue,Payment,
                             ProductChangePriceAttributes,Orders)
 from datetime import date
-from .forms import (ProductForm,ProductChangePriceAttributesForm,
-                    ProductAttributesForm,StocksForm,AttributeNameForm)
+from .forms import (ProductForm, ProductChangePriceAttributesForm,
+                    ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -34,9 +34,9 @@ def create_attribute_name(request):
 
 
 ##################### Attrbiute Names ######3
-
+@staff_member_required(login_url='/')
 def create_attribute_names(request):
-    AttributeNameFormset = modelformset_factory(AttributeName, form=AttributeNameForm)
+    AttributeNameFormset = modelformset_factory(AttributeName, form=AttributeNameForm,formset=AttributeNameFormSet)
     formset = AttributeNameFormset(request.POST or None, queryset=AttributeName.objects.none(), prefix='name')
     if request.method == "POST":
         if formset.is_valid():
@@ -44,25 +44,56 @@ def create_attribute_names(request):
                 with transaction.atomic():
                     for attribute in formset:
                         attribute.save()
-                    messages.success(request, f"Your Attribute Name is Created")
+                messages.success(request, f"Your Attribute Name is Created")
             except Exception as e:
-                messages.warning(request, f"Please Check Again.Invalid Data")
+                print(">>>>e",e)
+                messages.warning(request, f"Please Check Again,Invalid Data")
             return redirect('create_attribute')
         else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
+            for error in formset.non_form_errors():
+                messages.warning(request, error)
     context = {
         'formset': formset,
     }
-
     return render(request,'staffs/pages/attribute_name.html',context)
+
+
+@staff_member_required(login_url='/')
+def update_attribute_names(request,id):
+    attribute_name_instance=get_object_or_404(AttributeName,id=id)
+    if request.method=="POST":
+        forms=AttributeNameForm(request.POST,instance=attribute_name_instance)
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Attribute Name is Updated")
+            return redirect('list_attribute_name')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+            return render(request,'staffs/pages/attribute_name.html',{"forms":forms})
+    else:
+        forms=AttributeNameForm(instance=attribute_name_instance)
+        return render(request,'staffs/pages/attribute_name.html',{"forms":forms})
+    return render(request,'staffs/pages/attribute_name.html',{'forms':forms})
+
+@staff_member_required(login_url='/')
+def list_attribute_name(request):
+    attribute_names=AttributeName.objects.all()
+    return render(request,'staffs/pages/attribute_name_list.html',{'attribute_names':attribute_names})
+
+@staff_member_required(login_url='/')
+def remove_attribute_names(request,id):
+    attribute_name_instance=AttributeName.objects.filter(id=id)
+    attribute_name_instance.delete()
+    messages.success(request, f"Your Attribute Name has been removed")
+    return redirect('list_attribute_name')
 
 
 ##################### AttributeValue ##################3
 
 @staff_member_required(login_url='/')
 def create_attribute(request):
-    AttributeValueFormset = modelformset_factory(AttributeValue, form=ProductAttributesForm)
-    formset = AttributeValueFormset(request.POST or None, queryset=AttributeValue.objects.none(), prefix='name')
+    AttributeValueForm = modelformset_factory(AttributeValue, form=ProductAttributesForm,formset=AttributeNameFormSet)
+    formset = AttributeValueForm(request.POST or None, queryset=AttributeValue.objects.none(), prefix='name')
     if request.method == "POST":
         if formset.is_valid():
             try:
@@ -74,7 +105,8 @@ def create_attribute(request):
                 messages.warning(request, f"Please Check Again.Invalid Data")
             return redirect('product_attribute_list')
         else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
+            for error in formset.non_form_errors():
+                messages.warning(request, error)
     context = {
         'formset': formset,
     }
@@ -88,20 +120,27 @@ def update_attribute(request,id):
         if forms.is_valid():
             forms.save()
             messages.success(request, f"Your Attribute is Updated")
-            return redirect(product_update_attribute,id=attribute_instance.id)
+            return redirect('product_attribute_list')
         else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
+            messages.warning(request, f"Please Check Again,Invalid Data")
             return render(request,'staffs/pages/attribute.html',{"forms":forms})
     else:
         forms=ProductAttributesForm(instance=attribute_instance)
         return render(request,'staffs/pages/attribute.html',{"forms":forms})
     return render(request,'staffs/pages/attribute.html',{'forms':forms})
 
+@staff_member_required(login_url='/')
+def remove_attribute(request,id):
+    attribute_instance=AttributeValue.objects.filter(id=id)
+    attribute_instance.delete()
+    messages.success(request, f"Your Attribute has been removed")
+    return redirect('product_attribute_list')
+
 
 @staff_member_required(login_url='/')
 ##################### ProductAttribute ################
 def product_attribute_list(request):
-    product_attributes=Stocks.objects.all().values('product_id__id','product_id__productchangepriceattributes__id','product_id__p_name','product_id__productchangepriceattributes__price','product_id__productchangepriceattributes__attribute_values__a_value','product_id__productchangepriceattributes__attribute_values__a_name__a_name')
+    product_attributes=AttributeValue.objects.all()
     return render(request,'staffs/pages/product_attribute_list.html',{'product_attributes':product_attributes})
 
 
