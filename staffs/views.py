@@ -6,7 +6,8 @@ from products.models import (Products,Category,Stocks,
                             ProductChangePriceAttributes,Orders)
 from datetime import date
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
-                    ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet)
+                    ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
+                    ProductChangePriceAttributesFormSet)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -136,19 +137,18 @@ def remove_attribute(request,id):
     messages.success(request, f"Your Attribute has been removed")
     return redirect('product_attribute_list')
 
-
 @staff_member_required(login_url='/')
-##################### ProductAttribute ################
 def product_attribute_list(request):
     product_attributes=AttributeValue.objects.all()
     return render(request,'staffs/pages/product_attribute_list.html',{'product_attributes':product_attributes})
 
 
+##################### ProductAttribute ################
+
 @staff_member_required(login_url='/')
 def create_product_attribute(request,pid):
     product_instance=get_object_or_404(Products,id=pid)
     if request.method=="POST":
-        # request.POST['pid']=[str(pid)]
         forms=ProductChangePriceAttributesForm(request.POST)
         if forms.is_valid():
             forms.save(commit=False)
@@ -196,22 +196,33 @@ def product_list(request):
     products=Products.objects.all()
     return render(request,'staffs/pages/product_list.html',{'products':products})
 
+
+def get_attribute_values(request):
+    if request.method == 'GET':
+        a_name_id = request.GET.get('a_name_id')
+        attribute_values = AttributeValue.objects.filter(a_name_id=a_name_id)
+        values = [{'id': obj.id, 'value': obj.a_value} for obj in attribute_values]
+        return JsonResponse({'values': values})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
 @staff_member_required(login_url='/')
 def product_add(request):
+    formset = ProductChangePriceAttributesFormSet(request.POST or None)
+    forms = ProductForm(request.POST or None, request.FILES or None)
+
     if request.method=="POST":
-        forms=ProductForm(request.POST,request.FILES)
-        if forms.is_valid():
-            obj=forms.save() 
+        if forms.is_valid() and formset.is_valid():
+            product_obj=forms.save()
+            formset.instance = product_obj
+            formset.save()
             messages.success(request, f"Your Product is Created")
-            return redirect('product_update',id=obj.pk)
+            return redirect('product_update',id=product_obj.pk)
         else:
-            # print(">>>>>>>>",forms.errors)
-            messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/product_update.html',{"forms":forms})
+            messages.warning(request, f"Please Check Again,Invalid Data")
+            return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
     else:
-        forms=ProductForm()
-        return render(request,'staffs/pages/product_update.html',{"forms":forms})
-    return render(request,'staffs/pages/product_update.html',{'forms':forms})
+        return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
+    return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
 
 @staff_member_required(login_url='/')
 def product_update(request,id):

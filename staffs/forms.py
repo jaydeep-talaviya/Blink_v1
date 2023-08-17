@@ -47,17 +47,42 @@ class AttributeValueFormSet(BaseModelFormSet):
                 raise forms.ValidationError("Attribute Value should be atleast one character")
 
 
-
-
 class ProductForm(forms.ModelForm):
     class Meta:
         model=Products
         fields='__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['p_name'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['p_category'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['p_subcategory'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['price'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['description'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['description'].widget.attrs['rows'] = 3  # Set the number of rows
+
 class ProductChangePriceAttributesForm(forms.ModelForm):
+    a_name = forms.ModelChoiceField(required=True,queryset=AttributeName.objects.all())
+    a_value = forms.ModelChoiceField(required=True,queryset=AttributeValue.objects.none())
+
     class Meta:
         model=ProductChangePriceAttributes
-        fields=['attribute_values','price']
+        fields=['a_name','a_value','price']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['a_name'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['a_value'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['price'].widget.attrs['class'] = 'form-control formset-field'
+
+
+ProductChangePriceAttributesFormSet = forms.inlineformset_factory(
+    Products,
+    ProductChangePriceAttributes,
+    form=ProductChangePriceAttributesForm,
+    extra=1,  # Number of empty forms to display initially
+    can_delete=True,
+)
 
 class StocksForm(forms.ModelForm):
     class Meta:

@@ -16,21 +16,16 @@
 
               {% else %}
               <h1 class="h3 mb-0 text-gray-800">Add New Product</h1>
-
-
               {% endif %}
             </div>
             <div class="d-flex justify-content-center pb-2">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <!-- {{ forms|crispy}} -->
-
                     <div class="form-row">
-                        <div class="form-group col-md-12 mb-0">
+                        <div class="form-group col-md-4 mb-0">
                           {{ forms.p_name|as_crispy_field }}
                         </div>
-                      </div>
-                      <div class="form-row">
+
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.p_category|as_crispy_field }}
                         </div>
@@ -47,80 +42,162 @@
                       <div class="form-row">
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.price|as_crispy_field }}
+
                         </div>
                       </div>
                       <div class="form-row" style="overflow-wrap: break-word;">
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.photo_1|as_crispy_field }}
+                            <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                                <img id="image-preview-1" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                            </div>
                         </div>
                         <div class="form-group col-md-4 mb-0">
                             {{ forms.photo_2|as_crispy_field }}
+                            <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                             <img id="image-preview-2" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                            </div>
                           </div>
                           <div class="form-group col-md-4 mb-0">
                             {{ forms.photo_3|as_crispy_field }}
+                              <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                                <img id="image-preview-3" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                              </div>
                           </div>
                       </div>
                       <div class="form-row" style="overflow-wrap: break-word;">
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.photo_4|as_crispy_field }}
+                            <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                          <img id="image-preview-4" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                        </div>
                         </div>
                         <div class="form-group col-md-4 mb-0">
                             {{ forms.photo_5|as_crispy_field }}
-                          </div>
+                            <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                            <img id="image-preview-5" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                            </div>
+                            </div>
                           <div class="form-group col-md-4 mb-0">
                             {{ forms.photo_6|as_crispy_field }}
+                              <div style="width: 200px; height: 200px; border:1px solid;display: none;">
+                            <img id="image-preview-6" src="#" alt="Image Preview" style="max-width: 200px; height: 100%;display: none;">
+                              </div>
                           </div>
                       </div>
+		            <table class="table form-table table-bordered table-sm">
+                            <thead class="text-center">
+                            <tr>
+                                <th>Attribute Name</th>
+                                <th>Attribute Value</th>
+                                <th>Attribute Price</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for form_data in formset %}
+                                <tr class="item">
+                                    <td class="formset-row">
+                                        {{ form_data.a_name }}
+                                    </td>
+                                       <td class="formset-row">
+                                           <select id="id_a_value_{{ form_data.prefix }}" name="{{ form_data.prefix }}-{{form_data.a_value.name }}" class="form-control formset-field">
+                                              <option value="" selected="">---------</option>
+                                            </select>
+                                    </td>
+                                       <td>
+                                        {{ form_data.price }}
+                                    </td>
+
+
+                                    <td>
+                                        <button type="button" class="btn-danger btn-sm remove-form-row"
+                                                id="{{ formset.prefix }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="9"
+                                    style="border-left: none!important; border-right: none !important; border-bottom: none!important;">
+                                    <button type="button" class="btn-sm btn-success add-form-row"
+                                            id="{{ formset.prefix }}">
+                                       Add
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+            {{ formset.management_form }}
 
 
                     <button type="submit" class="btn btn-success"> Submit </button>
                 </form>
             </div>
-            <div>
-              {% if pid %}
-              <div class="my-4">
-                <a href="{% url 'create_product_attribute' pid=pid %}" class="btn btn-primary">Add New Product Attribute</a>
 
-              </div>
-
-              {% endif %}
-              
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Attribute Name</th>
-                    <th scope="col">Attribute Values</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for attrs in p_attrs %}
-                  <tr>
-                    <th scope="row">1</th>
-                    <td>{{attrs.attribute_values__a_name__a_name}}</td>
-                    <td>{{attrs.attribute_values__a_value}}</td>
-                    <td>{{attrs.price}}</td>
-                    <td>
-                      <div class="d-flex justify-content-around">
-                         <div>
-                          <a href="{% url 'product_update_attribute' pid=pid id=attrs.id %}" class="btn btn-primary text-decoration-none">Edit</a>
-                         </div>
-                         <div>
-                          <button class="btn btn-danger">Delete</button>
-                         </div>
-                      </div>
-                  </td>
-
-                  </tr>
-                  {% endfor %}
-              
-               
-                </tbody>
-              </table>
-            </div>
         
 </div>
+<script>
+    function addImagePreview(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
 
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.addEventListener('load', function () {
+                    preview.src = reader.result;
+                    preview.style.display = 'block';
+                    preview.parentElement.style.display= 'block';
+                });
+
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none';
+                preview.parentElement.style.display= 'none';
+
+            }
+        });
+    }
+
+    addImagePreview('id_photo_1', 'image-preview-1');
+    addImagePreview('id_photo_2', 'image-preview-2');
+    addImagePreview('id_photo_3', 'image-preview-3');
+    addImagePreview('id_photo_4', 'image-preview-4');
+    addImagePreview('id_photo_5', 'image-preview-5');
+    addImagePreview('id_photo_6', 'image-preview-6');
+
+
+<!--    ajax to get product attribute value from attribute name -->
+document.addEventListener('DOMContentLoaded', () => {
+    const formsetRows = document.querySelectorAll('.item');
+    formsetRows.forEach(row => {
+        console.log("row",row)
+        const aNameSelector = row.querySelector('.formset-row select[name$="-a_name"]');
+        const aValueSelector = row.querySelector('.formset-row select[name$="-a_value"]');
+        console.log(">>>> step 1>>>",aNameSelector,aValueSelector);
+        aNameSelector.addEventListener('change', () => {
+            const aNameId = aNameSelector.value;
+            fetch(`/staff/get_attribute_values/?a_name_id=${aNameId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data,aValueSelector)
+                    aValueSelector.innerHTML = '<option value="" selected>---------</option>';
+                    data.values.forEach(value => {
+                        aValueSelector.innerHTML += `<option value="${value.id}">${value.value}</option>`;
+                    });
+                });
+        });
+    });
+});
+
+</script>
+ <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/formset.js' %}"></script>
 {% endblock main-content %}
+

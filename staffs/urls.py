@@ -6,7 +6,8 @@ from .views import (home,product_list,product_update,
                     stock_list,stock_update,stock_create,
                     deals_of_day_list,create_deals_of_the_day,update_deals_of_the_day,
                     orderlists,single_order,paymentlists,
-                    create_attribute_names,update_attribute_names,remove_attribute_names,list_attribute_name
+                    create_attribute_names,update_attribute_names,remove_attribute_names,list_attribute_name,
+                    get_attribute_values
                     )
 
 urlpatterns = [
@@ -28,6 +29,10 @@ urlpatterns = [
     path('product/attribute/name/create/',create_attribute_name,name='create_attribute_name'),
     path('product/attribute/name/update/<int:id>',update_attribute_names,name='update_attribute_names'),
     path('product/attribute/name/remove/<int:id>',remove_attribute_names,name='remove_attribute_names'),
+
+    # ajax
+    path('get_attribute_values/',get_attribute_values,name='get_attribute_values'),
+
 
 
 
