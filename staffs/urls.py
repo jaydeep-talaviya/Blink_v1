@@ -7,7 +7,9 @@ from .views import (home,product_list,product_update,
                     deals_of_day_list,create_deals_of_the_day,update_deals_of_the_day,
                     orderlists,single_order,paymentlists,
                     create_attribute_names,update_attribute_names,remove_attribute_names,list_attribute_name,
-                    get_attribute_values
+                    get_attribute_values,
+                    create_category,update_category,list_category,remove_category,
+                    create_sub_category,update_sub_category,list_sub_category,remove_sub_category,
                     )
 
 urlpatterns = [
@@ -29,6 +31,16 @@ urlpatterns = [
     path('product/attribute/name/create/',create_attribute_name,name='create_attribute_name'),
     path('product/attribute/name/update/<int:id>',update_attribute_names,name='update_attribute_names'),
     path('product/attribute/name/remove/<int:id>',remove_attribute_names,name='remove_attribute_names'),
+
+    path('product/category/', list_category, name='list_category'),
+    path('product/category/create/', create_category, name='create_category'),
+    path('product/category/update/<int:id>', update_category, name='update_category'),
+    path('product/category/remove/<int:id>', remove_category, name='remove_category'),
+
+    path('product/subcategory/', list_sub_category, name='list_sub_category'),
+    path('product/subcategory/create/', create_sub_category, name='create_sub_category'),
+    path('product/subcategory/update/<int:id>', update_sub_category, name='update_sub_category'),
+    path('product/subcategory/remove/<int:id>', remove_sub_category, name='remove_sub_category'),
 
     # ajax
     path('get_attribute_values/',get_attribute_values,name='get_attribute_values'),

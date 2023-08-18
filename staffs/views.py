@@ -1,9 +1,11 @@
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
-from products.models import (Products,Category,Stocks,
-                            AttributeName,AttributeValue,Payment,
-                            ProductChangePriceAttributes,Orders)
+
+from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
+from products.models import (Products, Category, Stocks,
+                             AttributeName, AttributeValue, Payment,
+                             ProductChangePriceAttributes, Orders, Subcategory)
 from datetime import date
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
@@ -32,6 +34,123 @@ def create_attribute_name(request):
         return JsonResponse({'attribute_name_id':attribute_name.id,'attribute_name_a_name':attribute_name.a_name})
     else:
         return JsonResponse({"error": "please enter valid"}, status=400)
+
+
+########### Product Category #########
+
+def create_category(request):
+    ProductCategoryFormSet = modelformset_factory(Category, form=CategoryForm,formset=CategoryFormSet)
+    formset = ProductCategoryFormSet(request.POST or None, queryset=Category.objects.none(), prefix='category')
+    if request.method == "POST":
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    for category in formset:
+                        category.save()
+                messages.success(request, f"Your Category is Created")
+            except Exception as e:
+                print(">>>>e",e)
+                messages.warning(request, f"Please Check Again,Invalid Data")
+            return redirect('list_category')
+        else:
+            for error in formset.non_form_errors():
+                messages.warning(request, error)
+    context = {
+        'formset': formset,
+    }
+    return render(request,'staffs/pages/category.html',context)
+
+def list_category(request):
+    categories = Category.objects.all()
+    return render(request,'staffs/pages/category_list.html',{'categories':categories})
+
+def update_category(request,id):
+    category_instance=get_object_or_404(Category,id=id)
+    if request.method=="POST":
+        forms=CategoryForm(request.POST,instance=category_instance)
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Category is Updated")
+            return redirect('list_category')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+            return render(request,'staffs/pages/category.html',{"forms":forms})
+    else:
+        forms=CategoryForm(instance=category_instance)
+        return render(request,'staffs/pages/category.html',{"forms":forms})
+    return render(request,'staffs/pages/category.html',{'forms':forms})
+
+
+@staff_member_required(login_url='/')
+def remove_category(request,id):
+    category_instance=Category.objects.filter(id=id)
+    category_instance.delete()
+    messages.success(request, f"Your Category has been removed")
+    return redirect('list_category')
+
+############ Sub Category ################3
+
+@staff_member_required(login_url='/')
+def create_attribute_name(request):
+    if request.is_ajax and request.method == "POST":
+        attribute_name=AttributeName(a_name=request.POST.get('a_name',False))
+        attribute_name.save()
+        return JsonResponse({'attribute_name_id':attribute_name.id,'attribute_name_a_name':attribute_name.a_name})
+    else:
+        return JsonResponse({"error": "please enter valid"}, status=400)
+
+
+########### Product Sub Category #########
+
+def create_sub_category(request):
+    ProductSubCategoryFormSet = modelformset_factory(Subcategory, form=SubCategoryForm,formset=SubCategoryFormSet)
+    formset = ProductSubCategoryFormSet(request.POST or None, queryset=Subcategory.objects.none(), prefix='subcategory')
+    if request.method == "POST":
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    for subcategory in formset:
+                        subcategory.save()
+                messages.success(request, f"Your Sub-Category is Created")
+            except Exception as e:
+                print(">>>>e",e)
+                messages.warning(request, f"Please Check Again,Invalid Data")
+            return redirect('list_sub_category')
+        else:
+            for error in formset.non_form_errors():
+                messages.warning(request, error)
+    context = {
+        'formset': formset,
+    }
+    return render(request,'staffs/pages/sub_category.html',context)
+
+def list_sub_category(request):
+    subcategories = Subcategory.objects.all()
+    return render(request,'staffs/pages/sub_category_list.html',{'subcategories':subcategories})
+
+def update_sub_category(request,id):
+    sub_category_instance=get_object_or_404(Subcategory,id=id)
+    if request.method=="POST":
+        forms=SubCategoryForm(request.POST,instance=sub_category_instance)
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Sub Category is Updated")
+            return redirect('list_sub_category')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+            return render(request,'staffs/pages/sub_category.html',{"forms":forms})
+    else:
+        forms=SubCategoryForm(instance=sub_category_instance)
+        return render(request,'staffs/pages/sub_category.html',{"forms":forms})
+    return render(request,'staffs/pages/sub_category.html',{'forms':forms})
+
+
+@staff_member_required(login_url='/')
+def remove_sub_category(request,id):
+    subcategory_instance=Subcategory.objects.filter(id=id)
+    subcategory_instance.delete()
+    messages.success(request, f"Your Sub Category has been removed")
+    return redirect('list_sub_category')
 
 
 ##################### Attrbiute Names ######3
