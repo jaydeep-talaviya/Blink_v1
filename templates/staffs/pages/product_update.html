@@ -173,26 +173,32 @@
 
 
 <!--    ajax to get product attribute value from attribute name -->
-document.addEventListener('DOMContentLoaded', () => {
-    const formsetRows = document.querySelectorAll('.item');
-    formsetRows.forEach(row => {
-        console.log("row",row)
-        const aNameSelector = row.querySelector('.formset-row select[name$="-a_name"]');
-        const aValueSelector = row.querySelector('.formset-row select[name$="-a_value"]');
-        console.log(">>>> step 1>>>",aNameSelector,aValueSelector);
-        aNameSelector.addEventListener('change', () => {
-            const aNameId = aNameSelector.value;
-            fetch(`/staff/get_attribute_values/?a_name_id=${aNameId}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data,aValueSelector)
-                    aValueSelector.innerHTML = '<option value="" selected>---------</option>';
-                    data.values.forEach(value => {
-                        aValueSelector.innerHTML += `<option value="${value.id}">${value.value}</option>`;
+
+const get_attribute_values = (row)=>{
+
+            const aNameSelector = row.querySelector('.formset-row select[name$="-a_name"]');
+            const aValueSelector = row.querySelector('.formset-row select[name$="-a_value"]');
+
+                const aNameId = aNameSelector.value;
+                if (aNameId != ''){
+                fetch(`/staff/get_attribute_values/?a_name_id=${aNameId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        aValueSelector.innerHTML = '<option value="" selected>---------</option>';
+                        data.values.forEach(value => {
+                            aValueSelector.innerHTML += `<option value="${value.id}">${value.value}</option>`;
+                        });
                     });
-                });
-        });
-    });
+                }
+}
+
+// Use event delegation to attach event listeners to dynamically added forms
+document.addEventListener('change', event => {
+    const target = event.target;
+    if (target && target.parentElement.classList.contains('formset-row') && target.tagName === 'SELECT' && target.name.endsWith('-a_name')) {
+        // Assuming 'formset-row' is the class of your form rows
+        get_attribute_values(target.parentElement.parentElement);
+    }
 });
 
 </script>
