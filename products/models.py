@@ -38,7 +38,7 @@ class AttributeValue(models.Model):
     a_name=models.ForeignKey(AttributeName,on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.a_value
+        return self.a_name.a_name +" - "+self.a_value
 
 
 class Products(models.Model):
@@ -144,7 +144,7 @@ class Vouchers(models.Model):
         ('product_together','Product Together'),
         ('promocode','Promocode'),
     )
-    voucher_type = models.CharField(max_length=200)
+    voucher_type = models.CharField(max_length=200,choices=choices)
     on_above_purchase = models.FloatField(null=True,blank=True) #on_above_purchase
     off_price = models.FloatField(null=True,blank=True) #on_above_purchase + #product_together +# promocode
 
@@ -178,7 +178,7 @@ class Orders(models.Model):
     payment_failed=models.BooleanField(default=True)
     amount=models.FloatField(validators=[MinValueValidator(0)])
     total_discount=models.FloatField(validators=[MinValueValidator(0)],default=0)
-    vouchers = models.ForeignKey(Vouchers,on_delete=models.DO_NOTHING)
+    vouchers = models.ForeignKey(Vouchers,on_delete=models.DO_NOTHING,null=True)
 
 
 class OrderLines(models.Model):

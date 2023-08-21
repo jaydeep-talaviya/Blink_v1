@@ -60,20 +60,29 @@ class ProductForm(forms.ModelForm):
         self.fields['price'].widget.attrs['class'] = 'form-control formset-field'
         self.fields['description'].widget.attrs['class'] = 'form-control formset-field'
         self.fields['description'].widget.attrs['rows'] = 3  # Set the number of rows
+        if self.instance.id:
+            self.fields['p_name'].initial = self.instance.p_name
+            self.fields['p_category'].initial = self.instance.p_category
+            self.fields['p_subcategory'].initial = self.instance.p_subcategory
+            self.fields['price'].initial = self.instance.price
+            self.fields['description'].initial = self.instance.description
 
 class ProductChangePriceAttributesForm(forms.ModelForm):
-    a_name = forms.ModelChoiceField(required=True,queryset=AttributeName.objects.all())
-    a_value = forms.ModelChoiceField(required=True,queryset=AttributeValue.objects.none())
 
     class Meta:
         model=ProductChangePriceAttributes
-        fields=['a_name','a_value','price']
+        fields=['attribute_values','price']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['a_name'].widget.attrs['class'] = 'form-control formset-field'
-        self.fields['a_value'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['attribute_values'].widget.attrs['class'] = 'form-select formset-field'
         self.fields['price'].widget.attrs['class'] = 'form-control formset-field'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Print cleaned_data or specific field values for debugging
+        print(cleaned_data,">>>>>>>>\n\n\n\n\n")
+        return cleaned_data
 
 
 ProductChangePriceAttributesFormSet = forms.inlineformset_factory(
@@ -83,6 +92,7 @@ ProductChangePriceAttributesFormSet = forms.inlineformset_factory(
     extra=1,  # Number of empty forms to display initially
     can_delete=True,
 )
+
 
 class StocksForm(forms.ModelForm):
     class Meta:

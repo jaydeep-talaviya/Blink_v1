@@ -1,7 +1,8 @@
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from . models import Payment,Stocks,Checkout, OrderLines, Orders, Products,Rates,AttributeName,Cart,OtpModel
+from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
+    Vouchers
 from django.db.models import Avg,Count,Max,Min
 from users.models import User
 from django.urls import reverse
@@ -39,13 +40,8 @@ def search(request):
     if request.method == 'GET': # this will be GET now      
         product_search =  request.GET.get('search') # do some research what it does    
     subcategory="All"
-    # stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
-    if request.user.is_authenticated:
-        todays_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-    else:
-        todays_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
 
-    all_products=todays_products.filter(Q(p_subcategory__subcategory_name__icontains=product_search)|Q(p_category__category_name__icontains=product_search) | Q(p_name__icontains=product_search))
+    all_products=Products.objects.filter(Q(p_subcategory__subcategory_name__icontains=product_search)|Q(p_category__category_name__icontains=product_search) | Q(p_name__icontains=product_search))
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
     page = request.GET.get('page',1)   
@@ -63,16 +59,12 @@ def search(request):
 
 def productlist(request,subcategory=None):
     page = request.GET.get('page',1)
-    if request.user.is_authenticated:
-        todays_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-    else:
-        todays_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
 
     if subcategory == None:
-        all_products=todays_products.order_by('price')
+        all_products=Products.objects.all().order_by('price')
         subcategory='All'
     else:
-        all_products=todays_products.filter(Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)).order_by('price')
+        all_products=Products.objects.filter(Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)).order_by('price')
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
 
@@ -94,11 +86,7 @@ def productlist_sortby(request):
 
         sort_by=request.GET.get('sort_by',False)
         subcategory=request.GET.get('subcategory',False)
-        # all_products=Products.objects.all()
-        if request.user.is_authenticated:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-        else:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
+        all_products=Products.objects.all()
 
         if subcategory == 'All' or None:
             all_products=all_products.order_by('price')
@@ -130,13 +118,8 @@ def productlist_sortby(request):
     return render(request, 'products/productlist_temp.html',{'products':all_products})
 
 def productdetail(request,p_id):
-    
-    if request.user.is_authenticated:
-        all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-    else:
-        all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
 
-    products=all_products.get(id=p_id)
+    products=Products.objects.get(id=p_id)
 
     product_attr_list=products.productchangepriceattributes_set.values('id','attribute_values__a_name__a_name','attribute_values__a_value','price')
  
@@ -152,7 +135,6 @@ def productdetail(request,p_id):
         else:
             product_attr_dict[i['attribute_values__a_name__a_name']]+=','+i['attribute_values__a_value']
 
-   
     #avg_rate
     product_avg_rate=products.rates_set.aggregate(Avg('rate'))['rate__avg'] if products.rates_set.values().count() != 0 else 0
     rate_list=['orange' for i in range(int(product_avg_rate))]+['black' for i in range(5-int(product_avg_rate))]
@@ -163,24 +145,21 @@ def productdetail(request,p_id):
         get_user=User.objects.get(id=i['user_id'])
         i['user_id']=get_user
         i['rate']=['orange' for i in range(int(i['rate']))]+['black' for i in range(5-int(i['rate']))]
-    # deals=Deals_of_day.objects.filter(p_id_id=p_id,date__day=today.day,date__month=today.month,date__year=today.year,with_product__in=[i[0] for i in all_products.values_list('id')])
+
+    on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
+    deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day',products__id=products.id)
+
     return render(request, 'products/productdetail.html',{'products':products,
                                                             'product_attr_list':product_attr_dict,
                                                             'prdct_varient':prdct_varient,'avg_rate':rate_list,
                                                             'product_comments_rate':product_comments_rate,
-                                                            'deals':None,
+                                                            'deals':on_above_purchase_vouchers+deals_of_day_voucher,
                                                             })
 
 @login_required
 def submit_rates_and_comments(request):
     if request.method == "POST":
-        if request.user.is_authenticated:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-        else:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
-
-        products=all_products.get(id=request.POST.get('p_id',False))
-
+        products=Products.objects.get(id=request.POST.get('p_id',False))
         if len(Rates.objects.filter(Q(user=request.user) & Q(p_id=products))) == 0:
             rates_table=Rates.objects.create(comment=request.POST.get('comments',False),rate=request.POST.get('userRating',False),user=request.user,p_id=products)
             rates_table.save()
@@ -205,12 +184,7 @@ def productcart(request):
     # category=Category.objects.all()
     if request.method=="POST":
         requestdata=dict(request.POST)
-        if request.user.is_authenticated:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-        else:
-            all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
-
-        product=all_products.get(id=int(requestdata.get('p_id')[0]))
+        product=Products.objects.get(id=int(requestdata.get('p_id')[0]))
         x=product.productchangepriceattributes_set
 
         selected_varient=''
@@ -383,54 +357,51 @@ def productcartupdateremove(request):
 
 @login_required
 def createorder(request):
-    cart=Cart.objects.filter(user_id=request.user)
-    checkout=request.user.checkout_set.get()
-    if len(cart)!=0:
-        seller=User.objects.get(order_place_city=request.user.order_place_city,is_staff=True)
-        orders=Orders.objects.create(checkout=checkout,order_status='order_not_confirm',user=request.user,amount=0,created_seller=seller)
-
-        if checkout.payment_type == 'paytm':
-            amount=0
-            for c in cart:
-
-                OrderLines.objects.create(product_id=c.product_id,qty=c.qty,price=c.price,per_order_amount=c.qty*c.price,order_id=orders)
-                discount=Discount.objects.filter(on_above_purchase__lte=amount)
-                if discount:
-                    discount=discount.last()
-                    orders.discount=discount
-                    amount-=(amount*discount.percent_off)/100
-
-                amount+=c.qty*c.price
-                if request.user.is_authenticated:
-                    all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-                else:
-                    all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
-
-                # product=all_products.get(id=c.product_id.id)
-                stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
-                stock.left_qty=stock.left_qty-c.qty
-                stock.save()
-                c.delete()
-            orders.amount=amount
-            # orders.created_seller=
-            orders.save()
-            param_dict = {
-
-                'MID': 'iNqaaK84118094196288',
-                'ORDER_ID': str(orders.orderid),
-                'TXN_AMOUNT': str(orders.amount), #change after test
-                'CUST_ID': request.user.email, # check users mail
-                'INDUSTRY_TYPE_ID': 'Retail',
-                'WEBSITE': 'WEBSTAGING',
-                'CHANNEL_ID': 'WEB',
-                'CALLBACK_URL':'http://127.0.0.1:8000/handlerequest',
-
-                }
-            param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)    
-            return render(request, 'products/paytm.html', {'param_dict': param_dict})
-        else:
-            messages.error(request, "Something Went Wrong! Please Try again, Thank You")
-            return redirect('checkout')
+    # cart=Cart.objects.filter(user_id=request.user)
+    # checkout=request.user.checkout_set.get()
+    # if len(cart)!=0:
+    #     orders=Orders.objects.create(checkout=checkout,order_status='order_not_confirm',user=request.user,amount=0)
+    #
+    #     if checkout.payment_type == 'paytm':
+    #         amount=0
+    #         for c in cart:
+    #             OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
+    #             # discount=Vouchers.objects.filter(voucher_type='on_above_purchase',on_above_purchase)
+    #             # if discount:
+    #             #     discount=discount.last()
+    #             #     orders.discount=discount
+    #             #     amount-=(amount*discount.percent_off)/100
+    #
+    #             amount+=c.qty*c.price
+    #             if request.user.is_authenticated:
+    #                 all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
+    #             else:
+    #                 all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
+    #
+    #             # product=all_products.get(id=c.product_id.id)
+    #             stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
+    #             stock.left_qty=stock.left_qty-c.qty
+    #             stock.save()
+    #             c.delete()
+    #         orders.amount=amount
+    #         orders.save()
+    #         param_dict = {
+    #
+    #             'MID': 'iNqaaK84118094196288',
+    #             'ORDER_ID': str(orders.orderid),
+    #             'TXN_AMOUNT': str(orders.amount), #change after test
+    #             'CUST_ID': request.user.email, # check users mail
+    #             'INDUSTRY_TYPE_ID': 'Retail',
+    #             'WEBSITE': 'WEBSTAGING',
+    #             'CHANNEL_ID': 'WEB',
+    #             'CALLBACK_URL':'http://127.0.0.1:8000/handlerequest',
+    #
+    #             }
+    #         param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
+    #         return render(request, 'products/paytm.html', {'param_dict': param_dict})
+    #     else:
+    #         messages.error(request, "Something Went Wrong! Please Try again, Thank You")
+    return redirect('checkout')
             
 def update_order(request,orderid):
     order=Orders.objects.get(orderid=orderid)

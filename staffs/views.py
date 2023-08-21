@@ -335,7 +335,7 @@ def product_add(request):
             formset.instance = product_obj
             formset.save()
             messages.success(request, f"Your Product is Created")
-            return redirect('product_update',id=product_obj.pk)
+            return redirect('product_list')
         else:
             messages.warning(request, f"Please Check Again,Invalid Data")
             return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
@@ -346,20 +346,28 @@ def product_add(request):
 @staff_member_required(login_url='/')
 def product_update(request,id):
     product_instance=get_object_or_404(Products,id=id)
-    p_attrs=product_instance.productchangepriceattributes_set.values('id','attribute_values__a_name__a_name','attribute_values__a_value','price')
+    formset = ProductChangePriceAttributesFormSet(request.POST or None,instance = product_instance,queryset=product_instance.productchangepriceattributes_set.all())
+    forms = ProductForm(request.POST or None, request.FILES or None,instance=product_instance)
+
     if request.method=="POST":
-        forms=ProductForm(request.POST,request.FILES,instance=product_instance)
-        if forms.is_valid():
-            forms.save()
+        if forms.is_valid() and formset.is_valid():
+            product_obj = forms.save()
+            formset.instance = product_obj
+            formset.save()
             messages.success(request, f"Your Product is Updated")
-            return redirect(product_update,id=product_instance.id)
+            return redirect('product_list')
         else:
+            print(">>>",formset.errors)
             messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/product_update.html',{"forms":forms,'p_attrs':p_attrs,'pid':id})
-    else:
-        forms=ProductForm(instance=product_instance)
-        return render(request,'staffs/pages/product_update.html',{"forms":forms,'p_attrs':p_attrs,'pid':id})
-    return render(request,'staffs/pages/product_update.html',{'forms':forms,'p_attrs':p_attrs,'pid':id})
+            return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset,'pid':id})
+    return render(request, 'staffs/pages/product_update.html', {"forms": forms, 'formset': formset,'pid':id})
+
+@staff_member_required(login_url='/')
+def product_delete(request, id):
+    product_instance = Products.objects.filter(id=id)
+    # product_instance.delete()
+    messages.success(request, f"Your Product has been removed")
+    return redirect('product_list')
 
 ########## Stock ######################
 @staff_member_required(login_url='/')

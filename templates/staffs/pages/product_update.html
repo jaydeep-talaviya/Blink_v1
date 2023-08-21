@@ -15,8 +15,11 @@
               <h1 class="h3 mb-0 text-gray-800">Update {{forms.p_name.value}}</h1>
 
               {% else %}
+
+
               <h1 class="h3 mb-0 text-gray-800">Add New Product</h1>
               {% endif %}
+
             </div>
             <div class="d-flex justify-content-center pb-2">
                 <form method="post" enctype="multipart/form-data">
@@ -24,6 +27,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.p_name|as_crispy_field }}
+
                         </div>
 
                         <div class="form-group col-md-4 mb-0">
@@ -88,7 +92,6 @@
 		            <table class="table form-table table-bordered table-sm">
                             <thead class="text-center">
                             <tr>
-                                <th>Attribute Name</th>
                                 <th>Attribute Value</th>
                                 <th>Attribute Price</th>
                             </tr>
@@ -97,18 +100,12 @@
                             {% for form_data in formset %}
                                 <tr class="item">
                                     <td class="formset-row">
-                                        {{ form_data.a_name }}
+                                        {{ form_data.attribute_values }}
+                                        {{ form_data.id }}
                                     </td>
-                                       <td class="formset-row">
-                                           <select id="id_a_value_{{ form_data.prefix }}" name="{{ form_data.prefix }}-{{form_data.a_value.name }}" class="form-control formset-field">
-                                              <option value="" selected="">---------</option>
-                                            </select>
-                                    </td>
-                                       <td>
+                                   <td>
                                         {{ form_data.price }}
                                     </td>
-
-
                                     <td>
                                         <button type="button" class="btn-danger btn-sm remove-form-row"
                                                 id="{{ formset.prefix }}">
@@ -171,35 +168,6 @@
     addImagePreview('id_photo_5', 'image-preview-5');
     addImagePreview('id_photo_6', 'image-preview-6');
 
-
-<!--    ajax to get product attribute value from attribute name -->
-
-const get_attribute_values = (row)=>{
-
-            const aNameSelector = row.querySelector('.formset-row select[name$="-a_name"]');
-            const aValueSelector = row.querySelector('.formset-row select[name$="-a_value"]');
-
-                const aNameId = aNameSelector.value;
-                if (aNameId != ''){
-                fetch(`/staff/get_attribute_values/?a_name_id=${aNameId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        aValueSelector.innerHTML = '<option value="" selected>---------</option>';
-                        data.values.forEach(value => {
-                            aValueSelector.innerHTML += `<option value="${value.id}">${value.value}</option>`;
-                        });
-                    });
-                }
-}
-
-// Use event delegation to attach event listeners to dynamically added forms
-document.addEventListener('change', event => {
-    const target = event.target;
-    if (target && target.parentElement.classList.contains('formset-row') && target.tagName === 'SELECT' && target.name.endsWith('-a_name')) {
-        // Assuming 'formset-row' is the class of your form rows
-        get_attribute_values(target.parentElement.parentElement);
-    }
-});
 
 </script>
  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -32,10 +32,10 @@
                         <td>
                             <div class="d-flex justify-content-around">
                                <div>
-                                <a href="{% url 'product_update' id=product.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'product_update' id=product.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                <button class="btn btn-danger">Delete</button>
+                                 <a href="{% url 'product_delete' id=product.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
                                </div>
                             </div>
                         </td>
