@@ -2,7 +2,7 @@ from django import forms
 from django.forms import BaseModelFormSet
 
 from products.models import (Products, ProductChangePriceAttributes,
-                             Stocks, AttributeValue, AttributeName)
+                             Stocks, AttributeValue, AttributeName, Vouchers)
 
 ########## Attribute Name ###########33
 class AttributeNameForm(forms.ModelForm):
@@ -92,6 +92,16 @@ ProductChangePriceAttributesFormSet = forms.inlineformset_factory(
     extra=1,  # Number of empty forms to display initially
     can_delete=True,
 )
+
+class VouchersForm(forms.ModelForm):
+    class Meta:
+        model=Vouchers
+        fields='__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-select formset-field'
 
 
 class StocksForm(forms.ModelForm):

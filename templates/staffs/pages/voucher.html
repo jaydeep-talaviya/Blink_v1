@@ -1,0 +1,149 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Voucher{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5">
+         <form method="POST" class="py-5">
+		{% csrf_token %}
+
+		<table class="table form-table table-bordered table-sm">
+                            <thead class="text-center">
+                            <tr>
+                                <th>Voucher </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="voucher_type">
+                                    <th class="text-start pl-3">{{ forms.voucher_type.label }}</th>
+                                    <td>
+                                        {{ forms.voucher_type }}
+                                    </td>
+                                </tr>
+                                <tr class="item on_above_purchase" id="OnAbovePurchase">
+                                    <th class="text-start pl-3">{{ forms.on_above_purchase.label }}</th>
+                                    <td>
+                                        {{ forms.on_above_purchase }}
+                                    </td>
+                                </tr>
+                                <tr class="item off_price" id="OffPrice">
+                                    <th class="text-start pl-3">{{ forms.off_price.label }}</th>
+                                    <td>
+                                        {{ forms.off_price }}
+                                    </td>
+                                </tr>
+                                <tr class="item products" id="Products">
+                                    <th class="text-start pl-3">{{ forms.products.label }}</th>
+                                    <td>
+                                        {{ forms.products }}
+                                    </td>
+                                </tr>
+                                <tr class="item percent_off" id="PercentOff">
+                                    <th class="text-start pl-3">{{ forms.percent_off.label }}</th>
+                                    <td>
+                                        {{ forms.percent_off }}
+                                    </td>
+                                </tr>
+                                <tr class="item with_product" id="WithProduct">
+                                    <th class="text-start pl-3">{{ forms.with_product.label }}</th>
+                                    <td>
+                                        {{ forms.with_product }}
+                                    </td>
+                                </tr>
+                             <tr class="item promocode_name" id="PromocodeName">
+                                 <th class="text-start pl-3">{{ forms.promocode_name.label }}</th>
+                                    <td>
+                                        {{ forms.promocode_name }}
+                                    </td>
+                                </tr>
+                            <tr class="item users" id="Users">
+                                 <th class="text-start pl-3">{{ forms.users.label }}</th>
+                                    <td>
+                                        {{ forms.users }}
+                                    </td>
+                                </tr>
+                            <tr class="item user_who_have_used" id="UserWhoHaveUsed">
+                                 <th class="text-start pl-3">{{ forms.user_who_have_used.label }}</th>
+                                    <td>
+                                        {{ forms.user_who_have_used }}
+                                    </td>
+                                </tr>
+                            <tr class="item expirable" id="Expirable">
+                                 <th class="text-start pl-3">{{ forms.expirable.label }}</th>
+                                    <td>
+                                        {{ forms.expirable }}
+                                    </td>
+                                </tr>
+                            <tr class="item expire_at" id="ExpireAt">
+                                 <th class="text-start pl-3">{{ forms.expire_at.label }}</th>
+                                    <td>
+                                        {{ forms.expire_at }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+        <div class="text-center">
+            <button class="btn-sm btn-primary" type="submit">Submit</button>
+        </div>
+	</form>
+
+    </div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+    // Function to toggle field visibility based on voucher_type
+    function toggleFields() {
+        var voucherType = $('#id_voucher_type').val();  // Replace 'id_voucher_type' with the actual ID of your voucher_type field
+        var on_above_purchase = `<th class="text-start pl-3">{{ forms.on_above_purchase.label }}</th><td>{{ forms.on_above_purchase }}</td>`
+        var off_price = `<th class="text-start pl-3">{{ forms.off_price.label }}</th><td>{{ forms.off_price }}</td>`
+        var products = `<th class="text-start pl-3">{{ forms.products.label }}</th><td>{{ forms.products }}</td>`
+        var percent_off = `<th class="text-start pl-3">{{ forms.percent_off.label }}</th><td>{{ forms.percent_off }}</td>`
+        var with_product = `<th class="text-start pl-3">{{ forms.with_product.label }}</th><td>{{ forms.with_product }}</td>`
+        var promocode_name = `<th class="text-start pl-3">{{ forms.promocode_name.label }}</th><td>{{ forms.promocode_name }}</td>`
+        var users = `<th class="text-start pl-3">{{ forms.users.label }}</th><td>{{ forms.users }}</td>`
+        var user_who_have_used = `<th class="text-start pl-3">{{ forms.user_who_have_used.label }}</th><td>{{ forms.user_who_have_used }}</td>`
+        var expirable = `<th class="text-start pl-3">{{ forms.expirable.label }}</th><td>{{ forms.expirable }}</td>`
+        var expire_at = `<th class="text-start pl-3">{{ forms.expire_at.label }}</th><td>{{ forms.expire_at }}</td>`
+
+        $('#OnAbovePurchase,#OffPrice,#Products,#PercentOff,#WithProduct,#PromocodeName,#Users,#UserWhoHaveUsed,#Expirable,#ExpireAt').empty();
+
+
+        // Show or hide fields based on selected voucher_type
+        if (voucherType === 'on_above_purchase') {
+            $('#OnAbovePurchase').html(on_above_purchase);
+            $('#OffPrice').html(off_price);
+
+        } else if (voucherType === 'deals_of_day') {
+            $('#Products').html(products);
+            $('#PercentOff').html(percent_off);
+
+        } else if (voucherType === 'product_together') {
+            $('#Products').html(products);
+            $('#WithProduct').html(with_product);
+            $('#OffPrice').html(off_price);
+
+        } else if (voucherType === 'promocode') {
+            $('#PromocodeName').html(promocode_name);
+            $('#Users').html(users);
+            $('#UserWhoHaveUsed').html(user_who_have_used);
+            $('#Expirable').html(expirable);
+            $('#ExpireAt').html(expire_at);
+            $('#OffPrice').html(off_price);
+
+        }
+        // Add more conditions for other voucher types as needed
+    }
+
+    // Initial toggle and listen for changes
+    toggleFields();
+    $('#id_voucher_type').change(toggleFields);  // Replace 'id_voucher_type' with the actual ID of your voucher_type field
+});
+</script>
+
+
+{% endblock main-content %}
+

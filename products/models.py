@@ -155,9 +155,9 @@ class Vouchers(models.Model):
 
     promocode_name = models.CharField(max_length=100,null=True,blank=True) # promocode
     users=models.ManyToManyField(User,related_name='new_user_to_promo',null=True,blank=True) # promocode
-    user_who_have_used=models.ManyToManyField(User,related_name='user_who_have_used') # promocode
+    user_who_have_used=models.ManyToManyField(User,related_name='user_who_have_used',blank=True) # promocode
     created_at=models.DateTimeField(auto_now_add=datetime.now,null=True,blank=True) # promocode
-    expirable=models.BooleanField(default=True,null=True,blank=True) # promocode
+    expirable=models.BooleanField(null=True,blank=True) # promocode
     expire_at=models.DateTimeField(null=True,blank=True)# promocode
 
 

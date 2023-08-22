@@ -10,6 +10,7 @@ from .views import (home,product_list,product_update,product_delete,
                     get_attribute_values,
                     create_category,update_category,list_category,remove_category,
                     create_sub_category,update_sub_category,list_sub_category,remove_sub_category,
+create_voucher,list_vouchers
                     )
 
 urlpatterns = [
@@ -46,6 +47,8 @@ urlpatterns = [
     # ajax
     path('get_attribute_values/',get_attribute_values,name='get_attribute_values'),
 
+    path('product/voucher/', list_vouchers, name='list_vouchers'),
+    path('product/voucher/create/', create_voucher, name='create_voucher'),
 
 
 

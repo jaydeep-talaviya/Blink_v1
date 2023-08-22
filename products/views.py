@@ -153,7 +153,7 @@ def productdetail(request,p_id):
                                                             'product_attr_list':product_attr_dict,
                                                             'prdct_varient':prdct_varient,'avg_rate':rate_list,
                                                             'product_comments_rate':product_comments_rate,
-                                                            'deals':on_above_purchase_vouchers+deals_of_day_voucher,
+                                                            'deals':on_above_purchase_vouchers.union(deals_of_day_voucher),
                                                             })
 
 @login_required

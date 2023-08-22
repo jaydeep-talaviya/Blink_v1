@@ -5,11 +5,11 @@ from django.shortcuts import render,get_object_or_404,redirect
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
-                             ProductChangePriceAttributes, Orders, Subcategory)
+                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers)
 from datetime import date
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
-                    ProductChangePriceAttributesFormSet)
+                    ProductChangePriceAttributesFormSet, VouchersForm)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -365,9 +365,29 @@ def product_update(request,id):
 @staff_member_required(login_url='/')
 def product_delete(request, id):
     product_instance = Products.objects.filter(id=id)
-    # product_instance.delete()
+    product_instance.delete()
     messages.success(request, f"Your Product has been removed")
     return redirect('product_list')
+
+
+####### Vouchers #####
+@staff_member_required(login_url='/')
+def create_voucher(request):
+    forms = VouchersForm(request.POST or None)
+    if request.method=="POST":
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Voucher is Created")
+            return redirect('list_vouchers')
+        else:
+
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/voucher.html',{'forms':forms})
+
+@staff_member_required(login_url='/')
+def list_vouchers(request):
+    vouchers=Vouchers.objects.all()
+    return render(request,'staffs/pages/voucher_list.html',{'vouchers':vouchers})
 
 ########## Stock ######################
 @staff_member_required(login_url='/')
@@ -397,6 +417,7 @@ def stock_create(request):
         forms=StocksForm()
         return render(request,'staffs/pages/stock_update.html',{"forms":forms})
     return render(request,'staffs/pages/stock_update.html',{'forms':forms})
+
 
 @staff_member_required(login_url='/')
 def stock_update(request,id):
