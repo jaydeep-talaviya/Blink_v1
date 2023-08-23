@@ -33,16 +33,34 @@
                             <p class="text-dark">{% if voucher.on_above_purchase %} <span class="fw-bold">On Above Purchase : </span>{{voucher.on_above_purchase}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.created_at %} <span class="fw-bold">Promocode Created At : </span>{{voucher.created_at}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.off_price %} <span class="fw-bold">Off Price : </span>{{voucher.off_price}} {% endif %}</p>
-                            <p class="text-dark">{% if voucher.products.count %} <span class="fw-bold">Products {{voucher.products}} : </span>{% endif %}</p>
+                            <p class="text-dark">{% if voucher.products.count %} <span class="fw-bold">Products : </span>{{voucher.products.all|voucher_multiple_records_value}}{% endif %}</p>
                             <p class="text-dark">{% if voucher.percent_off %} <span class="fw-bold">Percent Off : </span>{{voucher.percent_off}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.with_product %} <span class="fw-bold">With Product : </span>{{voucher.with_product}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.promocode_name %} <span class="fw-bold">Promocode Name : </span>{{voucher.promocode_name}} {% endif %}</p>
-                            <p class="text-dark">{% if voucher.users.count %} <span class="fw-bold">Promocode User : </span>{{voucher.users}} {% endif %}</p>
+                            <p class="text-dark">{% if voucher.users.count %} <span class="fw-bold">Promocode User : </span>{{voucher.users.all|voucher_multiple_records_value}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.user_who_have_used.count %} <span class="fw-bold">Voucher Used By : </span>{{voucher.user_who_have_used}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.expirable %} <span class="fw-bold">Promocode/Voucher Expirable? : </span>{{voucher.expirable}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.expire_at %} <span class="fw-bold">Promocode-Expired at : </span>{{voucher.expire_at}} {% endif %}</p>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-around">
+                            {% if voucher.stop %}
+                                <div>
+                                    <a href="{% url 'update_status_voucher' id=voucher.id type=0 %}" class="btn-sm btn-primary  text-decoration-none">Start</a>
+                               </div>
+                                {% else %}
+                                 <div>
+                                <a href="{% url 'update_voucher' id=voucher.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                    <a href="{% url 'delete_voucher' id=voucher.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                               </div>
+                                <div>
+                                    <a href="{% url 'update_status_voucher' id=voucher.id type=1 %}" class="btn-sm btn-danger  text-decoration-none">Stop</a>
+                               </div>
+                                {% endif %}
 
-
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}

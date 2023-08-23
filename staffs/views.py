@@ -389,6 +389,35 @@ def list_vouchers(request):
     vouchers=Vouchers.objects.all()
     return render(request,'staffs/pages/voucher_list.html',{'vouchers':vouchers})
 
+@staff_member_required(login_url='/')
+def update_status_voucher(request,id,type):
+    voucher = Vouchers.objects.get(id=id)
+    voucher.stop = bool(type)
+    voucher.save()
+    return redirect('list_vouchers')
+
+
+@staff_member_required(login_url='/')
+def update_voucher(request,id):
+    voucher_instance=get_object_or_404(Vouchers,id=id)
+    forms = VouchersForm(request.POST, instance=voucher_instance)
+    if request.method=="POST":
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Voucher is Updated")
+            return redirect('list_vouchers')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/voucher.html',{'forms':forms})
+
+@staff_member_required(login_url='/')
+def delete_voucher(request, id):
+    voucher_instance = Vouchers.objects.filter(id=id)
+    voucher_instance.delete()
+    messages.success(request, f"Your Vouhcer has been removed")
+    return redirect('list_vouchers')
+
+
 ########## Stock ######################
 @staff_member_required(login_url='/')
 def stock_list(request):

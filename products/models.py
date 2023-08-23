@@ -159,7 +159,7 @@ class Vouchers(models.Model):
     created_at=models.DateTimeField(auto_now_add=datetime.now,null=True,blank=True) # promocode
     expirable=models.BooleanField(null=True,blank=True) # promocode
     expire_at=models.DateTimeField(null=True,blank=True)# promocode
-
+    stop = models.BooleanField(null=True,blank=True,default=False) #on_above_purchase + #product_together +# promocode + #deals_of_day
 
 class Orders(models.Model):
     
