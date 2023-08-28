@@ -1,12 +1,14 @@
 from django.urls import path
 from .views import (productlist,productdetail, return_policy,
-submit_rates_and_comments,
-productcart,productcartupdateremove,
-checkout_details,userorders,
-orderviews,html_to_pdf_view,
-productlist_sortby,search,
-cancelorder,
-return_policy,terms_and_conditions,about,contact,createorder,handlerequest,update_order,send_otp,match_otp,order_failed,order_created)
+                    submit_rates_and_comments,
+                    productcart,productcartupdateremove,
+                    checkout_details,userorders,
+                    orderviews,html_to_pdf_view,
+                    productlist_sortby,search,
+                    cancelorder,
+                    return_policy,terms_and_conditions,about,contact,createorder,
+                    handlerequest,update_order,
+                    send_otp,match_otp,order_failed,order_created,get_discounted_price)
 
 urlpatterns = [
     path('search',search,name='search'),
@@ -14,6 +16,7 @@ urlpatterns = [
     path('products/sorted_by',productlist_sortby,name='productlist_sortby'),
     path('products/<int:p_id>',productdetail,name='productdetail'),
 
+    path('products/voucher-applied',get_discounted_price,name='applied_voucher'),
     path('products/product/cart',productcart,name='productcart'),
     path('cart/update',productcartupdateremove,name='productcartupdateremove'),
     path('checkout',checkout_details,name='checkout'),

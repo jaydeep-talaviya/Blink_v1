@@ -1,0 +1,15 @@
+
+{% if voucher.voucher_type == 'deals_of_day' %}
+    <h6 class="text-start">Buy Today and get <span class="text-success">{{voucher.percent_off}}%</span> off </h6>
+{% endif %}
+{% if voucher.voucher_type == 'product_together' %}
+<h6 class="text-start">Buy with <span class="text-primary">
+    <a class="text-decoration-none text-primary" href="{% url 'productdetail' voucher.with_product.id %}">{{voucher.with_product}}</a>
+    </span> and get <span class="text-success">{{voucher.off_price}}</span> Rs Off </h6>
+{% endif %}
+{% if voucher.voucher_type == 'on_above_purchase' %}
+    <h6 class="text-start">Buy Any products above {{voucher.on_above_purchase}} Rs. and get <span class="text-success">{{voucher.off_price}}</span> off </h6>
+{% endif %}
+{% if voucher.voucher_type == 'promocode' %}
+    <h6 class="text-start">Use {{voucher.promocode_name}} and get <span class="text-success">{{voucher.off_price}}</span> off </h6>
+{% endif %}

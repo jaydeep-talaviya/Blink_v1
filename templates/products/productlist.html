@@ -107,14 +107,14 @@
                                 <div class="card">
                                     <div class="thumb-content">
                                             <div class="price">RS,{{product.price}}</div>
-                                            <a class="text-decoration-none" href="{% url 'productdetail' product.id %}">
+                                            <a class="text-decoration-none" href="{% url 'productdetail' p_id=product.id %}">
                                                 <img style=" height:250px;width:100%;" src="{{product.photo_1.url}}"
                                                     alt="Card image cap">
                                             </a>
                                         
                                     </div>
                                     <div class="card-body">
-                                        <h4 class="card-title"><a class="text-decoration-none" href="{% url 'productdetail' product.id %}">{{product.p_name}}</a></h4>
+                                        <h4 class="card-title"><a class="text-decoration-none" href="{% url 'productdetail' p_id=product.id %}">{{product.p_name}}</a></h4>
                                         <ul class="list-inline product-meta">
                                             <li class="list-inline-item">
                                                 <a class="text-decoration-none" href="#"><i class="fas fa-fire"></i> {{product.ingredience}}</a>

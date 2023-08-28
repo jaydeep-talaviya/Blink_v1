@@ -4,6 +4,8 @@
 
 {% block title %}Product Cart{% endblock title %}
 {% block main-content %}
+{% load voucher_type_render %}
+
 <link href="{% static 'css/cart.css' %}" rel="stylesheet" />
 
 
@@ -65,6 +67,38 @@
             </div>
         </div>
     </div>
+    <div class="col-md-8 offset-md-2">
+        <div class="p-4">
+            <ul class="list-group">
+                {% for voucher in vouchers %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                          <input class="form-check-input" data-id="{{voucher.id}}" type="radio" name="flexRadioDefault" id="flexRadioDefault{{forloop.count}}">
+                          <label class="form-check-label" for="flexRadioDefault{{forloop.count}}">
+                                 {% voucher_type_render voucher %}
+                          </label>
+                        </div>
+                  </li>
+                {% endfor %}
+                </ul>
+            <ul>
+              <li class="list-group-item d-flex justify-content-center align-items-center" id="voucher_apply_btn">
+                  <button class="btn-sm btn-primary">Apply</button>
+              </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-8 offset-md-2">
+        <div class="p-4">
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold"><span >Total Discount Amount :</span> <span class="text-success" id="total_discount_amount">0</span> Rs.</h4>
+
+                  <h4 class="fw-bold"><span >Total Amount Payable :</span> <span id="total_payable" class="total grandtotal">0</span> Rs.</h4>
+              </li>
+            </ul>
+        </div>
+    </div>
     <div class="d-flex justify-content-center">
         <div class="p-4">
             <a href="{% url 'productlist' %}"
@@ -77,21 +111,7 @@
         </div>
         {% endif %}
     </div>
-    <!-- <div class="widget user text-center">
-        <ul class="list-inline">
-            <li class="list-inline-item pr-5"><a href="{% url 'productlist' %}"
-                    class="btn btn-contact d-inline-block  btn-primary px-lg-5 px-md-3">Add More</a></li>
-                    <li class="list-inline-item pl-5">
-                        {% if cart %}
 
-                        <a href="{% url 'checkout' %}"
-                    class="btn btn-contact d-inline-block  btn-primary px-lg-5 px-md-3">Check OUT</a>
-                        {% endif %}
-                </li>
-                    
-                </ul>
-        
-    </div> -->
 </div>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 
@@ -100,13 +120,12 @@
     var grand_total=0;
     for(var i=0;i<x.length;i++){
         grand_total=Number(grand_total)+Number(x[i].innerText)
+        console.log(grand_total,">>>>>>>>>>>grand_total")
     }
     if ($('.grandtotal')[0]!=undefined){
         $('.grandtotal')[0].innerText=grand_total;
+       $('.grandtotal')[1].innerText=grand_total;
     }
-   
-    
-    
 
 
     function changeqty(cart_id,sign){
@@ -115,14 +134,7 @@
 				type: 'GET',
 				url: "{% url 'productcartupdateremove' %}",
 				data: { "cart_id":cart_id,'sign':sign},
-				// success: function (response) {
-				// 	// if not valid user, alert the user
-				// 	// console.log("response", response);
 
-				// },
-				// error: function (response) {
-				// 	console.log(response)
-				// },
                 complete: function (response) {
                     var x=$('.total_amount');
                     var grand_total=0;
@@ -144,11 +156,54 @@
                 
                 
 			});
-           
-        
-
-
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const applyButton = document.getElementById("voucher_apply_btn");
+
+    applyButton.addEventListener("click", function () {
+        const radioOptions = document.querySelectorAll('input[name="flexRadioDefault"]');
+
+        let selectedValue = "";
+        for (const radio of radioOptions) {
+            if (radio.checked) {
+                console.log(">>>>>>>",radio.dataset.id)
+                selectedValue = radio.dataset.id
+                break;
+            }
+        }
+
+        if (selectedValue !== "") {
+
+            alert("Selected Option: " + selectedValue);
+
+            $.ajax({
+                url: "{% url 'applied_voucher'  %}",
+                method: 'GET',
+                data:{"id":selectedValue},
+                success: function (result) {
+                    console.log(result,">>>>>result\n\n\n");
+                    $("#total_discount_amount").text(result.discount_price)
+
+                    if (result.applied){
+                        $("#total_payable").text(Math.round(result.user_cart_total_sum-result.discount_price,2))
+
+                    }
+                    else {
+                        $("#total_payable").text(result.user_cart_total_sum)
+
+                    }
+                }
+            });
+            // Here you can perform further actions based on the selected option.
+        } else {
+            alert("Please select an option.");
+        }
+    });
+});
+
+
+
 </script>
 
 {% endblock main-content %}

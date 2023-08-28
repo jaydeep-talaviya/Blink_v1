@@ -4,6 +4,7 @@
 
 {% block title %}Product Detail{% endblock title %}
 {% block main-content %}
+{% load deals_of_day_price %}
 <link href="{% static 'plugins/slick-carousel/slick/slick.css' %}" rel="stylesheet" />
 <link href="{% static 'plugins/slick-carousel/slick/slick-theme.css' %}" rel="stylesheet" />
 
@@ -235,16 +236,29 @@
 				<div class="widget user text-center text-dark">
 					<div class="widget price text-center">
 						<div>
-							<h4>Price : {{products.price}} Rs.</h4>
+							{% if not deals_of_day_voucher %}
+							<h4>Price : {{products.price}} Rs. </h4>
+							{% else %}
+								<h4 class="text-decoration-line-through">Price : {{products.price}} Rs. </h4>
+								<h4 class="text-success">Price : {% deals_of_day_price products.price deals_of_day_voucher.first.percent_off %} Rs. </h4>
+							<h6><span class="text-danger fw-bold">Deals of the Day  </span><span class="text-dark">{{deals_of_day_voucher.first.percent_off}}% off</span></h6>
+							{% endif %}
 						</div>
-							
+
 						{% if deals %}
+							<div class="py-3">
+								<h5 class="text-primary">Deals</h5>
 							{% for deal in deals %}
-								get {{deal.discount_price}} Rs off with <a class="text-decoration-none text-success" href="{% url 'productdetail' p_id=deal.with_product.id %}">{{deal.with_product}}</a> </br>
+
+								<h6 class="text-start">Buy with <span class="text-primary">
+									<a class="text-decoration-none text-primary" href="{% url 'productdetail' deal.with_product.id %}">{{deal.with_product}}</a>
+									</span> and get <span class="text-success">{{deal.off_price}}</span> Rs Off </h6>
+
 							{% endfor %}
+							</div>
 						{% endif %}
 
-					
+
 					</div>
 					<ul class="list-inline mt-20">
 						<li class="list-inline-item">
@@ -288,7 +302,6 @@
 															</select>
 														</div>
 													</div>
-
 													{% endfor %}
 												</div>
 
@@ -320,7 +333,33 @@
 						</ul>
 					</div>
 				</div>
-
+				<div class="widget user text-center text-dark">
+					<div class="widget price text-center">
+						<div class="fw-bold fs-5">
+							Prices
+						</div>
+					</div>
+					<div>
+						<ul class="list-group">
+							{% for product_attribute_price in products.productchangepriceattributes_set.all %}
+							<li class="list-group-item border border-3 d-flex justify-content-between" >
+								<div class="text-start">
+									{% for product_attribute in product_attribute_price.attribute_values.all %}
+									<span class="fs-6 text-dark">{{product_attribute.a_name.a_name}} -  {{product_attribute.a_value}} </span>
+									<br/>
+									{% endfor %}
+								</div>
+								<div>
+									<span class="fs-6 text-right text-success">
+										{% deals_of_day_price product_attribute_price.price deals_of_day_voucher.first.percent_off %}
+										Rs.
+									</span>
+								</div>
+							  </li>
+							{% endfor %}
+							</ul>
+					</div>
+				</div>
 
 
 

@@ -118,11 +118,9 @@ def productlist_sortby(request):
     return render(request, 'products/productlist_temp.html',{'products':all_products})
 
 def productdetail(request,p_id):
-
     products=Products.objects.get(id=p_id)
-
     product_attr_list=products.productchangepriceattributes_set.values('id','attribute_values__a_name__a_name','attribute_values__a_value','price')
- 
+
     product_attr_dict={}
     prdct_varient={}
     for i in product_attr_list:
@@ -148,12 +146,14 @@ def productdetail(request,p_id):
 
     on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
     deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day',products__id=products.id)
+    product_together_voucher = Vouchers.objects.filter(voucher_type='product_together',products__id=products.id)
 
     return render(request, 'products/productdetail.html',{'products':products,
                                                             'product_attr_list':product_attr_dict,
                                                             'prdct_varient':prdct_varient,'avg_rate':rate_list,
                                                             'product_comments_rate':product_comments_rate,
-                                                            'deals':on_above_purchase_vouchers.union(deals_of_day_voucher),
+                                                            'deals':on_above_purchase_vouchers.union(product_together_voucher),
+                                                            'deals_of_day_voucher':deals_of_day_voucher
                                                             })
 
 @login_required
@@ -179,6 +179,30 @@ def submit_rates_and_comments(request):
     else:
         return JsonResponse({"error": "please enter valid"}, status=400)
 
+
+def get_discounted_price(request):
+    user_cart_total_sum = sum([i['qty']*i['price'] for i in request.user.cart_set.values('qty','price')])
+    voucher = Vouchers.objects.get(id=request.GET.get('id'))
+    print(">>>>>>\n\n\n\n\n\n",voucher)
+    applied = False
+    discount_amount =0
+
+    if voucher.voucher_type == 'on_above_purchase':
+        if voucher.on_above_purchase < user_cart_total_sum:
+            discount_amount=voucher.off_price
+            applied=True
+    elif voucher.voucher_type == 'product_together':
+        if all(list(map(lambda x: x in list(request.user.cart_set.values_list('product_id', flat=True)),
+                     list(voucher.products.values_list('id', flat=True)) + [voucher.with_product_id]))):
+            discount_amount = voucher.off_price
+            applied = True
+    elif voucher.voucher_type == 'promocode':
+        discount_amount = voucher.off_price
+        applied = True
+
+    return JsonResponse({"discount_price": round(discount_amount,2),'applied':applied,"user_cart_total_sum":round(user_cart_total_sum,2)})
+
+
 @login_required
 def productcart(request):
     # category=Category.objects.all()
@@ -193,22 +217,40 @@ def productcart(request):
             a_value=i.split('-')[1]
             selected_varient=selected_varient+a_value+","
             x=x.filter(attribute_values__a_value=a_value,attribute_values__a_name__a_name=a_name)
+
         if len(x)!=0:
+            price = x[0].price
+            deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=product.id)
+            if deals_of_day_voucher:
+                price = x[0].price - (price * deals_of_day_voucher.first().percent_off) / 100
             if len(Cart.objects.filter(Q(product_id=product) & Q(user_id=request.user) & Q(selected_product_varient=selected_varient)))==0:
-                cart=Cart.objects.create(product_id=product,user_id=request.user,qty=1,selected_product_varient=selected_varient,price=x[0].price)
+                cart=Cart.objects.create(product_id=product,user_id=request.user,qty=1,selected_product_varient=selected_varient,price=price)
                 messages.success(request, f"Your Cart is Ready")
             else:
                 cart=Cart.objects.filter(Q(product_id=product) & Q(user_id=request.user) & Q(selected_product_varient=selected_varient))
-                cart=cart.update(qty=cart[0].qty+1)
+                cart=cart.update(qty=cart[0].qty+1,price=price)
                 messages.info(request, f"Your Cart is Updated")
         else:
             messages.error(request, f"product is unavailable with this varient")
+            return redirect('productdetail',product.id)
         cart=Cart.objects.filter(user_id=request.user)
         return render(request,"products/cart.html",{'cart':cart})
 
     else:
         cart=Cart.objects.filter(user_id=request.user)
-        return render(request,"products/cart.html",{'cart':cart})
+        products = list(cart.values_list('product_id',flat=True))
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products)
+        # promocode
+        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False)  # Add your other fixed conditions here
+        expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
+        user_used_conditions = ~Q(user_who_have_used = request.user.id)
+        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+        promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
+
+        total_vouchers = on_above_purchase_vouchers.union(product_together_voucher,promocodes_vouchers)
+
+        return render(request,"products/cart.html",{'cart':cart,'vouchers':total_vouchers})
 
 @login_required
 def match_otp(request):
