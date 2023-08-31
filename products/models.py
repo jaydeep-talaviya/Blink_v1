@@ -117,6 +117,7 @@ class Cart(models.Model):
     qty=models.IntegerField(validators=[MinValueValidator(0)])
     price=models.FloatField(validators=[MinValueValidator(1)])
     selected_product_varient=models.CharField(max_length=100)
+    vouchers = models.ForeignKey('Vouchers',on_delete=models.DO_NOTHING,null=True)
 
     def __str__(self):
         return str(self.user_id)+"'s carts "+ 'for'+ str(self.product_id.p_name)

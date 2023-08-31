@@ -26,3 +26,22 @@ def send_email_with_template(username, email):
     )
     email_message.content_subtype = 'html'
     email_message.send()
+
+
+def get_voucher_discount(voucher,user,user_cart_total_sum):
+    discount_amount=0
+    if voucher.voucher_type == 'on_above_purchase':
+        if voucher.on_above_purchase < user_cart_total_sum:
+            discount_amount=voucher.off_price
+            print(">>>>>>on_above_purchase",discount_amount)
+    elif voucher.voucher_type == 'product_together':
+        if all(list(map(lambda x: x in list(user.cart_set.values_list('product_id', flat=True)),
+                     list(voucher.products.values_list('id', flat=True)) + [voucher.with_product_id]))):
+            discount_amount = voucher.off_price
+            print(">>>>>>product_together",discount_amount)
+
+    elif voucher.voucher_type == 'promocode':
+        discount_amount = voucher.off_price
+        print(">>>>>>promocode", discount_amount)
+
+    return discount_amount

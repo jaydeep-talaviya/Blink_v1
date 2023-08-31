@@ -1,6 +1,8 @@
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+
+from utils.helper_functions import get_voucher_discount
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
     Vouchers
 from django.db.models import Avg,Count,Max,Min
@@ -180,25 +182,16 @@ def submit_rates_and_comments(request):
         return JsonResponse({"error": "please enter valid"}, status=400)
 
 
+
 def get_discounted_price(request):
     user_cart_total_sum = sum([i['qty']*i['price'] for i in request.user.cart_set.values('qty','price')])
     voucher = Vouchers.objects.get(id=request.GET.get('id'))
-    print(">>>>>>\n\n\n\n\n\n",voucher)
     applied = False
     discount_amount =0
 
-    if voucher.voucher_type == 'on_above_purchase':
-        if voucher.on_above_purchase < user_cart_total_sum:
-            discount_amount=voucher.off_price
-            applied=True
-    elif voucher.voucher_type == 'product_together':
-        if all(list(map(lambda x: x in list(request.user.cart_set.values_list('product_id', flat=True)),
-                     list(voucher.products.values_list('id', flat=True)) + [voucher.with_product_id]))):
-            discount_amount = voucher.off_price
-            applied = True
-    elif voucher.voucher_type == 'promocode':
-        discount_amount = voucher.off_price
-        applied = True
+    if float(get_voucher_discount(voucher,request.user,user_cart_total_sum)) > 0:
+        applied=True
+        request.user.cart_set.update(vouchers= voucher)
 
     return JsonResponse({"discount_price": round(discount_amount,2),'applied':applied,"user_cart_total_sum":round(user_cart_total_sum,2)})
 
@@ -399,16 +392,16 @@ def productcartupdateremove(request):
 
 @login_required
 def createorder(request):
-    # cart=Cart.objects.filter(user_id=request.user)
-    # checkout=request.user.checkout_set.get()
-    # if len(cart)!=0:
-    #     orders=Orders.objects.create(checkout=checkout,order_status='order_not_confirm',user=request.user,amount=0)
-    #
-    #     if checkout.payment_type == 'paytm':
-    #         amount=0
-    #         for c in cart:
-    #             OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
-    #             # discount=Vouchers.objects.filter(voucher_type='on_above_purchase',on_above_purchase)
+    cart=Cart.objects.filter(user_id=request.user)
+    checkout=request.user.checkout_set.get()
+    if len(cart)!=0:
+        orders=Orders.objects.create(checkout=checkout,order_status='order_not_confirm',user=request.user,amount=0)
+
+        if checkout.payment_type == 'paytm':
+            amount=0
+
+            for c in cart:
+                OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
     #             # if discount:
     #             #     discount=discount.last()
     #             #     orders.discount=discount

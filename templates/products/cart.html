@@ -67,11 +67,13 @@
             </div>
         </div>
     </div>
+     {% if cart %}
     <div class="col-md-8 offset-md-2">
         <div class="p-4">
             <ul class="list-group">
                 {% for voucher in vouchers %}
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="{{voucher.voucher_type}}_element" {% if voucher.voucher_type == 'on_above_purchase' %}  style="display: none;" id={{voucher.on_above_purchase}} {% endif %}>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" >
                         <div class="form-check">
                           <input class="form-check-input" data-id="{{voucher.id}}" type="radio" name="flexRadioDefault" id="flexRadioDefault{{forloop.count}}">
                           <label class="form-check-label" for="flexRadioDefault{{forloop.count}}">
@@ -79,6 +81,8 @@
                           </label>
                         </div>
                   </li>
+                </div>
+
                 {% endfor %}
                 </ul>
             <ul>
@@ -96,9 +100,13 @@
 
                   <h4 class="fw-bold"><span >Total Amount Payable :</span> <span id="total_payable" class="total grandtotal">0</span> Rs.</h4>
               </li>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <p id="voucher_error" class="text-danger"></p>
+                  </li>
             </ul>
         </div>
     </div>
+    {% endif %}
     <div class="d-flex justify-content-center">
         <div class="p-4">
             <a href="{% url 'productlist' %}"
@@ -125,7 +133,25 @@
     if ($('.grandtotal')[0]!=undefined){
         $('.grandtotal')[0].innerText=grand_total;
        $('.grandtotal')[1].innerText=grand_total;
+       renderVoucher(grand_total)
     }
+
+
+    function renderVoucher(totalPrice) {
+    var voucherElement = $('.on_above_purchase_element');
+    console.log(">>>>>voucher element",voucherElement,totalPrice)
+    // Check if the total price is above 1000
+        for(var i = 0; i < voucherElement.length; i++) {
+            if (totalPrice > 1000) {
+                voucherElement[i].style.display=""
+
+            } else {
+                voucherElement[i].style.display="none"
+            }
+         }
+
+    }
+
 
 
     function changeqty(cart_id,sign){
@@ -143,7 +169,9 @@
                     }
                     if ($('.grandtotal')[0]!=undefined){
                     $('.grandtotal')[0].innerText=grand_total;
-                   
+                       $('.grandtotal')[1].innerText=grand_total;
+                       renderVoucher(grand_total)
+
                     }
                     else{
                         $('.check-out')[0].style.display="none";
@@ -187,9 +215,10 @@
 
                     if (result.applied){
                         $("#total_payable").text(Math.round(result.user_cart_total_sum-result.discount_price,2))
-
+                        $('#voucher_error').text("")
                     }
                     else {
+                        $('#voucher_error').text("This Voucher may not be applicable")
                         $("#total_payable").text(result.user_cart_total_sum)
 
                     }
