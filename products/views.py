@@ -188,8 +188,11 @@ def get_discounted_price(request):
     voucher = Vouchers.objects.get(id=request.GET.get('id'))
     applied = False
     discount_amount =0
-
-    if float(get_voucher_discount(voucher,request.user,user_cart_total_sum)) > 0:
+    try:
+        discount_amount = get_voucher_discount(voucher,request.user,user_cart_total_sum)
+    except Exception:
+        print('>> something went wrong')
+    if float(discount_amount) > 0:
         applied=True
         request.user.cart_set.update(vouchers= voucher)
 
