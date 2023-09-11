@@ -11,6 +11,9 @@ class User(AbstractUser):
 class State(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     street=models.CharField(max_length=150)

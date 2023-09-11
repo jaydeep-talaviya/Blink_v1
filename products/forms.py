@@ -23,6 +23,13 @@ class CheckoutForm(forms.ModelForm):
         model = Checkout
         exclude = ('user',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control formset-field'
+            self.fields['address1'].widget.attrs['rows'] = 1
+            self.fields['address2'].widget.attrs['rows'] = 1
+            self.fields['state'].widget.attrs['class'] = 'form-select formset-field'
 
 class CategoryForm(forms.ModelForm):
     class Meta:

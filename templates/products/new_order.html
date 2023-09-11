@@ -32,13 +32,14 @@
                 <div class="img-prdct"><img style="max-width: 100%;height: inherit;"
                         src="{{orderline.product_id.photo_1.url}}">
                 </div>
-            </div>
+              </div>
             
             </td>
             <td>{{orderline.product_id.p_name}}</td>
             <td>{{orderline.qty}}</td>
-            <td>{{orderline.price}}</td>
-            <td>{{orderline.per_order_amount}}</td>
+            <td>{{orderline.unit_price}}</td>
+            <td>{{orderline.sub_total_amount}}</td>
+            <td>{{orderline.sub_total_amount}}</td>
           </tr>
           {% endfor %}
 

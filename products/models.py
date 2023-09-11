@@ -9,6 +9,9 @@ from django.conf import settings
 # Create your models here.
 import uuid
 
+from utils.helper_functions import get_voucher_discount
+
+
 class Warehouse(models.Model):
     owner=models.ForeignKey(User,on_delete=models.CASCADE)
     address=models.TextField()

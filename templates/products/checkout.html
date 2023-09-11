@@ -15,13 +15,13 @@
                     <div class="col">
                         <div class="mb-3">
                             <label for="id_first_name" class="form-label">First Name</label>
-                            <input type="text" name="first_name" maxlength="100" class="form-control" {% if checkoutform.first_name.value != None %} value="{{checkoutform.first_name.value}}"{% endif %} required id="id_first_name">
+                            {{checkoutform.first_name}}
                         </div>
                     </div>
                     <div class="col">
                         <div class="mb-3">
-                            <label for="id_last_name" class="form-label">Last Name</label>
-                            <input type="text" name="last_name" maxlength="100" class="form-control" {% if checkoutform.last_name.value != None %} value="{{checkoutform.last_name.value}}"{% endif %} required id="id_last_name">
+                           <label for="id_last_name" class="form-label">Last Name</label>
+                            {{checkoutform.last_name}}
                         </div>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
                     <div class="col">
                         <div class="mb-3">
                             <label for="id_address1" class="form-label">Address 1</label>
-                            <textarea name="address1" cols="20" class="form-control" rows="1" required="" id="id_address1">{% if checkoutform.address1.value != None %}{{checkoutform.address1.value}}{% endif %}</textarea>
+                            {{checkoutform.address1}}
                         </div>
                     </div>
                 </div>
@@ -38,68 +38,29 @@
                     <div class="col">
                         <div class="mb-3">
                             <label for="id_address2" class="form-label">Address 2(optional)</label>
-                            <textarea name="address2" cols="20" class="form-control" rows="1" required="" id="id_address2">{% if checkoutform.address2.value != None %}{{checkoutform.address2.value}}{% endif %}</textarea>
+                            {{checkoutform.address2}}
                         </div>
                     </div>
                 </div>
-                <!-- <div class="row">
-                    
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="id_country">Select Country</label>
-                            <select class="form-control" onchange="selected_conuntry(this.value)" name="country" id="id_country">
-                              {% for i,k in countries %}
-                                <option value="{{i}}-{{k}}">{{k}}</option>
-                                {% endfor %}
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="id_state">select State</label>
-                            <select class="form-control" hidden name="state" id="id_state">
-                                {% for i,k in states %}
-                                <option value="{{k}}">{{k}}</option>
-                                {% endfor %}
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col">
-                        <div class="mb-3">
-                            <label for="id_city" class="form-label">Zip</label>
-                            <input type="number" name="city" class="form-control" id="id_city">
-                        </div>
-                    </div>
-                </div> -->
 
             <div class="row">
                 <div class="col">
-                  
-                    <div class="mb-3">
-                        <label for="id_country" class="form-label">Country</label>
-                        <input type="text" name="country" class="form-control" {% if checkoutform.country.value != None %} value="{{checkoutform.country.value}}"{% endif %} id="id_country">
-                    </div>
-                </div>
-                <div class="col">
-                    
                     <div class="mb-3">
                         <label for="id_state" class="form-label">State</label>
-                        <input type="text" name="state" class="form-control" {% if checkoutform.state.value != None %} value="{{checkoutform.state.value}}"{% endif %} id="id_state">
+                        {{checkoutform.state}}
                     </div>
                 </div>
-            </div>
-            <div class="row">
+
                 <div class="col">
-                    
                     <div class="mb-3">
                         <label for="id_city" class="form-label">City</label>
-                        <input type="text" name="city" class="form-control" {% if checkoutform.zip.value != None %} value="{{checkoutform.city.value}}"{% endif %} id="id_city">
+                        {{checkoutform.city}}
                     </div>
                     </div>
                     <div class="col">
                         <div class="mb-3">
                             <label for="id_zip" class="form-label">Zip</label>
-                            <input type="text" name="zip" class="form-control" {% if checkoutform.zip.value != None %} value="{{checkoutform.zip.value}}"{% endif %} id="id_zip">
+                            {{checkoutform.zip}}
                         </div>
                     </div>
                    

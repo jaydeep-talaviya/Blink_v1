@@ -22,8 +22,9 @@ class Notification(models.Model):
 @receiver(post_save,sender=Delivery)
 def create_notification(sender,instance,created,**kwargs):
     #call group_send function directly to send notifications or you can create a dynamic task in celery beat
+    admin = User.objects.filter(is_superuser=True).first()
     if created:
-        Notification.objects.create(buyer=instance.order.user,seller=instance.order.created_seller,delivery=instance,message=str(instance.order.user.username)+" has Created Delivery! ")
+        Notification.objects.create(buyer=instance.order.user,seller=admin,delivery=instance,message=str(instance.order.user.username)+" has Created Delivery! ")
 
 
 

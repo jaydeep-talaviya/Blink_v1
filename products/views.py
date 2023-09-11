@@ -285,29 +285,11 @@ def order_failed(request):
 @login_required
 def order_created(request):
     order=Orders.objects.filter(user=request.user).last()
-    # deals=Deals_of_day.objects.filter(date__day=today.day,date__month=today.month,date__year=today.year)
     total_discount=[]
-    
     orderlines=OrderLines.objects.filter(order_id__orderid=order.orderid)
-    discount=0
-    # for deal in deals:
-    #     ol=orderlines.filter(product_id_id__in=[deal.p_id_id,deal.with_product_id])
-    #     total_discount.append({'product':deal.p_id.p_name,
-    #     'with_product':deal.with_product.p_name,
-    #     'deal_price_discount':deal.discount_price,
-    #     'qty_of_deal':ol.aggregate(Min('qty'))
-    #     })
-    #     print(ol.aggregate(Min('qty'))['qty__min'],"\n\n\n\n\n")
-    #     discount=+(deal.discount_price*ol.aggregate(Min('qty'))['qty__min'])
-    #     if not order.deals_of_day.filter(id=deal.id):
-    #         order.deals_of_day.add(deal)
-    grand_total=order.amount-discount
-    # if order.deals_of_day.count ==0:
-    #     order.amount=grand_total
-
+    grand_total=order.amount
     order.save()
-    # print(">>>>",grand_total)
-    return render(request,'products/otp_validated.html',{'order':order,'orderlines':orderlines,'total_discount':total_discount,"grand_total":grand_total})
+    return render(request,'products/new_order.html',{'order':order,'orderlines':orderlines,'total_discount':total_discount,"grand_total":grand_total})
 
 @login_required
 def send_otp(request):
@@ -512,7 +494,7 @@ def checkout_details(request):
             if form.is_valid():
                 if form.cleaned_data['payment_type']=='case_on_delivery':
                     form = form.save(commit=False) # Return an object without saving to the DB
-                    form.user = User.objects.get(pk=request.user.id) # Add an author field which will contain current user's id
+                    form.user = request.user # Add an author field which will contain current user's id
                     form.save() # Save the final "real form" to the 
                     messages.success(request, "To Confirm Order ,Varify OTP")
                     return redirect('send_otp')
@@ -526,16 +508,16 @@ def checkout_details(request):
             return render(request,'products/checkout.html',{'checkoutform':checkoutform})    
 
         else:
-            checkout[0].first_name=request.POST.get('first_name')
-            checkout[0].last_name=request.POST.get('last_name')
-            checkout[0].address1=request.POST.get('address1')
-            checkout[0].address2=request.POST.get('address2')
-            checkout[0].country=request.POST.get('country')
-            checkout[0].state=request.POST.get('state')
-            checkout[0].city=request.POST.get('city')
-            checkout[0].zip=request.POST.get('zip')
-            checkout[0].payment_type=request.POST.get('payment_type')
-            checkout[0].save()
+            checkout.update(first_name=request.POST.get('first_name'),
+                            last_name=request.POST.get('last_name'),
+                            address1=request.POST.get('address1'),
+                            address2=request.POST.get('address2'),
+                            country=request.POST.get('country'),
+                            state=request.POST.get('state'),
+                            city=request.POST.get('city'),
+                            zip=request.POST.get('zip'),
+                            payment_type=request.POST.get('payment_type'))
+
             if request.POST.get('payment_type') == 'case_on_delivery':
                 checkout[0].save()
                 checkoutform=CheckoutForm(instance=checkout[0])
@@ -557,7 +539,6 @@ def checkout_details(request):
 @login_required
 def userorders(request,order_by=None):
     page = request.GET.get('page',1)
-    # category=Category.objects.all()
     order_not_confirms=Orders.objects.filter(user=request.user,order_status='order_not_confirm').count()
     order_confirms=Orders.objects.filter(user=request.user,order_status='order_confirm').count()
     order_cancels=Orders.objects.filter(user=request.user,order_status='order_cancel').count()
@@ -579,7 +560,6 @@ def userorders(request,order_by=None):
 
 @login_required
 def orderviews(request,orderid):
-    # category=Category.objects.all()
     order=Orders.objects.get(orderid=orderid)
     orderlines=OrderLines.objects.filter(order_id=order.id)
     today=datetime.now()
