@@ -59,7 +59,6 @@
             <table class="table">
               <thead>
                     <tr>
-                      <th scope="col">#</th>
                       <th scope="col">Product Name</th>
                       <th scope="col">QTY</th>
                       <th scope="col">Price</th>
@@ -70,11 +69,10 @@
               <tbody>
                 {% for i in orderlines %}
                     <tr>
-                      <th scope="row">{{forloop.count}}</th>
                       <td class="table-active">{{i.product_id.p_name}}</td>
-                      <td >{{i.qty}}</td>
-                      <td >{{i.unit_price}}</td>
-                      <td >{{i.sub_total_amount}}</td>
+                      <td class="table-active" >{{i.qty}}</td>
+                      <td class="table-active" >{{i.unit_price}}</td>
+                      <td class="table-active">{{i.sub_total_amount}}</td>
                       <td>
                           <div style="width:70px;height: auto;">
                             <div class="img-prdct"><img style="max-width: 100%;height: inherit;" src="{{i.product_id.photo_1.url}}">
@@ -93,15 +91,12 @@
                 {% endif %}
             </div>
 
-
-            <div class="row pt-2">
-                <div class="col text-center">
-                    <button type="button" class="btn btn-outline-primary d-flex">{{order.checkout.address1}},
-                        {% if order.checkout.address2 %} {{order.checkout.address2}} {% endif %}
-                        <br />{{order.checkout.city}},{{order.checkout.zip}}<br />{{order.checkout.state}},{{order.checkout.country}}</button>
-
+        <hr/>
+            <div class="d-flex justify-content-between pt-2">
+                <div>
+                <h6>{{order.checkout.address1}},{% if order.checkout.address2 %} {{order.checkout.address2}} {% endif %} <br/>{{order.checkout.city}},{{order.checkout.zip}}<br/>{{order.checkout.state}},{{order.checkout.country}}</h6>
                 </div>
-                <div class="col align-self-center">
+                    <div>
 
                     {% if order.order_status == 'order_confirm' %}
 
@@ -118,7 +113,7 @@
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>

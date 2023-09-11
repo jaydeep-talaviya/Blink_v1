@@ -51,7 +51,7 @@
 								<td>
 									{{order.checkout.address1}},{% if order.checkout.address2 %} {{order.checkout.address2}} {% endif %} <br/>{{order.checkout.city}},{{order.checkout.zip}}<br/>{{order.checkout.state}},{{order.checkout.country}}
 								</td>
-                                <td> To:
+                                <td class="float-right"> To:
 									{{order.checkout.first_name}} {{order.checkout.last_name}}
                                     <br/>
                                     {% if order.user.email != None %} {{order.user.email}}<br/> {% endif %} {% if order.user.phone_number != None %} {{order.user.phone_number}}<br/> {% endif %} 
@@ -73,7 +73,7 @@
 							<tbody>
 							  <tr>
 								<td class="text-center">{{order.payment_set.last.payment_method}}</td>
-								<td  class="text-center">{{order.amount}} RS.</td>
+								<td  class="text-center">{{order.amount}} Rs.</td>
 								<td  class="text-center">{{order.payment_set.last.status}}</td>
 							  </tr>
 							  
@@ -86,57 +86,31 @@
 						<table class="table">
 							<thead class="bg-light">
 							  <tr>
-								<th scope="col">Product </th>
-								<th scope="col">QTY</th>
-								<th scope="col">Unit Price</th>
-								<th scope="col">Sub Total</th>
+								<th class="text-center" scope="col">Product </th>
+								<th class="text-center" scope="col">QTY</th>
+								<th class="text-center" scope="col">Unit Price</th>
+								<th class="text-center" scope="col">Sub Total</th>
 							  </tr>
 							</thead>
 							<tbody>
-								{% for orderline in orderlines %}
+							{% for orderline in orderlines %}
 							  <tr>
 								<td class="text-center">{{orderline.product_id}}</td>
 								<td  class="text-center">{{orderline.qty}}</td>
-								<td  class="text-center">{{orderline.price}} RS.</td>
-								<td  class="text-center">{% widthratio orderline.qty 1 orderline.price %} RS.</td>
+								<td  class="text-center">{{orderline.unit_price}} RS.</td>
+								<td  class="text-center">{% widthratio orderline.qty 1 orderline.unit_price %} RS.</td>
 							</tr>
 							{% endfor %}
 
 							</tbody>
 						  </table>
 					</div>
-					{% if order.deals_of_day.all %}
-					<div>
-						<h5>Applied Deals Of The Day </h5>
-						<table class="table">
-							<thead class="bg-light">
-							  <tr>
-								<th scope="col">Products Together</th>
-								<th scope="col">Discount Rs.</th>
-							  </tr>
-							</thead>
-							<tbody>
-							  {% for deal in order.deals_of_day.all %}
-							  <tr>
-								<th scope="row">{{forloop.count}}</th>
-								<td>{{deal.p_id.p_name}} with {{deal.with_product.p_name}}</td>
-								<td>{{deal.discount_price}} RS.</td>
-							  </tr>
-							  {% endfor %}
-					
-							</tbody>
-						  </table>
-					</div>
-					{% endif %}
 
-					<div>
-						{% if order.discount %}
-						<h6>On Total {{order.discount.on_above_purchase}} Rs. {{order.discount.percent_off}} % Off </h6>
-
-						{% endif %}
-					</div>
-					<div>
-						<h4 class="text-center">Grand Total: {{order.amount}} RS</h4>
+					<div class="text-dark ">
+						<h4 class="text-end fw-bold">Grand Total: {{order.amount}} Rs.</h4>
+						{% if order.vouchers %}
+								<h4 class="text-end fw-bold">Total Discount: {{order.total_discount}} Rs.</h4>
+							{% endif %}
 					</div>
 				
 		</div>
