@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 
 from utils.helper_functions import get_voucher_discount
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
@@ -560,6 +560,7 @@ def userorders(request,order_by=None):
 
 @login_required
 def orderviews(request,orderid):
+    # order = get_object_or_404(Orders,orderid=orderid)
     order=Orders.objects.get(orderid=orderid)
     orderlines=OrderLines.objects.filter(order_id=order.id)
     today=datetime.now()

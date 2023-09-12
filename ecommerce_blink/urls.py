@@ -19,6 +19,7 @@ import users
 import products
 from django.conf.urls.static import static
 from django.conf import settings
+from django.conf.urls import handler404, handler500
 
 
 urlpatterns = [
@@ -35,4 +36,10 @@ urlpatterns = [
     
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+handler404 = 'users.views.page_not_found'  # Replace with your app's custom 500 view
+handler500 = 'users.views.server_error'  # Replace with your app's custom 500 view
+handler403 = 'users.views.permission_denied'  # Replace with your app's custom 500 view
+handler400 = 'users.views.bad_request'  # Replace with your app's custom 404 view
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

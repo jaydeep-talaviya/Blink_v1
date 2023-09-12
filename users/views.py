@@ -127,3 +127,16 @@ def profile_delete(request,id):
     exist_user = User.objects.filter(id=id)
     exist_user.delete()
     return redirect('logout')
+
+##### Extra Pages
+def bad_request(request,exception):
+    return render(request,'global/page_400.html',{})
+
+def permission_denied(request, exception=None):
+    return render(request,'global/page_403.html',{})
+
+def page_not_found(request,exception):
+    return render(request,'global/page_404.html',{})
+
+def server_error(request,exception=None):
+    return render(request,'global/page_500.html',{})
