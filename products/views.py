@@ -198,6 +198,26 @@ def get_discounted_price(request):
 
     return JsonResponse({"discount_price": round(discount_amount,2),'applied':applied,"user_cart_total_sum":round(user_cart_total_sum,2)})
 
+def get_total_vouchers(request):
+    total_vouchers=Vouchers.objects.none()
+    cart = Cart.objects.filter(user_id=request.user)
+    if cart:
+        products = list(cart.values_list('product_id', flat=True))
+        user_cart_total_sum = sum([i['qty'] * i['price'] for i in request.user.cart_set.values('qty', 'price')])
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',on_above_purchase__lt=user_cart_total_sum)
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products)
+        # promocode
+        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id,
+                             stop=False)  # Add your other fixed conditions here
+        expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
+        user_used_conditions = ~Q(user_who_have_used=request.user.id)
+        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+        promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
+
+        total_vouchers = on_above_purchase_vouchers.union(product_together_voucher, promocodes_vouchers)
+    print("\n\n\n\n\ vouchers",total_vouchers)
+    return render(request, 'products/voucher_temp.html', {'vouchers': total_vouchers})
+
 
 @login_required
 def productcart(request):
@@ -230,7 +250,19 @@ def productcart(request):
             messages.error(request, f"product is unavailable with this varient")
             return redirect('productdetail',product.id)
         cart=Cart.objects.filter(user_id=request.user)
-        return render(request,"products/cart.html",{'cart':cart})
+
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=[product.id])
+        # promocode
+        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False)  # Add your other fixed conditions here
+        expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
+        user_used_conditions = ~Q(user_who_have_used = request.user.id)
+        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+        promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
+
+        total_vouchers = on_above_purchase_vouchers.union(product_together_voucher,promocodes_vouchers)
+
+        return render(request,"products/cart.html",{'cart':cart,'vouchers':total_vouchers})
 
     else:
         cart=Cart.objects.filter(user_id=request.user)

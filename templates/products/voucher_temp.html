@@ -1,0 +1,17 @@
+{% load voucher_type_render %}
+
+
+<ul class="list-group voucher_replacer">
+{% for voucher in vouchers %}
+<div class="{{voucher.voucher_type}}_element" {% if voucher.voucher_type == 'on_above_purchase' %} id={{voucher.on_above_purchase}} {% endif %}>
+    <li class="list-group-item d-flex justify-content-between align-items-center" >
+        <div class="form-check">
+          <input class="form-check-input" data-id="{{voucher.id}}" type="radio" name="flexRadioDefault" id="flexRadioDefault{{forloop.count}}"/>
+          <label class="form-check-label" for="flexRadioDefault{{forloop.count}}">
+                 {% voucher_type_render voucher %}
+          </label>
+        </div>
+  </li>
+</div>
+{% endfor %}
+</ul>

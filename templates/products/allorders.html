@@ -24,13 +24,20 @@
             </div>
             <!-- Dashboard Links -->
             <div class="widget user-dashboard-menu">
+            {% url 'userorders' as userorders_url %}
+            {% url 'userorders' 'order_not_confirm' as order_not_confirm_url %}
+            {% url 'userorders' 'order_confirm' as order_confirm_url %}
+            {% url 'userorders' 'order_cancel' as order_cancel_url %}
+            {% url 'userorders' 'order_delivering' as order_delivering_url %}
+            {% url 'userorders' 'order_shipped' as order_shipped_url %}
+
               <ul>
-                <li class="active"><a class="text-decoration-none" href=""><i class="fa fa-user"></i> My Orders</a></li>
-                <li><a class="text-decoration-none" href="{% url 'userorders' 'order_not_confirm' %}"><i class="far fa-bookmark"></i> Not Paid Orders <span>{{order_not_confirms}}</span></a></li>
-                <li><a class="text-decoration-none" href="{% url 'userorders' 'order_confirm' %}"><i class="far fa-star"></i> Confirm Orders <span>{{order_confirms}}</span></a></li>
-                <li><a class="text-decoration-none" href="{% url 'userorders' 'order_cancel' %}"><i class="far fa-frown-open"></i> Cancled Orders <span>{{order_cancels}}</span></a></li>
-                <li><a class="text-decoration-none" href="{% url 'userorders' 'order_delivering' %}"><i class="fas fa-shipping-fast"></i> In Shipping Orders<span>{{order_deliverings}}</span></a></li>
-                <li><a class="text-decoration-none" href="{% url 'userorders' 'order_shipped' %}"><i class="fas fa-bookmark"></i> Order Shipped<span>{{order_shippeds}}</span></a></li>
+                <li class="{% if request.path == userorders_url %} active {% endif %}" ><a class="text-decoration-none" href="{% url 'userorders' %}"><i class="fa fa-user"></i> My Orders</a></li>
+                <li class="{% if request.path == order_not_confirm_url %} active {% endif %}" ><a class="text-decoration-none" href="{% url 'userorders' 'order_not_confirm' %}"><i class="far fa-bookmark"></i> Not Paid Orders <span>{{order_not_confirms}}</span></a></li>
+                <li class="{% if request.path == order_confirm_url %} active {% endif %}"><a class="text-decoration-none" href="{% url 'userorders' 'order_confirm' %}"><i class="far fa-star"></i> Confirm Orders <span>{{order_confirms}}</span></a></li>
+                <li class="{% if request.path == order_cancel_url %} active {% endif %}"><a class="text-decoration-none" href="{% url 'userorders' 'order_cancel' %}"><i class="far fa-frown-open"></i> Cancled Orders <span>{{order_cancels}}</span></a></li>
+                <li class="{% if request.path == order_delivering_url %} active {% endif %}"><a class="text-decoration-none" href="{% url 'userorders' 'order_delivering' %}"><i class="fas fa-shipping-fast"></i> In Shipping Orders<span>{{order_deliverings}}</span></a></li>
+                <li class="{% if request.path == order_shipped_url %} active {% endif %}"><a class="text-decoration-none" href="{% url 'userorders' 'order_shipped' %}"><i class="fas fa-bookmark"></i> Order Shipped<span>{{order_shippeds}}</span></a></li>
 
                 <li><a class="text-decoration-none" href="{% url 'logout' %}"><i class="fa fa-cog"></i> Logout</a></li>
                 <!-- <li><a href="" data-toggle="modal" data-target="#deleteaccount"><i class="fa fa-power-off"></i>Delete

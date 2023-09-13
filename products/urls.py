@@ -8,7 +8,8 @@ from .views import (productlist,productdetail, return_policy,
                     cancelorder,
                     return_policy,terms_and_conditions,about,contact,createorder,
                     handlerequest,update_order,
-                    send_otp,match_otp,order_failed,order_created,get_discounted_price)
+                    send_otp,match_otp,order_failed,order_created,get_discounted_price,
+                    get_total_vouchers)
 
 urlpatterns = [
     path('search',search,name='search'),
@@ -44,5 +45,8 @@ urlpatterns = [
 
     path('createorder',createorder,name="createorder"),
     path("handlerequest", handlerequest, name="HandleRequest"),
-    path('update_order/<str:orderid>',update_order,name="update_order")
+    path('update_order/<str:orderid>',update_order,name="update_order"),
+
+    path("get/vouchers", get_total_vouchers, name="get_total_vouchers"),
+
 ]
