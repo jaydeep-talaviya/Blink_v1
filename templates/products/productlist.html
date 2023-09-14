@@ -1,7 +1,10 @@
 {% extends '../base.html' %}
 {% load static %}
 {% block title %}Buy Now{% endblock title %}
+
 {% block main-content %}
+{% load deals_of_day_price %}
+
 <link type="text/css" href="{% static 'css/slider.css' %}" rel="stylesheet" />
 
 <section class="section-sm">
@@ -106,10 +109,20 @@
                             <div class="product-item bg-light">
                                 <div class="card">
                                     <div class="thumb-content">
-                                            <div class="price">RS,{{product.price}}</div>
+                                            <div class="price">
+
+                                            </div>
+                                        	{% if product.get_product_deals_of_date %}
+                                            <div class="price">
+                                                {% deals_of_day_price product.price product.get_product_deals_of_date.percent_off %} Rs.
+                                            </div>
+                                            {% else %}
+                                            <div class="price"> {{ product.price }} Rs. </div>
+                                            {% endif %}
+
+
                                             <a class="text-decoration-none" href="{% url 'productdetail' p_id=product.id %}">
-                                                <img style=" height:250px;width:100%;" src="{{product.photo_1.url}}"
-                                                    alt="Card image cap">
+                                                <img style="height:250px;width:100%;" src="{{product.photo_1.url}}" alt="Card image cap">
                                             </a>
                                         
                                     </div>

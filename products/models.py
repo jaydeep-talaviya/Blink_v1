@@ -80,6 +80,9 @@ class Products(models.Model):
             imag3.thumbnail(output_size)
             imag3.save(self.photo_3.path)
 
+    def get_product_deals_of_date(self):
+        deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=self.id)
+        return deals_of_day_voucher.first() or None
 
 class ProductChangePriceAttributes(models.Model):
     attribute_values=models.ManyToManyField(AttributeValue)

@@ -35,9 +35,6 @@ from .tasks import remove_all_cart_products
 today = date.today()
 
 
-MERCHANT_KEY = 'Z9uzcquqrxUuNErK'
-
-
 def search(request):        
     if request.method == 'GET': # this will be GET now      
         product_search =  request.GET.get('search') # do some research what it does    
@@ -103,7 +100,6 @@ def productlist_sortby(request):
                 all_products=all_products.annotate(rating_count=Count('rates__rate')).order_by('-rating_count')
             else:
                 all_products=all_products.order_by(sort_by)
-           
 
         else:
             minvalue=request.GET.get('minvalue',False)
@@ -411,48 +407,48 @@ def productcartupdateremove(request):
 def createorder(request):
     cart=Cart.objects.filter(user_id=request.user)
     checkout=request.user.checkout_set.get()
-    if len(cart)!=0:
-        orders=Orders.objects.create(checkout=checkout,order_status='order_not_confirm',user=request.user,amount=0)
+    if len(cart)!=0 and checkout.payment_type == 'paytm':
+        orders = Orders.objects.create(checkout=checkout, order_status='order_confirm', user=request.user, amount=0,
+                                       vouchers=cart.last().vouchers if cart.last().vouchers else None)
+        amount=0
+        for c in cart:
+            OrderLines.objects.create(product_id=c.product_id, qty=c.qty, unit_price=c.price,
+                                      sub_total_amount=c.qty * c.price, order_id=orders)
+            amount += c.qty * c.price
 
-        if checkout.payment_type == 'paytm':
-            amount=0
+            # stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
+            # stock.left_qty=stock.left_qty-c.qty
+            # stock.save()
+            # c.delete()
 
-            for c in cart:
-                OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
-    #             # if discount:
-    #             #     discount=discount.last()
-    #             #     orders.discount=discount
-    #             #     amount-=(amount*discount.percent_off)/100
-    #
-    #             amount+=c.qty*c.price
-    #             if request.user.is_authenticated:
-    #                 all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day,stocks__shop_id__owner__city=request.user.order_place_city)
-    #             else:
-    #                 all_products=Products.objects.prefetch_related('stocks_set').filter(stocks__stock_day__year=today.year, stocks__stock_day__month=today.month, stocks__stock_day__day=today.day)
-    #
-    #             # product=all_products.get(id=c.product_id.id)
-    #             stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
-    #             stock.left_qty=stock.left_qty-c.qty
-    #             stock.save()
-    #             c.delete()
-    #         orders.amount=amount
-    #         orders.save()
-    #         param_dict = {
-    #
-    #             'MID': 'iNqaaK84118094196288',
-    #             'ORDER_ID': str(orders.orderid),
-    #             'TXN_AMOUNT': str(orders.amount), #change after test
-    #             'CUST_ID': request.user.email, # check users mail
-    #             'INDUSTRY_TYPE_ID': 'Retail',
-    #             'WEBSITE': 'WEBSTAGING',
-    #             'CHANNEL_ID': 'WEB',
-    #             'CALLBACK_URL':'http://127.0.0.1:8000/handlerequest',
-    #
-    #             }
-    #         param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
-    #         return render(request, 'products/paytm.html', {'param_dict': param_dict})
-    #     else:
-    #         messages.error(request, "Something Went Wrong! Please Try again, Thank You")
+        voucher = cart.last().vouchers
+        discount_amount = 0
+        try:
+            discount_amount = get_voucher_discount(voucher, request.user, amount)
+        except Exception:
+            print('>> something went wrong')
+        amount=amount-discount_amount
+
+        Payment.objects.create(user=orders.user, order_id=orders, payment_method='Online', status='Pending')
+        orders.amount = amount
+        orders.total_discount = discount_amount
+        orders.payment_failed = False
+        orders.save()
+
+        param_dict = {
+                'MID': settings.MID,
+                'ORDER_ID': str(orders.orderid),
+                'TXN_AMOUNT': str(orders.amount), #change after test
+                'CUST_ID': request.user.email, # check users mail
+                'INDUSTRY_TYPE_ID': settings.INDUSTRY_TYPE_ID,
+                'WEBSITE': settings.WEBSITE,
+                'CHANNEL_ID': settings.CHANNEL_ID,
+                'CALLBACK_URL': settings.CALLBACK_URL,
+                }
+        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.MERCHANT_KEY)
+        return render(request, 'products/paytm.html', {'param_dict': param_dict})
+    else:
+        messages.error(request, "Something Went Wrong! Please Try again, Thank You")
     return redirect('checkout')
             
 def update_order(request,orderid):
@@ -460,14 +456,14 @@ def update_order(request,orderid):
     order.orderid=uuid.uuid4()
     order.save()
     param_dict = {
-                'MID': 'iNqaaK84118094196288',
+                'MID': settings.MID,
                 'ORDER_ID': str(order.orderid),
                 'TXN_AMOUNT': str(order.amount), #change after test
                 'CUST_ID': request.user.email, # check users mail
-                'INDUSTRY_TYPE_ID': 'Retail',
-                'WEBSITE': 'WEBSTAGING',
-                'CHANNEL_ID': 'WEB',
-                'CALLBACK_URL':'http://127.0.0.1:8000/handlerequest',
+                'INDUSTRY_TYPE_ID': settings.INDUSTRY_TYPE_ID,
+                'WEBSITE': settings.WEBSITE,
+                'CHANNEL_ID': settings.CHANNEL_ID,
+                'CALLBACK_URL': settings.CALLBACK_URL,
                 }
 
     param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)    
@@ -544,7 +540,6 @@ def checkout_details(request):
                             last_name=request.POST.get('last_name'),
                             address1=request.POST.get('address1'),
                             address2=request.POST.get('address2'),
-                            country=request.POST.get('country'),
                             state=request.POST.get('state'),
                             city=request.POST.get('city'),
                             zip=request.POST.get('zip'),
@@ -556,8 +551,8 @@ def checkout_details(request):
                 messages.success(request, "To Confirm Order ,Varify OTP")
                 return redirect('send_otp')    
             else:
-                messages.warning(request, "Please Try Again, Something Went Wrong!")
-                # messages.info(request, "Updated Form With Your New Changes")
+                # messages.warning(request, "Please Try Again, Something Went Wrong!")
+                messages.info(request, "Updated Form With Your New Changes")
                 return redirect("createorder")
     else:
         try:

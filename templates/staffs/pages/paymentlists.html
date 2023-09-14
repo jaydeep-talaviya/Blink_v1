@@ -62,7 +62,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
-                            <span class="fw-bold">Payable Amount:</span> {{payment.order_id.amount}} Rs.
+                            <span class="fw-bold">Payable Amount:</span> {{payment.order_id.amount|floatformat:"2"}} Rs.
                         </div>
                         <div class="col-sm-4">
                             <span class="fw-bold">From :</span> {{payment.order_id.user.username}} 

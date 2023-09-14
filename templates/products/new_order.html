@@ -38,8 +38,7 @@
             <td>{{orderline.product_id.p_name}}</td>
             <td>{{orderline.qty}}</td>
             <td>{{orderline.unit_price}}</td>
-            <td>{{orderline.sub_total_amount}}</td>
-            <td>{{orderline.sub_total_amount}}</td>
+            <td>{{orderline.sub_total_amount|floatformat:"2"}}</td>
           </tr>
           {% endfor %}
 
@@ -81,7 +80,7 @@
     {% endif %}
 
     <div>
-      <h5 class="text-center">Grand Total : <span class="text-success">{{grand_total}} RS.</span></h5>
+      <h5 class="text-center">Grand Total : <span class="text-success">{{grand_total|floatformat:"2"}} RS.</span></h5>
     </div>
     
     

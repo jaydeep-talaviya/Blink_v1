@@ -63,7 +63,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
-                            <span class="fw-bold">Order Total Amount:</span> {{order.amount}} Rs.
+                            <span class="fw-bold">Order Total Amount:</span> {{order.amount|floatformat:"2"}} Rs.
                         </div>
                         <div class="col-sm-4">
                             <span class="fw-bold">Payment Status:</span> {{order.payment_set.last.status}} 

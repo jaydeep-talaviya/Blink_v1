@@ -90,7 +90,7 @@
               </div>
             {% endif %}
             <div id="Grand Total">
-                <h5>Total Pay: {{order.amount}} Rs.</h5>
+                <h5>Total Pay: {{order.amount|floatformat:"2"}} Rs.</h5>
             </div>
 
             <div class="row pt-2">

@@ -295,3 +295,10 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 
 
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+MERCHANT_KEY='Z9uzcquqrxUuNErK'
+MID="iNqaaK84118094196288"
+INDUSTRY_TYPE_ID="Retail"
+WEBSITE="WEBSTAGING"
+CHANNEL_ID="WEB"
+CALLBACK_URL="'http://127.0.0.1:8000/handlerequest"

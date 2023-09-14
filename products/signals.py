@@ -25,14 +25,12 @@ def create_otp(sender, instance, created, **kwargs):
     if instance.varified == True:
         cart=Cart.objects.filter(user_id=instance.user)
         checkout=instance.user.checkout_set.get()
-        if len(cart)!=0:
-            # seller=User.objects.get(order_place_city=instance.user.order_place_city,is_staff=True)
+        if len(cart)!=0 and checkout.payment_type == 'case_on_delivery':
             orders=Orders.objects.create(checkout=checkout,order_status='order_confirm',user=instance.user,amount=0,vouchers=cart.last().vouchers if cart.last().vouchers else None)
             amount=0
             for c in cart:
-                if checkout.payment_type == 'case_on_delivery':
-                    OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
-                    amount+=c.qty*c.price
+                OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders)
+                amount+=c.qty*c.price
                 # change into stock of any products
                 # stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
                 # stock.left_qty=stock.left_qty-c.qty
@@ -77,20 +75,26 @@ def change_order_status(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Orders)
 def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
+    if instance.order_status == 'order_confirm':
+        if instance.vouchers:
+            voucher = instance.vouchers
+            voucher.user_who_have_used.add(instance.user)
 
     if instance.order_status == 'order_cancel':
         orderlines=instance.order.all()
 
-        for orderline in orderlines:
-            last_stock=orderline.product_id.stocks_set.last()
-            last_stock.left_qty+=orderline.qty
-            last_stock.save()
+        # for orderline in orderlines:
+        #     last_stock=orderline.product_id.stocks_set.last()
+        #     last_stock.left_qty+=orderline.qty
+        #     last_stock.save()
         if instance.payment_set.all():
             instance.delivery_set.all().delete()
             payment=instance.payment_set.last()
             payment.status='Cancel'
             payment.save()
-
+        if instance.vouchers:
+            voucher = instance.vouchers
+            voucher.user_who_have_used.remove(instance.user)
 
 @receiver(post_save, sender=Payment)
 def on_payment_cancel(sender, instance, created, **kwargs):

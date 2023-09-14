@@ -73,7 +73,7 @@
 							<tbody>
 							  <tr>
 								<td class="text-center">{{order.payment_set.last.payment_method}}</td>
-								<td  class="text-center">{{order.amount}} Rs.</td>
+								<td  class="text-center">{{order.amount|floatformat:"2"}} Rs.</td>
 								<td  class="text-center">{{order.payment_set.last.status}}</td>
 							  </tr>
 							  
@@ -107,7 +107,7 @@
 					</div>
 
 					<div class="text-dark ">
-						<h4 class="text-end fw-bold">Grand Total: {{order.amount}} Rs.</h4>
+						<h4 class="text-end fw-bold">Grand Total: {{order.amount|floatformat:"2"}} Rs.</h4>
 						{% if order.vouchers %}
 								<h4 class="text-end fw-bold">Total Discount: {{order.total_discount}} Rs.</h4>
 							{% endif %}
