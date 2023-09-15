@@ -21,5 +21,17 @@ class Address(models.Model):
     city=models.CharField(max_length=150)
     state=models.ForeignKey(State, on_delete=models.PROTECT)
 
+class Employee(models.Model):
+    choices = (
+        ('warehouse_owner','Warehouse Owner'),
+        ('delivery_person','Delivery Person'),
+        ('manager','Manager'),
+        ('product_maker','Product Maker'),
+        ('qa','QA'),
+        ('other','Other'),
+    )
+    type = models.CharField(max_length=255,choices=choices)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    salary = models.FloatField(default=0,null=True,blank=True)
 
 

@@ -6,8 +6,6 @@ class UserRegistrationForm(forms.Form):
     email=forms.EmailField(error_messages={'required':"Please Enter Correct Email Address"})
     password=forms.CharField(widget=forms.PasswordInput,error_messages={'required':"Please Enter Password"})
     password2=forms.CharField(error_messages={'required':"Please Enter Correct Password"},label="Confirm Password",widget=forms.PasswordInput)
-    
-
 
 
 class UserLoginForm(forms.Form):

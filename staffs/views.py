@@ -5,11 +5,14 @@ from django.shortcuts import render,get_object_or_404,redirect
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
-                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers)
+                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse)
+from users.models import User
 from datetime import date
+
+from users.models import Employee
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
-                    ProductChangePriceAttributesFormSet, VouchersForm)
+                    ProductChangePriceAttributesFormSet, VouchersForm, WarehouseForm, EmployeeForm,UserForm)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -524,4 +527,97 @@ def paymentlists(request,status='SUCCESS'):
     payments=Payment.objects.filter(created_at__year=today.year, created_at__month=today.month, created_at__day=today.day,status=status)
     # payments=Payment.objects.filter(status=status)
     return render(request,'staffs/pages/paymentlists.html',{'paymentlist':payments,'Status':status})
+
+
+######## Employee ###########
+def create_employee(request):
+    user_forms = UserForm(request.POST or None)
+    employee_forms = EmployeeForm(request.POST or None)
+    if request.method=="POST":
+        if user_forms.is_valid() and employee_forms.is_valid():
+            user = user_forms.save()
+            employee = employee_forms.save(commit=False)
+            employee.user = user
+            employee.save()
+
+            messages.success(request, f"Your Employee is Created")
+            return redirect('list_employees')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/employee.html',{'user_forms':user_forms,'employee_forms':employee_forms})
+
+@staff_member_required(login_url='/')
+def list_employees(request):
+    employees=Employee.objects.all()
+    return render(request,'staffs/pages/employee_list.html',{'employees':employees})
+
+@staff_member_required(login_url='/')
+def update_employee(request,id):
+    employee_instance=get_object_or_404(Employee,id=id)
+    user_instance=get_object_or_404(User,id=employee_instance.user.id)
+    user_form = UserForm(instance=user_instance)
+    employee_form = EmployeeForm(instance=employee_instance)
+    if request.method=="POST":
+        user_form = UserForm(request.POST,instance=user_instance)
+        employee_form = EmployeeForm(request.POST,instance=employee_instance)
+        if user_form.is_valid() and employee_form.is_valid():
+            user = user_form.save()
+            employee = employee_form.save(commit=False)
+            employee.user = user
+            employee.save()
+            messages.success(request, f"Your Employee is Updated")
+            return redirect('list_employees')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/employee.html',{'user_forms':user_form,'employee_forms':employee_form})
+
+@staff_member_required(login_url='/')
+def delete_employee(request, id):
+    employee_instance = Employee.objects.filter(id=id)
+    employee_instance.delete()
+    messages.success(request, f"Your Employee has been removed")
+    return redirect('list_employees')
+
+
+######3 warehouse #########
+
+@staff_member_required(login_url='/')
+def create_warehouse(request):
+    forms = WarehouseForm(request.POST or None)
+    if request.method=="POST":
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Warehouse is Created")
+            return redirect('list_warehouses')
+        else:
+
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/warehouse.html',{'forms':forms})
+
+
+@staff_member_required(login_url='/')
+def list_warehouses(request):
+    warehouses=Warehouse.objects.all()
+    return render(request,'staffs/pages/warehouse_list.html',{'warehouses':warehouses})
+
+@staff_member_required(login_url='/')
+def update_warehouse(request,id):
+    warehouse_instance=get_object_or_404(Warehouse,id=id)
+    forms = WarehouseForm(instance=warehouse_instance)
+    if request.method=="POST":
+        forms = WarehouseForm(request.POST, instance=warehouse_instance)
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Warehouse is Updated")
+            return redirect('list_warehouses')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/warehouse.html',{'forms':forms})
+
+@staff_member_required(login_url='/')
+def delete_warehouse(request, id):
+    warehouse_instance = Employee.objects.filter(id=id)
+    warehouse_instance.delete()
+    messages.success(request, f"Your Warehouse has been removed")
+    return redirect('list_warehouses')
 

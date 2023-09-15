@@ -1,16 +1,18 @@
 from django.urls import path
-from .views import (home,product_list,product_update,product_delete,
-                    product_add,create_product_attribute,product_update_attribute,
-                    create_attribute,update_attribute,remove_attribute,
-                    create_attribute_name,product_attribute_list,
-                    stock_list,stock_update,stock_create,
-                    deals_of_day_list,create_deals_of_the_day,update_deals_of_the_day,
-                    orderlists,single_order,paymentlists,
-                    create_attribute_names,update_attribute_names,remove_attribute_names,list_attribute_name,
+from .views import (home, product_list, product_update, product_delete,
+                    product_add, create_product_attribute, product_update_attribute,
+                    create_attribute, update_attribute, remove_attribute,
+                    create_attribute_name, product_attribute_list,
+                    stock_list, stock_update, stock_create,
+                    deals_of_day_list, create_deals_of_the_day, update_deals_of_the_day,
+                    orderlists, single_order, paymentlists,
+                    create_attribute_names, update_attribute_names, remove_attribute_names, list_attribute_name,
                     get_attribute_values,
-                    create_category,update_category,list_category,remove_category,
-                    create_sub_category,update_sub_category,list_sub_category,remove_sub_category,
-create_voucher,list_vouchers,update_voucher,delete_voucher,update_status_voucher
+                    create_category, update_category, list_category, remove_category,
+                    create_sub_category, update_sub_category, list_sub_category, remove_sub_category,
+                    create_voucher, list_vouchers, update_voucher, delete_voucher, update_status_voucher,
+                    create_employee,list_employees,update_employee,delete_employee,
+                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse
                     )
 
 urlpatterns = [
@@ -73,5 +75,17 @@ urlpatterns = [
     path('product/payments/',paymentlists,name='paymentlists'),
     path('product/payments/<str:status>',paymentlists,name='paymentlists_with_status'),
 
+    ##### employee #####
+    path('product/employee/', list_employees, name='list_employees'),
+    path('product/employee/create/', create_employee, name='create_employee'),
+    path('product/employee/update/<int:id>', update_employee, name='update_employee'),
+    path('product/employee/remove/<int:id>', delete_employee, name='delete_employee'),
 
+    ##### warehouse #####
+    path('product/warehouse/', list_warehouses, name='list_warehouses'),
+    path('product/warehouse/create/', create_warehouse, name='create_warehouse'),
+    path('product/warehouse/update/<int:id>', update_warehouse, name='update_warehouse'),
+    path('product/warehouse/remove/<int:id>', delete_warehouse, name='delete_warehouse'),
+
+    path('product/warehouse/create/',create_warehouse,name='create_warehouse'),
 ]

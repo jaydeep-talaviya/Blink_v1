@@ -1,0 +1,38 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Warehouse{% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5 col-md-8 offset-md-2">
+        <div class="text-center">
+            <h3 class="text-decoration-underline text-dark fw-bold">Create Employee</h3>
+
+        </div>
+             <form method="POST" class="py-5">
+                  <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.owner|as_crispy_field }}
+                        </div>
+                          <div class="form-group col-md-4 mb-0">
+                          {{ forms.name|as_crispy_field }}
+                        </div>
+                       <div class="form-group col-md-4 mb-0">
+                          {{ forms.mobile_no|as_crispy_field }}
+                        </div>
+                  </div>
+                 <div  class="form-row">
+                     <div class="form-group col-md-6 mb-0">
+                          {{ forms.address|as_crispy_field }}
+                        </div>
+                 </div>
+		{% csrf_token %}
+                  <div class="col-md-2 offset-md-5">
+                        <button type="submit" class="btn-sm btn-primary">Apply</button>
+                 </div>
+             </form>
+    </div>
+
+{% endblock main-content %}

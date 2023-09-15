@@ -1,0 +1,58 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Warehouse List{% endblock title %}
+{% block main-content %}
+{% load custom_tags %}
+
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+    <div class="text-center p-5">
+        <a href="{% url 'create_warehouse' %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                      <th scope="col">Name</th>
+                    <th scope="col">Handle By</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">In Use Since </th>
+                    <th scope="col">Mobile No</th>
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for warehouse in warehouses %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                          <td> {{warehouse.name}}</td>
+                        <td> {{warehouse.address}}</td>
+                        <td> {{warehouse.user.created_at}}</td>
+                        <td> {{warehouse.mobile_no}}</td>
+                        <td> {{warehouse.salary}}</td>
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'update_warehouse' id=warehouse.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                               </div>
+                               <div>
+                                    <a href="{% url 'delete_warehouse' id=warehouse.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+              </table>
+          </div>
+    </div>
+
+</div>
+
+{% endblock main-content %}

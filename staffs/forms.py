@@ -2,7 +2,9 @@ from django import forms
 from django.forms import BaseModelFormSet
 
 from products.models import (Products, ProductChangePriceAttributes,
-                             Stocks, AttributeValue, AttributeName, Vouchers)
+                             Stocks, AttributeValue, AttributeName, Vouchers,Warehouse)
+from users.models import User, Employee
+
 
 ########## Attribute Name ###########33
 class AttributeNameForm(forms.ModelForm):
@@ -109,3 +111,37 @@ class StocksForm(forms.ModelForm):
         model=Stocks
         fields=['left_qty','total_qty','on_alert_qty','product_id']
 
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username','email','phone_number']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control formset-field'
+
+class EmployeeForm(forms.ModelForm):
+    type = forms.ChoiceField(choices=Employee.choices)
+    class Meta:
+        model = Employee
+        fields = ['type','salary']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control formset-field'
+
+class WarehouseForm(forms.ModelForm):
+    class Meta:
+        model = Warehouse
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['owner'].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['address'].widget.attrs['rows'] = 1  # Set the number of rows
+        self.fields['owner'].queryset = User.objects.filter(employee__type='warehouse_owner')

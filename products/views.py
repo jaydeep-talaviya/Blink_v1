@@ -381,8 +381,6 @@ def contact(request):
     if request.method=="GET":
         return render(request,"products/contact.html")
 
-    
-    # return render(request,"products/contact.html")
 
 @login_required
 def productcartupdateremove(request):

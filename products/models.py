@@ -15,7 +15,7 @@ from utils.helper_functions import get_voucher_discount
 class Warehouse(models.Model):
     owner=models.ForeignKey(User,on_delete=models.CASCADE)
     address=models.TextField()
-    created_at=models.DateTimeField()
+    created_at=models.DateTimeField(auto_now_add=True)
     mobile_no=models.CharField(max_length=100)
     name=models.CharField(max_length=100)
 
