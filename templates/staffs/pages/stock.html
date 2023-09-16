@@ -9,14 +9,24 @@
 
 {%load crispy_forms_tags %} 
 
-<div class="container mb-5">
+ <div class="container my-5 col-md-8 offset-md-2">
+        <div class="text-center">
+            <h3 class="text-decoration-underline text-dark fw-bold">Create Stocks</h3>
 
+        </div>
             {% load crispy_forms_tags %}
 
-            <div class="d-flex justify-content-center pb-2">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <!-- {{ forms|crispy}} -->
+                    <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.warehouse_id|as_crispy_field }}
+                        </div>
+                        <div class="form-group col-md-4 mb-0">
+                          {{ forms.product_id|as_crispy_field }}
+                        </div>
+                      </div>
 
                     <div class="form-row">
                         <div class="form-group col-md-4 mb-0">
@@ -30,16 +40,11 @@
                           {{ forms.on_alert_qty|as_crispy_field }}
                         </div>
                       </div>
-                      <div class="form-row">
-                        <div class="form-group col-md-4 mb-0">
-                          {{ forms.product_id|as_crispy_field }}
-                        </div>
-                        </div>
 
-
-                    <button type="submit" class="btn btn-success"> Submit </button>
+                    <div class="col-md-2 offset-md-5">
+                        <button type="submit" class="btn-sm btn-primary">Apply</button>
+                 </div>
                 </form>
-            </div>
 
             </div>
         

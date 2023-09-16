@@ -33,17 +33,20 @@
                         <td> {{stock.product_id}}</td>
                         <td> {{stock.total_qty}}</td>
                         <td> {{stock.left_qty}}</td>
-                        <td> {{stock.finished}}</td>
+                        <td> {% if stock.finished %} Yes {% else %} No {% endif %}</td>
 
                         <td>
+                            {% if not stock.finished %}
                             <div class="d-flex justify-content-around">
                                <div>
-                                <a href="{% url 'stock_update' id=stock.id %}" class="btn btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'stock_update' id=stock.id %}" class="btn-sm text-decoration-none btn-primary ">Edit</a>
                                </div>
                                <div>
-                                <button class="btn btn-danger">Delete</button>
+                                <a href="{% url 'stock_finish' id=stock.id %}" class="btn-sm text-decoration-none btn-danger">Finish</a>
                                </div>
                             </div>
+                            {% endif %}
+
                         </td>
                     </tr>
                 {% endfor %}

@@ -19,6 +19,8 @@ class Warehouse(models.Model):
     mobile_no=models.CharField(max_length=100)
     name=models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name + " owned by " + self.owner.username
 class Category(models.Model):
     category_name=models.CharField(max_length=50)
     
@@ -60,7 +62,7 @@ class Products(models.Model):
     photo_6=models.ImageField(upload_to='products',blank=True,null=True)
 
     def __str__(self):
-        return self.p_name
+        return self.p_name + " with "+ self.p_category.category_name
     
     def save(self, *args, **kwargs):
         super(Products, self).save(*args, **kwargs)
@@ -115,7 +117,10 @@ class Stocks(models.Model):
     total_qty=models.IntegerField(validators=[MinValueValidator(1)])
     left_qty=models.IntegerField(validators=[MinValueValidator(1)])
     on_alert_qty=models.IntegerField(validators=[MinValueValidator(1)])
-    finished=models.BooleanField(default=False)
+    finished = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.product_id.p_name + " At "+ self.warehouse_id.name + " with "+self.left_qty
 
 class Cart(models.Model):
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)

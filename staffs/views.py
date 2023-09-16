@@ -424,7 +424,8 @@ def delete_voucher(request, id):
 ########## Stock ######################
 @staff_member_required(login_url='/')
 def stock_list(request):
-    stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
+    # stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
+    stocks=Stocks.objects.all()
     return render(request,'staffs/pages/stock_list.html',{'stocks':stocks})
 
 @staff_member_required(login_url='/')
@@ -432,23 +433,16 @@ def stock_create(request):
     if request.method=="POST":
         forms=StocksForm(request.POST)
         if forms.is_valid():
-            obj=forms.save(commit=False)
-            stock=Stocks.objects.create(shop_id=request.user.store_set.first(),
-                            product_id=forms.cleaned_data['product_id'],
-                            total_qty=forms.cleaned_data['total_qty'],
-                            left_qty=forms.cleaned_data['left_qty'],
-                            on_alert_qty=forms.cleaned_data['on_alert_qty'],
-                            finished=False)
-            stock.save()
+            stock = forms.save()
             messages.success(request, f"Your Stocks is Created")
-            return redirect(stock_update,id=stock.id)
+            return redirect('stock_list')
         else:
             messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/stock_update.html',{"forms":forms})
+            return render(request,'staffs/pages/stock.html',{"forms":forms})
     else:
         forms=StocksForm()
-        return render(request,'staffs/pages/stock_update.html',{"forms":forms})
-    return render(request,'staffs/pages/stock_update.html',{'forms':forms})
+        return render(request,'staffs/pages/stock.html',{"forms":forms})
+    return render(request,'staffs/pages/stock.html',{'forms':forms})
 
 
 @staff_member_required(login_url='/')
@@ -459,14 +453,23 @@ def stock_update(request,id):
         if forms.is_valid():
             forms.save()
             messages.success(request, f"Your Stocks is Updated")
-            return redirect(stock_update,id=stock_instance.id)
+            return redirect('stock_list')
         else:
             messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/stock_update.html',{"forms":forms,'stock_instance':stock_instance})
+            return render(request,'staffs/pages/stock.html',{"forms":forms,'stock_instance':stock_instance})
     else:
         forms=StocksForm(instance=stock_instance)
-        return render(request,'staffs/pages/stock_update.html',{"forms":forms,'stock_instance':stock_instance})
-    return render(request,'staffs/pages/stock_update.html',{'forms':forms,'stock_instance':stock_instance})
+        return render(request,'staffs/pages/stock.html',{"forms":forms,'stock_instance':stock_instance})
+    return render(request,'staffs/pages/stock.html',{'forms':forms,'stock_instance':stock_instance})
+
+
+@staff_member_required(login_url='/')
+def stock_finish(request, id):
+    stock_instance = Stocks.objects.get(id=id)
+    stock_instance.finished=True
+    stock_instance.save()
+    messages.success(request, f"Your Stock has been finished successfully")
+    return redirect('stock_list')
 
 
 ####################Deals Of the day##################
@@ -620,4 +623,6 @@ def delete_warehouse(request, id):
     warehouse_instance.delete()
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
+
+
 

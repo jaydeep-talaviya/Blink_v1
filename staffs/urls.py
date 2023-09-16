@@ -3,7 +3,7 @@ from .views import (home, product_list, product_update, product_delete,
                     product_add, create_product_attribute, product_update_attribute,
                     create_attribute, update_attribute, remove_attribute,
                     create_attribute_name, product_attribute_list,
-                    stock_list, stock_update, stock_create,
+                    stock_list, stock_update, stock_create,stock_finish,
                     deals_of_day_list, create_deals_of_the_day, update_deals_of_the_day,
                     orderlists, single_order, paymentlists,
                     create_attribute_names, update_attribute_names, remove_attribute_names, list_attribute_name,
@@ -59,8 +59,10 @@ urlpatterns = [
 
     path('product/stocks/',stock_list,name='stock_list'),
     path('product/stocks/create/',stock_create,name='stock_create'),
-
     path('product/stocks/update/<int:id>',stock_update,name='stock_update'),
+    path('product/stocks/finish/<int:id>',stock_finish,name='stock_finish'),
+
+
 
     path('product/today_deals/',deals_of_day_list,name='deals_of_day_list'),
     path('product/today_deals/create',create_deals_of_the_day,name='create_deals_of_the_day'),
