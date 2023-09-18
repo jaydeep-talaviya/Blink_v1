@@ -12,7 +12,8 @@ from .views import (home, product_list, product_update, product_delete,
                     create_sub_category, update_sub_category, list_sub_category, remove_sub_category,
                     create_voucher, list_vouchers, update_voucher, delete_voucher, update_status_voucher,
                     create_employee,list_employees,update_employee,delete_employee,
-                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse
+                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse,
+                    prepare_order,get_order_products_and_qty
                     )
 
 urlpatterns = [
@@ -89,5 +90,9 @@ urlpatterns = [
     path('product/warehouse/update/<int:id>', update_warehouse, name='update_warehouse'),
     path('product/warehouse/remove/<int:id>', delete_warehouse, name='delete_warehouse'),
 
-    path('product/warehouse/create/',create_warehouse,name='create_warehouse'),
+    path('product/prepare/products/select/',get_order_products_and_qty,name='get_order_products_and_qty'),
+    path('product/prepare/order/create/',prepare_order,name='prepare_order'),
+
+
+
 ]

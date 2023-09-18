@@ -1,0 +1,96 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Prepare Order{% endblock title %}
+{% block main-content %}
+{% load attribute_from_orderline %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Prepare Order </h1>
+              </div>
+                <div class="row pb-2">
+                    <div class="col-md-6 offset-md-3">
+                          <select class="form-select" id="order_selector" onchange="handleSelectionChange()">
+                                {% for order in orders %}
+                                    <option value="{{order.id}}">
+                                        {{order.order.first.product_id.p_name}}
+                                     {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }}
+                                      others
+                                      {% endif %}
+                                    </option>
+                                {% endfor %}
+                          </select>
+
+                    </div>
+                </div>
+
+                 <div>
+                      <table class="table" id="ordered_product_table">
+                          <thead>
+                            <tr>
+                              <th scope="col">#</th>
+                              <th scope="col">Product</th>
+                              <th scope="col">QTY</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {% for orderline in orders.first.order.all %}
+                            <tr>
+                              <th scope="row">{{forloop.counter}}</th>
+                              <td>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</td>
+                              <td>{{orderline.qty}}</td>
+                            </tr>
+                          {% endfor %}
+                          </tbody>
+                      </table>
+
+                 </div>
+
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<script type="text/javascript">
+        function handleSelectionChange(){
+                var selectedValue = document.getElementById("order_selector").value;
+
+                console.log("Selected value: " + selectedValue);
+
+            $.ajax({
+                url: "{% url 'get_order_products_and_qty'  %}",
+                method: 'GET',
+                data:{"order_id":selectedValue},
+                success: function (result) {
+                    console.log(result,">>>>>result\n\n\n");
+                     var tableBody = $('#ordered_product_table tbody');
+                        // Clear existing rows, if needed
+                        tableBody.empty();
+
+                        // Loop through the data and add rows
+                        $.each(result.order_products, function(index, item) {
+                        console.log(">>>>>items",item)
+                          var row = $('<tr>');
+                            row.append($('<td>').text(index+1)); // Replace with the actual data properties
+                          row.append($('<td>').text(item.product_name +' ('+item.product_selected_variant+')' )); // Replace with the actual data properties
+                          row.append($('<td>').text(item.qty));    // Replace with the actual data properties
+                          // Add more cells as needed
+
+                          tableBody.append(row); // Append the row to the table body
+                        });
+
+                }
+            });
+
+     }
+
+
+</script>
+
+{% endblock main-content %}

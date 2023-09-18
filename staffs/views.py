@@ -18,6 +18,7 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
+from utils.helper_functions import get_attribute_full_name
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -624,5 +625,11 @@ def delete_warehouse(request, id):
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
 
+def get_order_products_and_qty(request):
+    order_id = request.GET.get('order_id')
+    order = Orders.objects.get(id = order_id)
+    return JsonResponse({"order_products":[{'product_name':orderline.product_id.p_name,'product_selected_variant':get_attribute_full_name(orderline),'product_id':orderline.product_id.id,"qty":orderline.qty} for orderline in  order.order.all()]})
 
-
+def prepare_order(request):
+    orders = Orders.objects.filter(order_status='order_confirm')
+    return render(request,'staffs/pages/prepare_order.html',{'orders':orders})

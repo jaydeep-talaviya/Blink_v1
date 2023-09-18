@@ -176,7 +176,7 @@ class Vouchers(models.Model):
 class Orders(models.Model):
     
     orderstatus=[
-        ('                                                                                  q','Order Not Paid'),
+        ('order_prepared','Order Prepared'),
         ('order_confirm','Order Confirm'),
         ('order_cancel','Order Cancel'),
         ('order_delivering','Order Delivering'),
@@ -184,7 +184,7 @@ class Orders(models.Model):
     ]
     orderid=models.CharField(max_length=50,default=uuid.uuid4)
     checkout=models.ForeignKey(Checkout,on_delete=models.DO_NOTHING)
-    order_status=models.CharField(max_length=100,choices=orderstatus,default='order_not_confirm')
+    order_status=models.CharField(max_length=100,choices=orderstatus,default='order_confirm')
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     user=models.ForeignKey(User,on_delete=models.DO_NOTHING,related_name='buyer')
     payment_failed=models.BooleanField(default=True)
@@ -199,7 +199,7 @@ class OrderLines(models.Model):
     unit_price=models.FloatField(validators=[MinValueValidator(1)])
     sub_total_amount=models.FloatField(validators=[MinValueValidator(0)])
     order_id=models.ForeignKey(Orders,on_delete=models.CASCADE,related_name='order')
-
+    selected_product_varient = models.CharField(max_length=100)
 class Delivery(models.Model):
     order = models.ForeignKey(Orders,on_delete=models.CASCADE)
     delivery_id=models.CharField(max_length=50,default=uuid.uuid4)

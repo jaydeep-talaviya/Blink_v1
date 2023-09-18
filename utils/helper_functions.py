@@ -45,3 +45,9 @@ def get_voucher_discount(voucher,user,user_cart_total_sum):
         print(">>>>>>promocode", discount_amount)
 
     return discount_amount
+
+
+def get_attribute_full_name(orderline):
+    return ' with '.join(["-".join(attr) for attr in orderline.product_id.productchangepriceattributes_set.filter(
+        attribute_values__a_value__in=orderline.selected_product_varient.split(',')[:-1]).values_list(
+        'attribute_values__a_name__a_name', 'attribute_values__a_value').distinct()])

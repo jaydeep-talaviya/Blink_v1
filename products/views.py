@@ -411,7 +411,7 @@ def createorder(request):
         amount=0
         for c in cart:
             OrderLines.objects.create(product_id=c.product_id, qty=c.qty, unit_price=c.price,
-                                      sub_total_amount=c.qty * c.price, order_id=orders)
+                                      sub_total_amount=c.qty * c.price, order_id=orders,selected_product_varient=c.selected_product_varient)
             amount += c.qty * c.price
 
             # stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
