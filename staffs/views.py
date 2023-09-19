@@ -8,7 +8,7 @@ from products.models import (Products, Category, Stocks,
                              ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse)
 from users.models import User
 from datetime import date
-
+from django.db.models import Q
 from users.models import Employee
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
@@ -429,6 +429,25 @@ def stock_list(request):
     stocks=Stocks.objects.all()
     return render(request,'staffs/pages/stock_list.html',{'stocks':stocks})
 
+
+def get_product_by_warehouse(request):
+    warehouse_id = request.GET.get('warehouse_id')
+    if warehouse_id:
+        stocks = Stocks.objects.filter(warehouse_id=warehouse_id,finished=False)
+        product_ids = stocks.values('product_id').distinct()
+
+        ### product objects
+        warehouse_products = Products.objects.filter(id__in=product_ids)
+        ## product with its attribute available
+        product_availble_from_stocks = [stock.product_id.productchangepriceattributes_set.filter(~Q(id=stock.product_attributes_id)).values_list('p_id',flat=True) for stock in stocks]
+        products = Products.objects.filter(Q(id__in=product_availble_from_stocks)).union(
+            Products.objects.filter(~Q(id__in=product_availble_from_stocks)))
+        # warehouse_products sent for div
+        return JsonResponse({'products':list(products.values('p_name','id')),'warehouse_products':[]})
+
+    else:
+        return JsonResponse({'products':[],'warehouse_products':[]})
+
 @staff_member_required(login_url='/')
 def stock_create(request):
     if request.method=="POST":
@@ -633,3 +652,4 @@ def get_order_products_and_qty(request):
 def prepare_order(request):
     orders = Orders.objects.filter(order_status='order_confirm')
     return render(request,'staffs/pages/prepare_order.html',{'orders':orders})
+

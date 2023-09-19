@@ -114,13 +114,14 @@ class Rates(models.Model):
 class Stocks(models.Model):
     warehouse_id=models.ForeignKey(Warehouse,on_delete=models.CASCADE)
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)
+    product_attributes=models.ForeignKey(ProductChangePriceAttributes,on_delete=models.CASCADE)
     total_qty=models.IntegerField(validators=[MinValueValidator(1)])
     left_qty=models.IntegerField(validators=[MinValueValidator(1)])
     on_alert_qty=models.IntegerField(validators=[MinValueValidator(1)])
     finished = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.product_id.p_name + " At "+ self.warehouse_id.name + " with "+self.left_qty
+        return self.product_id.p_name + " At "+ self.warehouse_id.name + " with "+str(self.left_qty)
 
 class Cart(models.Model):
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)

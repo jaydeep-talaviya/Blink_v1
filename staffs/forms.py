@@ -109,13 +109,15 @@ class VouchersForm(forms.ModelForm):
 class StocksForm(forms.ModelForm):
     class Meta:
         model=Stocks
-        fields=['warehouse_id','product_id','total_qty','left_qty','on_alert_qty',]
+        fields=['warehouse_id','product_id','product_attributes','total_qty','left_qty','on_alert_qty',]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control formset-field'
         self.fields['warehouse_id'].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['warehouse_id'].widget.attrs['id'] = 'selecter_warehouse'
+        self.fields['warehouse_id'].widget.attrs['onchange'] = 'handleSelectionChange()'
         self.fields['product_id'].widget.attrs['class'] = 'form-select formset-field'
         self.fields['warehouse_id'].label = 'Warehouse'
         self.fields['product_id'].label = 'Product'

@@ -26,6 +26,9 @@
                         <div class="form-group col-md-4 mb-0">
                           {{ forms.product_id|as_crispy_field }}
                         </div>
+                         <div class="form-group col-md-4 mb-0">
+                          {{ forms.product_attributes|as_crispy_field }}
+                        </div>
                       </div>
 
                     <div class="form-row">
@@ -49,5 +52,38 @@
             </div>
         
 </div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 
+<script type="text/javascript">
+        function handleSelectionChange(){
+                var selectedValue = document.getElementById("selecter_warehouse").value;
+                console.log("Selected value: " + selectedValue);
+
+                 $.ajax({
+                url: "{% url 'get_product_by_warehouse'  %}",
+                method: 'GET',
+                data:{"warehouse_id":selectedValue},
+                success: function (result) {
+                console.log(result,">>>>>result\n\n\n");
+
+                var selectElement = document.getElementById('id_product_id');
+
+                // Remove all existing options
+                while (selectElement.firstChild) {
+                  selectElement.removeChild(selectElement.firstChild);
+                }
+                    // Iterate through the product data and create options
+                result.products.forEach(function(product) {
+                console.log(product)
+                  var option = document.createElement('option');
+                  option.value = product.id;
+                  option.text = product.p_name;
+                  selectElement.appendChild(option);
+                });
+
+                }
+            });
+
+        }
+</script>
 {% endblock main-content %}
