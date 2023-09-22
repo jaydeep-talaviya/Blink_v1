@@ -119,6 +119,7 @@ class StocksForm(forms.ModelForm):
         self.fields['warehouse_id'].widget.attrs['id'] = 'selecter_warehouse'
         self.fields['warehouse_id'].widget.attrs['onchange'] = 'handleSelectionChange()'
         self.fields['product_id'].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['product_id'].widget.attrs['onchange'] = 'handleSelectionChangeByProduct()'
         self.fields['warehouse_id'].label = 'Warehouse'
         self.fields['product_id'].label = 'Product'
 

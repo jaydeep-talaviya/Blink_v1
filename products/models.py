@@ -92,7 +92,7 @@ class ProductChangePriceAttributes(models.Model):
     price=models.FloatField(validators=[MinValueValidator(1)])
 
     def __str__(self):
-        return str(self.p_id)+" "+str(self.id)
+        return ','.join([str(attribute_value) for attribute_value in self.attribute_values.all()])
 
 
 class Rates(models.Model):

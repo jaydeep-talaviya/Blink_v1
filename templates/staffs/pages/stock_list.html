@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Stock List{% endblock title %}
 {% block main-content %}
+{% load product_attribute_names %}
 <div class="my-5">
     {%include '../partials/breadcrumbs.html'%}
   </div>
@@ -30,7 +31,7 @@
                     {% for stock in stocks %}
                     <tr>
                         <td> {{ forloop.counter }}</td>
-                        <td> {{stock.product_id}}</td>
+                        <td> {{stock.product_id}} ({{stock.product_attributes }})</td>
                         <td> {{stock.total_qty}}</td>
                         <td> {{stock.left_qty}}</td>
                         <td> {% if stock.finished %} Yes {% else %} No {% endif %}</td>

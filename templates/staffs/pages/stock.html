@@ -74,16 +74,48 @@
                 }
                     // Iterate through the product data and create options
                 result.products.forEach(function(product) {
-                console.log(product)
+
                   var option = document.createElement('option');
                   option.value = product.id;
                   option.text = product.p_name;
                   selectElement.appendChild(option);
                 });
+                  handleSelectionChangeByProduct();
+                }
+            });
+        }
+
+            function handleSelectionChangeByProduct(){
+                var selectedValue_product_id = document.getElementById("id_product_id").value;
+                var selectedValue_warehouse_id = document.getElementById("selecter_warehouse").value;
+                console.log("Selected value product: " + selectedValue_warehouse_id+" product "+selectedValue_product_id);
+                 $.ajax({
+                url: "{% url 'get_product_attrs_by_product_warehouse'  %}",
+                method: 'GET',
+                data:{"warehouse_id":selectedValue_warehouse_id,'product_id':selectedValue_product_id},
+                success: function (result) {
+                console.log(result,">>>>>result\n\n\n");
+                 var selectElement = document.getElementById('id_product_attributes');
+
+                // Remove all existing options
+                while (selectElement.firstChild) {
+                  selectElement.removeChild(selectElement.firstChild);
+                }
+                    // Iterate through the product data and create options
+                result.product_attributes.forEach(function(product_attribute) {
+
+                  var option = document.createElement('option');
+                  option.value = product_attribute[0];
+                  option.text = product_attribute[1];
+                  selectElement.appendChild(option);
+                });
 
                 }
             });
-
         }
+
+            window.onload = function() {
+                handleSelectionChangeByProduct();
+        };
 </script>
 {% endblock main-content %}

@@ -19,6 +19,8 @@ from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name
+from itertools import chain
+
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -429,24 +431,48 @@ def stock_list(request):
     stocks=Stocks.objects.all()
     return render(request,'staffs/pages/stock_list.html',{'stocks':stocks})
 
+def get_differenced_ids(list1,list2):
+    set1 = set(list1)
+    set2 = set(list2)
+    difference = list(set2 - set1)
+    return difference
 
 def get_product_by_warehouse(request):
     warehouse_id = request.GET.get('warehouse_id')
     if warehouse_id:
         stocks = Stocks.objects.filter(warehouse_id=warehouse_id,finished=False)
         product_ids = stocks.values('product_id').distinct()
-
         ### product objects
         warehouse_products = Products.objects.filter(id__in=product_ids)
         ## product with its attribute available
-        product_availble_from_stocks = [stock.product_id.productchangepriceattributes_set.filter(~Q(id=stock.product_attributes_id)).values_list('p_id',flat=True) for stock in stocks]
-        products = Products.objects.filter(Q(id__in=product_availble_from_stocks)).union(
-            Products.objects.filter(~Q(id__in=product_availble_from_stocks)))
+        total_product_attribute_ids = warehouse_products.values_list('productchangepriceattributes__id', flat=True)
+        product_availble_from_stocks = [stock.product_id.productchangepriceattributes_set.filter(~Q(id=stock.product_attributes_id)) for stock in stocks]
+        product_availble_from_stocks_ids = get_differenced_ids([i.id for i in list(chain(*product_availble_from_stocks))], list(total_product_attribute_ids))
+        product_ids_from_warehouse = ProductChangePriceAttributes.objects.filter(id__in=product_availble_from_stocks_ids).values_list('p_id',
+                                                                                                         flat=True)
+        products = Products.objects.filter(Q(id__in=product_ids_from_warehouse)).union(
+            Products.objects.filter(~Q(id__in=[i.p_id.id for i in list(chain(*product_availble_from_stocks))])))
         # warehouse_products sent for div
         return JsonResponse({'products':list(products.values('p_name','id')),'warehouse_products':[]})
 
     else:
         return JsonResponse({'products':[],'warehouse_products':[]})
+
+
+def get_product_attrs_by_product_warehouse(request):
+    warehouse_id = request.GET.get('warehouse_id')
+    product_id = request.GET.get('product_id')
+    if warehouse_id and product_id:
+        selected_product = Products.objects.get(id=product_id)
+        product_attributes = selected_product.productchangepriceattributes_set.all()
+
+        stocks = Stocks.objects.filter(warehouse_id=warehouse_id,product_id=product_id, finished=False)
+        if stocks:
+            product_attributes_ids = stocks.values_list('product_attributes', flat=True)
+            product_attributes = selected_product.productchangepriceattributes_set.filter(~Q(id__in=[product_attributes_ids]))
+        return JsonResponse({'product_attributes': [(product_attribute.id,str(product_attribute)) for product_attribute in product_attributes]})
+    else:
+        return JsonResponse({'product_attributes':[]})
 
 @staff_member_required(login_url='/')
 def stock_create(request):

@@ -14,7 +14,7 @@ from .views import (home, product_list, product_update, product_delete,
                     create_employee,list_employees,update_employee,delete_employee,
                     create_warehouse,list_warehouses,update_warehouse,delete_warehouse,
                     prepare_order,get_order_products_and_qty,
-                    get_product_by_warehouse
+                    get_product_by_warehouse,get_product_attrs_by_product_warehouse
                     )
 
 urlpatterns = [
@@ -61,6 +61,7 @@ urlpatterns = [
 
     path('product/stocks/',stock_list,name='stock_list'),
     path('product/stock/warehouse/select/', get_product_by_warehouse, name='get_product_by_warehouse'),
+    path('product/stock/warehouse/product/select/', get_product_attrs_by_product_warehouse, name='get_product_attrs_by_product_warehouse'),
     path('product/stocks/create/',stock_create,name='stock_create'),
     path('product/stocks/update/<int:id>',stock_update,name='stock_update'),
     path('product/stocks/finish/<int:id>',stock_finish,name='stock_finish'),
