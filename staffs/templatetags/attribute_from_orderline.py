@@ -29,6 +29,12 @@ def get_attribute_id_from_orderline(record):
     print(">>>>>>>>>>intersection\n\n\n\n",filtered_records)
     return filtered_records.first().id
 
+@register.filter(name='get_left_qty_in_warehouse_for_product')
+def get_left_qty_in_warehouse_for_product(orderline,warehouse):
+    product_attribute =get_attribute_id_from_orderline(orderline)
+    stocks = orderline.product_id.stocks_set.filter(warehouse_id_id=warehouse.get('id'), product_attributes=product_attribute,
+                                           finished=False)
+    return stocks.first()
 
 @register.filter(name='get_warehouse_from_orderline')
 def get_warehouse_from_orderline(record):

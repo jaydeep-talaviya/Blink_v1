@@ -51,3 +51,8 @@ def get_attribute_full_name(orderline):
     return ' with '.join(["-".join(attr) for attr in orderline.product_id.productchangepriceattributes_set.filter(
         attribute_values__a_value__in=orderline.selected_product_varient.split(',')[:-1]).values_list(
         'attribute_values__a_name__a_name', 'attribute_values__a_value').distinct()])
+
+
+def get_warehouse_dict(orderline):
+    queryset = orderline.product_id.stocks_set.all().values('warehouse_id', 'warehouse_id__name').distinct()
+    return [{'warehouse_name':item['warehouse_id__name'],'id': item['warehouse_id']} for item in queryset]

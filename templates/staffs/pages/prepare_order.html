@@ -28,29 +28,71 @@
 
                     </div>
                 </div>
+            <form action="{% url 'prepare_order' %}" method="post">
+                {% csrf_token %}
+                <div id="dynamic_warehouse_content">
+                     <div>
+                          <table class="table" id="ordered_product_table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Product</th>
+                                  <th scope="col">QTY</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              {% for orderline in orders.first.order.all %}
+                                <tr>
+                                  <th scope="row">{{forloop.counter}}</th>
+                                  <td>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</td>
+                                  <td>{{orderline.qty}}</td>
+                                </tr>
+                              {% endfor %}
+                              </tbody>
+                          </table>
 
-                 <div>
-                      <table class="table" id="ordered_product_table">
-                          <thead>
-                            <tr>
-                              <th scope="col">#</th>
-                              <th scope="col">Product</th>
-                              <th scope="col">QTY</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                          {% for orderline in orders.first.order.all %}
-                            <tr>
-                              <th scope="row">{{forloop.counter}}</th>
-                              <td>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</td>
-                              <td>{{orderline.qty}}</td>
-                            </tr>
-                          {% endfor %}
-                          </tbody>
-                      </table>
+                     </div>
+                     <div class="card">
+                    <div id="dynamic_warehouse_selector">
+                        <input type="text" hidden="true" name="order_id" class="form-control" value="{{orders.first.id}}"/>
 
-                 </div>
+                      {% for orderline in orders.first.order.all %}
+                        <div class="row pb-2">
+                            <div class="col-md-8 offset-md-2">
+                                <label class="form-label">Product</label>
+                                <input type="text" hidden="true" name="product_id_{{forloop.counter}}" class="form-control" value="{{orderline.product_id.id}}_{{orderline|get_attribute_id_from_orderline}}"/>
+                                <input type="text" disabled class="form-control" value="{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})" >
+                            </div>
+                            <div class="row py-2">
+                                <div class="col-md-4 offset-md-2">
+                                    <label class="form-label">Select Warehouse</label>
+                                      <select class="form-select form-control" name="warehouse_{{forloop.counter}}" id="warehouse_{{forloop.counter}}" onchange="handleSelectionChange()">
+                                          {% for warehouse in orderline|get_warehouse_from_orderline %}
+                                          {% with stock_record=orderline|get_left_qty_in_warehouse_for_product:warehouse %}
+                                             <option value="{{warehouse.id}}">{{warehouse.warehouse_name}}
+                                                {% if stock_record.left_qty <= stock_record.on_alert_qty %}
+                                                 ( {{stock_record.on_alert_qty}} Left)
+                                                 {% endif %}
+                                             </option>
+                                         {% endwith %}
 
+                                          {% endfor %}
+                                      </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Select Quantity</label>
+                                    <input type="number" class="form-control" name="qty_{{forloop.counter}}" value="{{orderline.qty}}" min="{{orderline.qty}}" max="{{orderline.qty}}"/>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+                <div class="card">
+                    <button class="btn-sm btn-primary prepare_order_btn">Prepare Order</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -64,33 +106,37 @@
                 console.log("Selected value: " + selectedValue);
 
             $.ajax({
-                url: "{% url 'get_order_products_and_qty'  %}",
+                url: "{% url 'prepare_order_dynamic_content'  %}",
                 method: 'GET',
                 data:{"order_id":selectedValue},
                 success: function (result) {
                     console.log(result,">>>>>result\n\n\n");
-                     var tableBody = $('#ordered_product_table tbody');
-                        // Clear existing rows, if needed
-                        tableBody.empty();
-
-                        // Loop through the data and add rows
-                        $.each(result.order_products, function(index, item) {
-                        console.log(">>>>>items",item)
-                          var row = $('<tr>');
-                            row.append($('<td>').text(index+1)); // Replace with the actual data properties
-                          row.append($('<td>').text(item.product_name +' ('+item.product_selected_variant+')' )); // Replace with the actual data properties
-                          row.append($('<td>').text(item.qty));    // Replace with the actual data properties
-                          // Add more cells as needed
-
-                          tableBody.append(row); // Append the row to the table body
-                        });
-
+                     $('#dynamic_warehouse_content').replaceWith(result);
                 }
             });
 
      }
 
 
+<!--    function check_qty(){-->
+<!--&lt;!&ndash;        find total qty of product &ndash;&gt;-->
+<!--            var total_qty = 0;-->
+<!--            var prepared_qty = 0;-->
+<!--            $('[name^="qty_"]').each((x)=>{-->
+<!--                 prepared_qty+=Number($('[name^="qty_"]')[x].value)-->
+<!--                 total_qty +=Number($('[name^="qty_"]')[x].max)-->
+<!--            })-->
+<!--            if (total_qty == prepared_qty){-->
+
+<!--            }-->
+<!--            else{-->
+<!--                alert("Please Validate Quantity");-->
+<!--            }-->
+<!--    }-->
+<!--    check_qty()-->
+
+
 </script>
+
 
 {% endblock main-content %}

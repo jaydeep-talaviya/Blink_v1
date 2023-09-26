@@ -1,0 +1,62 @@
+{% load attribute_from_orderline %}
+
+ <div id="dynamic_warehouse_content">
+     <div>
+          <table class="table" id="ordered_product_table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Product</th>
+                  <th scope="col">QTY</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for orderline in order.order.all %}
+                <tr>
+                  <th scope="row">{{forloop.counter}}</th>
+                  <td>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</td>
+                  <td>{{orderline.qty}}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+          </table>
+
+     </div>
+     <div class="card">
+    <div id="dynamic_warehouse_selector">
+        <input type="text" hidden="true" name="order_id" class="form-control" value="{{order.id}}"/>
+
+      {% for orderline in order.order.all %}
+        <div class="row pb-2">
+
+            <div class="col-md-8 offset-md-2">
+                <label class="form-label">Product</label>
+                <input type="text" hidden="true" name="product_id_{{forloop.counter}}" class="form-control" value="{{orderline.product_id.id}}_{{orderline|get_attribute_id_from_orderline}}"/>
+                <input type="text" disabled class="form-control" value="{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})" >
+            </div>
+            <div class="row py-2">
+                <div class="col-md-4 offset-md-2">
+                    <label class="form-label">Select Warehouse</label>
+                      <select class="form-select form-control" name="warehouse_{{forloop.counter}}" id="warehouse_{{forloop.counter}}" onchange="handleSelectionChange()">
+                          {% for warehouse in orderline|get_warehouse_from_orderline %}
+                          {% with stock_record=orderline|get_left_qty_in_warehouse_for_product:warehouse %}
+                             <option value="{{warehouse.id}}">{{warehouse.warehouse_name}}
+                                {% if stock_record.left_qty <= stock_record.on_alert_qty %}
+                                 ( {{stock_record.on_alert_qty}} Left)
+                                 {% endif %}
+                             </option>
+                         {% endwith %}
+
+                          {% endfor %}
+                      </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Select Quantity</label>
+                    <input type="number" class="form-control" name="qty_{{forloop.counter}}" value="1" min="1" max="{{orderline.qty}}"/>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</div>

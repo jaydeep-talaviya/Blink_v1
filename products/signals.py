@@ -138,3 +138,10 @@ def on_payment_cancel(sender, instance, created, **kwargs):
                     send_mail( subject, message, email_from, recipient_list )
             except Exception as e:
                 print(e)
+
+
+@receiver(post_save, sender=Stocks)
+def check_finished_or_not(sender, instance, created, **kwargs):
+    if instance.left_qty == 0:
+        instance.finished = True
+        instance.save()

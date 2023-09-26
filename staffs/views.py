@@ -18,9 +18,10 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
-from utils.helper_functions import get_attribute_full_name
+from utils.helper_functions import get_attribute_full_name, get_warehouse_dict
 from itertools import chain
 
+from .models import OrderPrepare
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -670,12 +671,53 @@ def delete_warehouse(request, id):
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
 
-def get_order_products_and_qty(request):
-    order_id = request.GET.get('order_id')
-    order = Orders.objects.get(id = order_id)
-    return JsonResponse({"order_products":[{'product_name':orderline.product_id.p_name,'product_selected_variant':get_attribute_full_name(orderline),'product_id':orderline.product_id.id,"qty":orderline.qty} for orderline in  order.order.all()]})
+@staff_member_required(login_url='/')
+def prepare_order_dynamic_content(request):
+    if request.method == "GET":
+        order_id = request.GET.get("order_id", None)
+        order = Orders.objects.get(id = order_id)
+        return render(request,'staffs/pages/prepare_order_temp.html',{'order':order})
 
 def prepare_order(request):
-    orders = Orders.objects.filter(order_status='order_confirm')
-    return render(request,'staffs/pages/prepare_order.html',{'orders':orders})
+    orders = Orders.objects.filter(order_status='order_confirm').order_by('-created_at')
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                data_dict = dict(request.POST)
+                warehouses = [value[0] for key, value in data_dict.items() if key.startswith('warehouse_')]
+                stock_available = len(warehouses) > 0
+                for id_idx in range(0, len(warehouses)):
+                    product, product_attribute = data_dict.get(f'product_id_{id_idx + 1}')[0].split("_")
+                    # find stock by product and warehouse and reduce quantity
+                    stock = Stocks.objects.filter(warehouse_id=warehouses[id_idx], product_id=product,
+                                                  product_attributes=product_attribute, finished=False)
+                    if stock.count() != 1:
+                        stock_available = False
 
+
+                order_id = data_dict.get('order_id',None)[0]
+                # get warehouse and reduce quantity from Stock.
+                if stock_available:
+                    for id_idx in range(0,len(warehouses)):
+                        product,product_attribute = data_dict.get(f'product_id_{id_idx + 1}')[0].split("_")
+                        # find stock by product and warehouse and reduce quantity
+                        stock = Stocks.objects.filter(warehouse_id=warehouses[id_idx],product_id=product,product_attributes=product_attribute,finished=False)
+                        qty = data_dict.get(f'qty_{id_idx + 1}')[0]
+
+                        stock_obj = stock.first()
+                        stock_obj.left_qty = stock_obj.left_qty - int(qty)
+                        stock_obj.save()
+                        # create OrderPrepare for admin so that he/she can send products to user.
+                        order_prepare = OrderPrepare(order_id_id=order_id,warehouse_id_id=warehouses[id_idx],stock_id_id=stock_obj.id,purchase_qty=qty,status='preparing')
+                        order_prepare.save()
+                    current_order = Orders.objects.get(id=order_id)
+                    current_order.order_status = 'order_prepared'
+                    current_order.save()
+                    messages.success(request,"You have successfully Started Prepared Order")
+                else:
+                    messages.warning(request, f"Please check if stock for the current data is available")
+        except Exception as e:
+            # Rollback the transaction explicitly in case of an exception
+            transaction.rollback()
+
+    return render(request,'staffs/pages/prepare_order.html',{'orders':orders})
