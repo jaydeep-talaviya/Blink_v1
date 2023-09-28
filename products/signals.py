@@ -1,5 +1,7 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+
+from staffs.models import LedgerLine, Ledger
 from users.models import User
 from utils.helper_functions import get_voucher_discount
 from .models import OtpModel, Orders, OrderLines, Cart, Products, Stocks, Payment, Delivery, Vouchers
@@ -52,11 +54,11 @@ def create_otp(sender, instance, created, **kwargs):
 
 
 
-@receiver(post_save, sender=Payment) 
-def create_delivery_on_payment_success(sender, instance, created, **kwargs):
-    if instance.status!='Failed' and created:
-        delivery=Delivery.objects.create(order=instance.order_id,state='Confirm')
-        delivery.save()
+# @receiver(post_save, sender=Payment)
+# def create_delivery_on_payment_success(sender, instance, created, **kwargs):
+#     if instance.status!='Failed' and created:
+#         delivery=Delivery.objects.create(order=instance.order_id,state='Confirm')
+#         delivery.save()
 
 
 @receiver(post_save, sender=Delivery)
@@ -71,6 +73,20 @@ def change_order_status(sender, instance, created, **kwargs):
             payment=instance.order.payment_set.last()
             payment.status = 'SUCCESS'
             payment.save()
+        create_ledger = Ledger(ledger_type='order', order_id_id=instance.order.id)
+        create_ledger.save()
+        for orderline in instance.order.order.all():
+            LedgerLine.objects.create(ledger_id=create_ledger.id, orderline_id=orderline.id, type_of_transaction='credit',
+                                      amount=orderline.sub_total_amount,
+                                      description=f'Transaction Credited for Order ID:{orderline.order_id.orderid} for Product {orderline.product_id}')
+        if instance.order.vouchers:
+            discount_amount = sum([i.sub_total_amount for i in instance.order.order.all()]) - instance.order.amount
+
+            if discount_amount:
+                LedgerLine.objects.create(ledger_id=create_ledger.id,
+                                          type_of_transaction='debit',
+                                          amount=discount_amount,
+                                          description=f'Transaction Debited for Order ID:{instance.order.orderid} for Voucher Discount {instance.order.vouchers}')
 
 
 @receiver(post_save, sender=Orders)

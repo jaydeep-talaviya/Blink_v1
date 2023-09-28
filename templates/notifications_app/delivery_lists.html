@@ -51,7 +51,7 @@
                             <span class="fw-bold">User :</span> {{delivery.order.user.username}}
                         </div>
                         <div class="col-sm-4">
-                            <span class="fw-bold">Created At:</span> {{delivery.created_at.time }}
+                            <span class="fw-bold">Created At:</span> {{delivery.created_at.date }}
                         </div>
                     </div>
                     <div class="row">
@@ -73,12 +73,8 @@
             <h3 class="text-center">There are no any delivery for {{Status}}</h3>
         </div>
         {% endif %}
-        
-        
-
 
 </section>
 
 
-
-{% endblock content %}
+{% endblock main-content %}

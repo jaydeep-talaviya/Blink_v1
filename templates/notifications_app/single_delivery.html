@@ -29,9 +29,7 @@
 				<h6 class="d-flex justify-content-between">
 					<span>Order User :  {{delivery.order.user.username}}
 					</span>
-					<span>Order Created By : {{delivery.order.created_seller.username}}
-					</span>
-				
+
 				</h6>
 			  </div>
 			  <div>
@@ -41,19 +39,20 @@
 				<h6 class="text-start">Current Status :  {{delivery.state }}</h6>
 			  </div>
 			  <div class="form-group">
-				<form name="delivery_status_change" action="" method="POST" class="d-flex" >
+				<form name="delivery_status_change" action="" method="POST" class="d-flex align-items-center" >
 						{% csrf_token %}
-						<div class="col-sm-2">
+						<div class="col-4">
 							<label for="delivery_status">Update Delivery Status</label>
 						</div>
-						<div class="col-sm-3">
-							<select class="form-control-sm" name="delivery_status" id="delivery_status">
+						<div class="col-4">
+							<select class="form-control form-select" name="delivery_status" id="delivery_status">
+
 								<option value="Confirm" {% if delivery.state == 'Confirm' %}selected{% endif %}>Confirm</option>
 								<option value="Delivering" {% if delivery.state == 'Delivering' %}selected{% endif %}>Delivering</option>
 								<option value="Shipped" {% if delivery.state == 'Shipped' %}selected{% endif %}>Shipped</option>
 							  </select>
 						</div>
-						<div class="col-sm-2">
+						<div class="col-4 text-center">
 							<button type="submit" class="btn-sm btn-primary">Apply</button>
 
 						</div>

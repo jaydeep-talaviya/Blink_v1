@@ -721,3 +721,6 @@ def prepare_order(request):
             transaction.rollback()
 
     return render(request,'staffs/pages/prepare_order.html',{'orders':orders})
+
+def create_ladger_of_order(request):
+    pass

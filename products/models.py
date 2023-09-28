@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User,State
+from users.models import User, State, Employee
 from django.core.validators import MaxValueValidator, MinValueValidator 
 from datetime import datetime
 from datetime import timedelta
@@ -202,9 +202,13 @@ class OrderLines(models.Model):
     order_id=models.ForeignKey(Orders,on_delete=models.CASCADE,related_name='order')
     selected_product_varient = models.CharField(max_length=100)
 class Delivery(models.Model):
+    delivery_state = (('Confirm','Confirm'),
+                      ('Delivering','Delivering'),
+                      ('Shipped','Shipped'),)
     order = models.ForeignKey(Orders,on_delete=models.CASCADE)
     delivery_id=models.CharField(max_length=50,default=uuid.uuid4)
-    state=models.CharField(max_length=100)
+    delivery_person = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    state=models.CharField(max_length=100,choices=delivery_state)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
 
@@ -218,6 +222,6 @@ class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
-    payment_method=models.CharField(max_length=100)
+    payment_method=models.CharField(max_length=100,choices=[('Online','Online'),('Offline','Offline')])
     status=models.CharField(max_length=100)
     txnId=models.CharField(max_length=150,null=True,blank=True)
