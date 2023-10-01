@@ -100,7 +100,7 @@ urlpatterns = [
     path('product/prepare/order/create/',prepare_order,name='prepare_order'),
     path('product/prepare/order/update/<str:orderid>',update_prepare_order,name='update_prepare_order'),
 
-    path('product/prepare/order/delivery/create/', create_delivery, name='create_delivery'),
+    path('product/prepare/order/delivery/create/<str:orderid>', create_delivery, name='create_delivery'),
 
 
 ]

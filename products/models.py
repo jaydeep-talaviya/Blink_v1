@@ -193,6 +193,8 @@ class Orders(models.Model):
     total_discount=models.FloatField(validators=[MinValueValidator(0)],default=0)
     vouchers = models.ForeignKey(Vouchers,on_delete=models.DO_NOTHING,null=True)
 
+    def __str__(self):
+        return str(self.orderid)
 
 class OrderLines(models.Model):
     product_id=models.ForeignKey(Products,on_delete=models.CASCADE)

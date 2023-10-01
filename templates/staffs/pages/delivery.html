@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %} Delivery {% endblock title %}
 {% block main-content %}
+{% load attribute_from_orderline %}
 <div class="my-5">
     {%include '../partials/breadcrumbs.html'%}
   </div>
@@ -9,20 +10,51 @@
  <div class="container mt-5 col-md-8 offset-md-2">
         <div class="text-center">
             <h3 class="text-decoration-underline text-dark fw-bold">Create Delivery</h3>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                 <span class="fw-bold">Order For:</span>
+            {{order.order.first.product_id.p_name}}
+             {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }}
+              others
+              {% endif %}
+            </div>
+            <div class="card-body">
+                {% for orderline in order.order.all %}
+                     <div class="row">
+                  <div class="col-md-12">
+                      <h6><span class="fw-bold">Product Name:</span> <span>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</span></h6>
+                  </div>
+                   <div class="col-md-4">
+                       <h6><span class="fw-bold">Quality:</span> <span>{{orderline.qty}}</span></h6>
+                  </div>
+                   <div class="col-md-4">
+                       <h6><span class="fw-bold">Unit Price:</span> <span>{{orderline.unit_price}} Rs.</span></h6>
+                  </div>
+                  <div class="col-md-4">
+                      <h6><span class="fw-bold">Sub-Total Products:</span> <span>{{orderline.sub_total_amount}} Rs.</span></h6>
+                  </div>
+              </div>
+                {% endfor %}
+                <div class="card-footer">
+                    <div class="d-flex text-center">
+                        Grand Total : <h5 class="text-success">{{order.amount}}</h5>
+                    </div>
+                </div>
+            </div>
+
 
         </div>
              <form method="POST" class="py-5">
                   <div class="form-row">
-                        <div class="form-group col-md-4 mb-0">
-                          {{ forms.order|as_crispy_field }}
-                        </div>
-                          <div class="form-group col-md-4 mb-0">
+
+                          <div class="form-group col-md-6 offset-md-2 mb-0">
                           {{ forms.delivery_person|as_crispy_field }}
                         </div>
 
                   </div>
 
-		{% csrf_token %}
+		        {% csrf_token %}
                   <div class="col-md-2 offset-md-5">
                         <button type="submit" class="btn-sm btn-primary">Apply</button>
                  </div>

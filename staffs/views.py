@@ -724,7 +724,6 @@ def prepare_order(request):
 
 
 def update_prepare_order(request,orderid):
-    print(">>>>>>>>>>>\n\\n\n\n\n\n\n\nn\\n\n\n\n\n\n",orderid,request.POST)
     data_dict = dict(request.POST)
     order = Orders.objects.get(orderid=orderid)
     if request.method == 'POST':
@@ -745,17 +744,20 @@ def list_prepare_orders(request):
     orders = Orders.objects.all().order_by('-created_at')
     return render(request,'staffs/pages/prepare_orders_list.html',{'orders':orders})
 
-def create_delivery(request):
+def create_delivery(request,orderid):
+    order = Orders.objects.get(orderid=orderid)
     forms = DeliveryForm(request.POST or None)
+    forms.instance.order_id = order.id
+
     if request.method=="POST":
         if forms.is_valid():
-            forms.save()
-            messages.success(request, f"Your Delivery is Started")
-            return redirect('delivery_list')
-        else:
 
+            # forms.save()
+            messages.success(request, f"Your Delivery is Started")
+            return redirect('delivery_list_with_status',status='Confirm')
+        else:
             messages.warning(request, f"Please Check Again,Invalid Data")
-    return render(request,'staffs/pages/delivery.html',{'forms':forms})
+    return render(request,'staffs/pages/delivery.html',{'forms':forms,'order':order})
 
 
 def create_ladger_of_order(request):
