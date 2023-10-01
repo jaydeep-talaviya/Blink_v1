@@ -6,7 +6,8 @@ from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCa
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
                              ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse)
-from users.models import User
+from users.forms import EmployeeSalaryForm
+from users.models import User, EmployeeSalary
 from datetime import date
 from django.db.models import Q
 from users.models import Employee
@@ -581,6 +582,7 @@ def paymentlists(request,status='SUCCESS'):
 
 
 ######## Employee ###########
+
 def create_employee(request):
     user_forms = UserForm(request.POST or None)
     employee_forms = EmployeeForm(request.POST or None)
@@ -626,6 +628,55 @@ def update_employee(request,id):
 def delete_employee(request, id):
     employee_instance = Employee.objects.filter(id=id)
     employee_instance.delete()
+    messages.success(request, f"Your Employee has been removed")
+    return redirect('list_employees')
+
+######### Employee Salary ##########
+
+@staff_member_required(login_url='/')
+def create_employee_salary(request,id):
+    employee = Employee.objects.get(id=id)
+    forms = EmployeeSalaryForm(request.POST or None)
+    forms.instance.employee_id = employee.id
+
+    if request.method == "POST":
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Salary for Employee is Created")
+            return redirect('employee_salary_list',id=id)
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/employee_salary.html',{'forms':forms,'employee':employee})
+
+@staff_member_required(login_url='/')
+def employee_salary_list(request,id):
+    employee_salary = EmployeeSalary.objects.filter(employee_id=id)
+    return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary})
+@staff_member_required(login_url='/')
+def update_employee_salary(request,id):
+    print(">>>>>>>>>\n\n\n\n\n\n\n\n\n\n",id)
+    employee_salary = get_object_or_404(EmployeeSalary,id=id)
+    employee = Employee.objects.get(id=employee_salary.employee_id)
+    forms = EmployeeSalaryForm(instance=employee_salary)
+
+    forms.instance.employee_id = employee.id
+
+    if request.method == "POST":
+        forms = EmployeeSalaryForm(request.POST or None,instance=employee_salary)
+        forms.instance.employee_id = employee.id
+
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Salary for Employee is Created")
+            return redirect('employee_salary_list',id=employee_salary.employee_id)
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/employee_salary.html',{'forms':forms,'employee':employee})
+
+@staff_member_required(login_url='/')
+def delete_employee_salary(request,id):
+    employee_instance = EmployeeSalary.objects.filter(id=id)
+    # employee_instance.delete()
     messages.success(request, f"Your Employee has been removed")
     return redirect('list_employees')
 
@@ -751,9 +802,12 @@ def create_delivery(request,orderid):
 
     if request.method=="POST":
         if forms.is_valid():
-
-            # forms.save()
-            messages.success(request, f"Your Delivery is Started")
+            if not order.delivery_set.exists():
+                order.orderprepare_set.update(status='prepared')
+                forms.save()
+                messages.success(request, f"Your Delivery is Started")
+            else:
+                messages.warning(request, f"Already Your Delivery for the order is created")
             return redirect('delivery_list_with_status',status='Confirm')
         else:
             messages.warning(request, f"Please Check Again,Invalid Data")

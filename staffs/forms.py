@@ -145,6 +145,7 @@ class EmployeeForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control formset-field'
 
+
 class WarehouseForm(forms.ModelForm):
     class Meta:
         model = Warehouse

@@ -1,0 +1,30 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %} Employee Salary {% endblock title %}
+{% block main-content %}
+{% load attribute_from_orderline %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5 col-md-8 offset-md-2">
+        <div class="text-center">
+            <h3 class="text-decoration-underline text-dark fw-bold">Create Salary</h3>
+            <h6 class="text-decoration-underline text-dark fw-bold">For : {{employee.user.username}}</h6>
+        </div>
+
+             <form method="POST" class="py-2">
+                  <div class="form-row">
+                          <div class="form-group col-md-8 offset-md-2 mb-0">
+                          {{ forms.salary|as_crispy_field }}
+                        </div>
+                  </div>
+
+		        {% csrf_token %}
+                  <div class="col-md-2 offset-md-5">
+                        <button type="submit" class="btn-sm btn-primary">Apply</button>
+                 </div>
+             </form>
+    </div>
+
+{% endblock main-content %}

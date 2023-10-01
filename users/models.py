@@ -36,3 +36,12 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class EmployeeSalary(models.Model):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    salary = models.FloatField(default=0)
+    created_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.employee.user.username+"s' Salary" + str(self.salary)

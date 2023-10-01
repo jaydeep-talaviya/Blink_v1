@@ -1,5 +1,6 @@
 from django import forms
-from .models import User
+from .models import User, EmployeeSalary
+
 
 class UserRegistrationForm(forms.Form):
     username=forms.CharField(error_messages={'required':"please Enter Username"})
@@ -20,3 +21,17 @@ class UpdateForm(forms.ModelForm):
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'})
         }
+
+class EmployeeSalaryForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeSalary
+        fields = ['salary']
+
+
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['salary'].widget.attrs['min'] = 1
+        self.fields['salary'].widget.attrs['step'] = 0.1
+

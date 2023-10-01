@@ -12,10 +12,11 @@ from .views import (home, product_list, product_update, product_delete,
                     create_sub_category, update_sub_category, list_sub_category, remove_sub_category,
                     create_voucher, list_vouchers, update_voucher, delete_voucher, update_status_voucher,
                     create_employee,list_employees,update_employee,delete_employee,
+                    create_employee_salary,employee_salary_list,update_employee_salary,delete_employee_salary,
                     create_warehouse,list_warehouses,update_warehouse,delete_warehouse,
                     prepare_order,prepare_order_dynamic_content,
                     get_product_by_warehouse,get_product_attrs_by_product_warehouse,
-                    list_prepare_orders,create_delivery,update_prepare_order
+                    list_prepare_orders,create_delivery,update_prepare_order,
                     )
 
 urlpatterns = [
@@ -88,6 +89,11 @@ urlpatterns = [
     path('product/employee/update/<int:id>', update_employee, name='update_employee'),
     path('product/employee/remove/<int:id>', delete_employee, name='delete_employee'),
 
+    path('product/employee/salary/create/<int:id>', create_employee_salary, name='create_employee_salary'),
+    path('product/employee/salary/update/<int:id>', update_employee_salary, name='update_employee_salary'),
+    path('product/employee/salary/delete/<int:id>', delete_employee_salary, name='delete_employee_salary'),
+    path('product/employee/salary/<int:id>', employee_salary_list, name='employee_salary_list'),
+
     ##### warehouse #####
     path('product/warehouse/', list_warehouses, name='list_warehouses'),
     path('product/warehouse/create/', create_warehouse, name='create_warehouse'),
@@ -101,6 +107,7 @@ urlpatterns = [
     path('product/prepare/order/update/<str:orderid>',update_prepare_order,name='update_prepare_order'),
 
     path('product/prepare/order/delivery/create/<str:orderid>', create_delivery, name='create_delivery'),
+
 
 
 ]
