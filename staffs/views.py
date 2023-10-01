@@ -651,10 +651,9 @@ def create_employee_salary(request,id):
 @staff_member_required(login_url='/')
 def employee_salary_list(request,id):
     employee_salary = EmployeeSalary.objects.filter(employee_id=id)
-    return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary})
+    return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary,'employee_id':id})
 @staff_member_required(login_url='/')
 def update_employee_salary(request,id):
-    print(">>>>>>>>>\n\n\n\n\n\n\n\n\n\n",id)
     employee_salary = get_object_or_404(EmployeeSalary,id=id)
     employee = Employee.objects.get(id=employee_salary.employee_id)
     forms = EmployeeSalaryForm(instance=employee_salary)
@@ -676,9 +675,11 @@ def update_employee_salary(request,id):
 @staff_member_required(login_url='/')
 def delete_employee_salary(request,id):
     employee_instance = EmployeeSalary.objects.filter(id=id)
-    # employee_instance.delete()
+    employee_id = employee_instance.first().employee_id
+
+    employee_instance.delete()
     messages.success(request, f"Your Employee has been removed")
-    return redirect('list_employees')
+    return redirect('employee_salary_list',id=employee_id)
 
 
 ######3 warehouse #########

@@ -108,6 +108,9 @@ urlpatterns = [
 
     path('product/prepare/order/delivery/create/<str:orderid>', create_delivery, name='create_delivery'),
 
+    # get Product from Product maker and add to warehouse
+
+
 
 
 ]

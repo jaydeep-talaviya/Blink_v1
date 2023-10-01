@@ -2,6 +2,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from staffs.models import OrderPrepare, Ledger, LedgerLine
+from users.models import EmployeeSalary
 
 
 @receiver(post_save, sender=OrderPrepare)
@@ -23,3 +24,12 @@ def create_ledger_for_order(sender, instance, created, **kwargs):
                                           description=f'Transaction Debited for Order ID:{instance.order_id.orderid} for Voucher Discount {instance.order_id.vouchers}')
 
 
+
+@receiver(post_save, sender=EmployeeSalary)
+def create_ledger_for_employee_salary(sender, instance, created, **kwargs):
+    if created:
+        create_ledger = Ledger(ledger_type='employee_salary')
+        create_ledger.save()
+        LedgerLine.objects.create(ledger_id=create_ledger.id, employee_id_id=instance.employee.id, type_of_transaction='debit',
+                                      amount=instance.salary,
+                                      description=f'Transaction Debited for Salary :{instance.salary} Rs. and credited to {instance.employee.user.username}')

@@ -1,6 +1,9 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from .models import User
+
+from staffs.models import Ledger, LedgerLine
+from .models import User, EmployeeSalary
+
 
 @receiver(post_save, sender=User)
 def populate_profile(sociallogin, user, **kwargs):    

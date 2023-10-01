@@ -9,7 +9,8 @@
   </div>
 <div class="container mb-5">
     <div class="text-center p-5">
-        <a href="{% url 'create_employee' %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
+        <a href="{% url 'create_employee_salary' id=employee_id %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
+
     </div>
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
@@ -35,7 +36,7 @@
                                 <a href="{% url 'update_employee_salary' id=salary.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'update_employee_salary' id=salary.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                    <a href="{% url 'delete_employee_salary' id=salary.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
                                </div>
                             </div>
                         </td>
