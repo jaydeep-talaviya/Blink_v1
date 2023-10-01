@@ -22,6 +22,7 @@ def test(request):
     )
     return HttpResponse("Done")
 
+
 def single_delivery(request,delivery_id):
 
     delivery=Delivery.objects.get(delivery_id=delivery_id)

@@ -12,7 +12,8 @@ from django.db.models import Q
 from users.models import Employee
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
-                    ProductChangePriceAttributesFormSet, VouchersForm, WarehouseForm, EmployeeForm,UserForm)
+                    ProductChangePriceAttributesFormSet, VouchersForm, WarehouseForm, EmployeeForm, UserForm,
+                    DeliveryForm)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -679,7 +680,7 @@ def prepare_order_dynamic_content(request):
         return render(request,'staffs/pages/prepare_order_temp.html',{'order':order})
 
 def prepare_order(request):
-    orders = Orders.objects.filter(order_status='order_confirm').order_by('-created_at')
+    orders = Orders.objects.all().order_by('-created_at')
     if request.method == "POST":
         try:
             with transaction.atomic():
@@ -694,7 +695,6 @@ def prepare_order(request):
                     if stock.count() != 1:
                         stock_available = False
 
-
                 order_id = data_dict.get('order_id',None)[0]
                 # get warehouse and reduce quantity from Stock.
                 if stock_available:
@@ -706,13 +706,13 @@ def prepare_order(request):
 
                         stock_obj = stock.first()
                         stock_obj.left_qty = stock_obj.left_qty - int(qty)
-                        stock_obj.save()
+                        # stock_obj.save()
                         # create OrderPrepare for admin so that he/she can send products to user.
                         order_prepare = OrderPrepare(order_id_id=order_id,warehouse_id_id=warehouses[id_idx],stock_id_id=stock_obj.id,purchase_qty=qty,status='preparing')
-                        order_prepare.save()
+                        # order_prepare.save()
                     current_order = Orders.objects.get(id=order_id)
                     current_order.order_status = 'order_prepared'
-                    current_order.save()
+                    # current_order.save()
                     messages.success(request,"You have successfully Started Prepared Order")
                 else:
                     messages.warning(request, f"Please check if stock for the current data is available")
@@ -721,6 +721,42 @@ def prepare_order(request):
             transaction.rollback()
 
     return render(request,'staffs/pages/prepare_order.html',{'orders':orders})
+
+
+def update_prepare_order(request,orderid):
+    print(">>>>>>>>>>>\n\\n\n\n\n\n\n\nn\\n\n\n\n\n\n",orderid,request.POST)
+    data_dict = dict(request.POST)
+    order = Orders.objects.get(orderid=orderid)
+    if request.method == 'POST':
+        for idx,single_order_prepare in enumerate(order.orderprepare_set.all()):
+            warehouse_id = data_dict.get(f'warehouse_{idx+1}',None)
+            if warehouse_id:
+                single_order_prepare.warehouse_id_id = warehouse_id[0]
+                single_order_prepare.save()
+                messages.success(request, "You have successfully Updated Prepared Order")
+            else:
+                messages.warning(request, f"Please Check Again,Invalid Data")
+                break
+    return render(request,'staffs/pages/update_prepare_order.html',{'order':order})
+
+
+
+def list_prepare_orders(request):
+    orders = Orders.objects.all().order_by('-created_at')
+    return render(request,'staffs/pages/prepare_orders_list.html',{'orders':orders})
+
+def create_delivery(request):
+    forms = DeliveryForm(request.POST or None)
+    if request.method=="POST":
+        if forms.is_valid():
+            forms.save()
+            messages.success(request, f"Your Delivery is Started")
+            return redirect('delivery_list')
+        else:
+
+            messages.warning(request, f"Please Check Again,Invalid Data")
+    return render(request,'staffs/pages/delivery.html',{'forms':forms})
+
 
 def create_ladger_of_order(request):
     pass

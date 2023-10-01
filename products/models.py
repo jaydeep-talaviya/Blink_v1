@@ -208,7 +208,7 @@ class Delivery(models.Model):
     order = models.ForeignKey(Orders,on_delete=models.CASCADE)
     delivery_id=models.CharField(max_length=50,default=uuid.uuid4)
     delivery_person = models.ForeignKey(Employee,on_delete=models.CASCADE)
-    state=models.CharField(max_length=100,choices=delivery_state)
+    state=models.CharField(max_length=100,choices=delivery_state,default='Confirm')
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
 

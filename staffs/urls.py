@@ -14,7 +14,8 @@ from .views import (home, product_list, product_update, product_delete,
                     create_employee,list_employees,update_employee,delete_employee,
                     create_warehouse,list_warehouses,update_warehouse,delete_warehouse,
                     prepare_order,prepare_order_dynamic_content,
-                    get_product_by_warehouse,get_product_attrs_by_product_warehouse
+                    get_product_by_warehouse,get_product_attrs_by_product_warehouse,
+                    list_prepare_orders,create_delivery,update_prepare_order
                     )
 
 urlpatterns = [
@@ -93,7 +94,13 @@ urlpatterns = [
     path('product/warehouse/update/<int:id>', update_warehouse, name='update_warehouse'),
     path('product/warehouse/remove/<int:id>', delete_warehouse, name='delete_warehouse'),
 
+    #### prepare orders
+    path('product/prepare/order/', list_prepare_orders, name='list_prepare_orders'),
     path('product/prepare/products/select/',prepare_order_dynamic_content,name='prepare_order_dynamic_content'),
     path('product/prepare/order/create/',prepare_order,name='prepare_order'),
+    path('product/prepare/order/update/<str:orderid>',update_prepare_order,name='update_prepare_order'),
+
+    path('product/prepare/order/delivery/create/', create_delivery, name='create_delivery'),
+
 
 ]

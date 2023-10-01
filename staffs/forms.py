@@ -2,7 +2,7 @@ from django import forms
 from django.forms import BaseModelFormSet
 
 from products.models import (Products, ProductChangePriceAttributes,
-                             Stocks, AttributeValue, AttributeName, Vouchers,Warehouse)
+                             Stocks, AttributeValue, AttributeName, Vouchers, Warehouse, Delivery)
 from users.models import User, Employee
 
 
@@ -157,3 +157,8 @@ class WarehouseForm(forms.ModelForm):
         self.fields['owner'].widget.attrs['class'] = 'form-select formset-field'
         self.fields['address'].widget.attrs['rows'] = 1  # Set the number of rows
         self.fields['owner'].queryset = User.objects.filter(employee__type='warehouse_owner')
+
+class DeliveryForm(forms.ModelForm):
+    class Meta:
+        model = Delivery
+        fields = ['order','delivery_person']

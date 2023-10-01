@@ -1,5 +1,6 @@
 from django import template
 
+from products.models import Warehouse
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict
 
 register = template.Library()
@@ -40,3 +41,7 @@ def get_left_qty_in_warehouse_for_product(orderline,warehouse):
 def get_warehouse_from_orderline(record):
     return get_warehouse_dict(record)
 
+@register.filter(name='get_selected_warehouses')
+def get_selected_warehouses(orderprepare):
+    warehouses = Warehouse.objects.filter(stocks__product_id=orderprepare.stock_id.product_id,stocks__product_attributes = orderprepare.stock_id.product_attributes).distinct()
+    return warehouses

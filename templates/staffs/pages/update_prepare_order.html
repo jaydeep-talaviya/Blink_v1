@@ -1,0 +1,95 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Update Prepared Order{% endblock title %}
+{% block main-content %}
+{% load attribute_from_orderline %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+
+<div class="container mb-5">
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Update Prepare Order </h1>
+              </div>
+                <div class="row pb-2">
+                    <div class="col-md-6 offset-md-3">
+                    <h4 class="text-center">
+                        <input type="hidden" id='order_selector' value="{{order.id}}"/>
+                        <span class="fw-bold">Order For:</span>  {{order.order.first.product_id.p_name}}
+                         {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }}
+                          others
+                          {% endif %}
+                        </h4>
+
+                    </div>
+                </div>
+            <form action="{% url 'update_prepare_order' orderid=order.orderid %}" method="post">
+                {% csrf_token %}
+                <div id="dynamic_warehouse_content">
+                     <div>
+                          <table class="table" id="ordered_product_table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Product</th>
+                                  <th scope="col">QTY</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              {% for orderline in order.order.all %}
+                                <tr>
+                                  <th scope="row">{{forloop.counter}}</th>
+                                  <td>{{orderline.product_id.p_name}} ({{orderline|get_attribute_from_orderline}})</td>
+                                  <td>{{orderline.qty}}</td>
+                                </tr>
+                              {% endfor %}
+                              </tbody>
+                          </table>
+
+                     </div>
+                     <div class="card">
+                    <div id="dynamic_warehouse_selector">
+                        <input type="text" hidden="true" name="order_id" class="form-control" value="{{order.id}}"/>
+
+                      {% for orderprepare in order.orderprepare_set.all %}
+                        <div class="row pb-2">
+                            <div class="col-md-8 offset-md-2">
+                                <label class="form-label">Product</label>
+                                <input type="text" disabled class="form-control" value="{{orderprepare.stock_id.product_id.p_name}} ({{ orderprepare.stock_id.product_attributes}} )" >
+                            </div>
+                            <div class="row py-2">
+                                <div class="col-md-4 offset-md-2">
+                                    <label class="form-label">Select Warehouse</label>
+                                      <select class="form-select form-control" name="warehouse_{{forloop.counter}}" id="warehouse_{{forloop.counter}}">
+                                          {% for warehouse in orderprepare|get_selected_warehouses %}
+                                             <option {% if warehouse.id == orderprepare.warehouse_id.id %} selected {% endif %} value="{{warehouse.id}}">{{warehouse.name}}
+                                                {% if orderprepare.stock_id.left_qty <= orderprepare.stock_id.on_alert_qty %}
+                                                 ( {{orderprepare.stock_id.on_alert_qty}} Left)
+                                                 {% endif %}
+                                             </option>
+
+                                          {% endfor %}
+                                      </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Select Quantity</label>
+                                    <input type="number" class="form-control" name="qty_{{forloop.counter}}" value="{{orderprepare.purchase_qty}}" min="{{orderprepare.purchase_qty}}" max="{{orderprepare.purchase_qty}}"/>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+                <div class="card">
+                    <button class="btn-sm btn-primary prepare_order_btn">Prepare Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock main-content %}

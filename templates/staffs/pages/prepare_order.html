@@ -66,7 +66,7 @@
                             <div class="row py-2">
                                 <div class="col-md-4 offset-md-2">
                                     <label class="form-label">Select Warehouse</label>
-                                      <select class="form-select form-control" name="warehouse_{{forloop.counter}}" id="warehouse_{{forloop.counter}}" onchange="handleSelectionChange()">
+                                      <select class="form-select form-control" name="warehouse_{{forloop.counter}}" id="warehouse_{{forloop.counter}}" >
                                           {% for warehouse in orderline|get_warehouse_from_orderline %}
                                           {% with stock_record=orderline|get_left_qty_in_warehouse_for_product:warehouse %}
                                              <option value="{{warehouse.id}}">{{warehouse.warehouse_name}}
