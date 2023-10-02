@@ -39,9 +39,7 @@
                                <div>
                                 <a href="{% url 'update_prepare_order' orderid=order.orderid %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
-                               <div>
-                                    <a href="" class="btn-sm btn-danger text-decoration-none">Delete</a>
-                               </div>
+
                             </div>
                             {% if not order.delivery_set.exists %}
                              <div class="pt-2 text-center">

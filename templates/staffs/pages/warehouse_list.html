@@ -42,7 +42,12 @@
                                 <a href="{% url 'update_warehouse' id=warehouse.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'delete_warehouse' id=warehouse.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                     {% with idx=warehouse.id model_name='Warehouse' %}
+                                        {% with dynamic_url='delete_warehouse' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
                                </div>
                             </div>
                         </td>

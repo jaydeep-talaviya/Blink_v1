@@ -35,7 +35,13 @@
                                 <a href="{% url 'update_attribute' id=product_attribute.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'remove_attribute' id=product_attribute.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                   {% with idx=product_attribute.id model_name='Product Attribute' %}
+                                        {% with dynamic_url='remove_attribute' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
+
                                </div>
                             </div>
                         </td>

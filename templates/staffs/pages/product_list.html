@@ -8,7 +8,7 @@
 <div class="container mb-5">
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
-            <div class="p-3 text-center">
+            <div class="p-3 text-cfenter">
                 <a href="{% url 'product_add' %}" class="btn btn-primary text-decoration-none">Add New Product</a>
             </div>
             <table class="table">
@@ -35,7 +35,13 @@
                                 <a href="{% url 'product_update' id=product.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                 <a href="{% url 'product_delete' id=product.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                     {% with idx=product.id model_name='Product' %}
+                                        {% with dynamic_url='product_delete' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
+
                                </div>
                             </div>
                         </td>

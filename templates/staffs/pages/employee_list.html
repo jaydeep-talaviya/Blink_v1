@@ -41,7 +41,12 @@
                                 <a href="{% url 'update_employee' id=employee.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'delete_employee' id=employee.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                   {% with idx=employee.id model_name='Employee' %}
+                                        {% with dynamic_url='delete_employee' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
                                </div>
                             </div>
                                  <div>

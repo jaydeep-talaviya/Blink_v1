@@ -521,46 +521,6 @@ def stock_finish(request, id):
     return redirect('stock_list')
 
 
-####################Deals Of the day##################
-
-@staff_member_required(login_url='/')
-def deals_of_day_list(request):
-    deals_of_days=Deals_of_day.objects.filter(date__year=today.year, date__month=today.month, date__day=today.day)
-    return render(request,'staffs/pages/deals_of_day_list.html',{'deals_of_days':deals_of_days})
-
-@staff_member_required(login_url='/')
-def update_deals_of_the_day(request,id):
-    deals_of_the_day_instance=get_object_or_404(Deals_of_day,id=id)
-    if request.method=="POST":
-        forms=Deals_of_dayForm(request.POST,instance=deals_of_the_day_instance)
-        if forms.is_valid():
-            forms.save() 
-            messages.success(request, f"Your Deals of the day is Updated")
-            return redirect(update_deals_of_the_day,id=deals_of_the_day_instance.id)
-        else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/deals_of_day_update.html',{"forms":forms})
-    else:
-        forms=Deals_of_dayForm(instance=deals_of_the_day_instance)
-        return render(request,'staffs/pages/deals_of_day_update.html',{"forms":forms})
-    return render(request,'staffs/pages/deals_of_day_update.html',{'forms':forms})
- 
-@staff_member_required(login_url='/')
-def create_deals_of_the_day(request):
-    if request.method=="POST":
-        forms=Deals_of_dayForm(request.POST)
-        if forms.is_valid():
-            obj=forms.save() 
-            messages.success(request, f"Your Deals of the day is Created")
-            return redirect(update_deals_of_the_day,id=obj.id)
-        else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/deals_of_day_update.html',{"forms":forms})
-    else:
-        forms=Deals_of_dayForm()
-        return render(request,'staffs/pages/deals_of_day_update.html',{"forms":forms})
-    return render(request,'staffs/pages/deals_of_day_update.html',{'forms':forms})
- 
  #########################################################
 
 @staff_member_required(login_url='/')

@@ -1,0 +1,23 @@
+<!-- Modal -->
+<div class="modal fade" id="exampleModal_{{idx}}" tabindex="-1" aria-labelledby="exampleModalLabel_{{idx}}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are You sure You want to remove this {{model_name}}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="{{delete_url}}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button type="button" class="btn-sx btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal_{{idx}}">
+  Delete
+</button>
+

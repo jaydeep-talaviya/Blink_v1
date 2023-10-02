@@ -53,7 +53,12 @@
                                 <a href="{% url 'update_voucher' id=voucher.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'delete_voucher' id=voucher.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                     {% with idx=voucher.id model_name='Voucher' %}
+                                        {% with dynamic_url='delete_voucher' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
                                </div>
                                 <div>
                                     <a href="{% url 'update_status_voucher' id=voucher.id type=1 %}" class="btn-sm btn-danger  text-decoration-none">Stop</a>

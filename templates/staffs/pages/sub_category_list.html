@@ -34,7 +34,12 @@
                                 <a href="{% url 'update_sub_category' id=category.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
-                                    <a href="{% url 'remove_sub_category' id=category.id %}" class="btn-sm btn-danger text-decoration-none">Delete</a>
+                                   {% with idx=category.id model_name='Sub Category' %}
+                                        {% with dynamic_url='remove_sub_category' %}
+                                            {% url dynamic_url id=idx as delete_url %}
+                                            {% include '../partials/common_delete.html' %}
+                                        {% endwith %}
+                                    {% endwith %}
                                </div>
                             </div>
                         </td>
