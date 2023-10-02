@@ -14,7 +14,7 @@ from users.models import Employee
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductAttributesForm, StocksForm, AttributeNameForm, AttributeNameFormSet, AttributeValueFormSet,
                     ProductChangePriceAttributesFormSet, VouchersForm, WarehouseForm, EmployeeForm, UserForm,
-                    DeliveryForm)
+                    DeliveryForm, LedgerForm, LedgerLineForm)
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
@@ -23,7 +23,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict
 from itertools import chain
 
-from .models import OrderPrepare
+from .models import OrderPrepare, Ledger
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -697,7 +697,6 @@ def create_warehouse(request):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/warehouse.html',{'forms':forms})
 
-
 @staff_member_required(login_url='/')
 def list_warehouses(request):
     warehouses=Warehouse.objects.all()
@@ -815,5 +814,44 @@ def create_delivery(request,orderid):
     return render(request,'staffs/pages/delivery.html',{'forms':forms,'order':order})
 
 
-def create_ladger_of_order(request):
-    pass
+def list_of_ledgers(request,type=None):
+    print(">>>>>type\n\n\n\n\n\n",type)
+    ledgers = Ledger.objects.all()
+
+    if type is not None:
+        ledgers=ledgers.filter(ledger_type=type)
+    return render(request,'staffs/pages/list_of_ledgers.html',{'ledgers':ledgers,'type':type})
+
+def create_other_ledgers(request):
+    ledger_form = LedgerForm(request.POST or None)
+    ledger_line_form = LedgerLineForm(request.POST or None)
+    if request.method == "POST":
+        if ledger_form.is_valid() and ledger_line_form.is_valid():
+            ledger = ledger_form.save()
+            ledger_line = ledger_line_form.save(commit=False)
+            ledger_line.ledger = ledger
+            ledger_line.save()
+            messages.success(request, f"Your Ledger is Created")
+            return redirect('list_of_ledgers',type=ledger.ledger_type)
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+
+    return render(request,'staffs/pages/create_other_ledger.html',{'ledger_form':ledger_form,'ledger_line_form':ledger_line_form})
+
+
+def update_other_ledgers(request,id):
+    ledger = Ledger.objects.get(id=id)
+    ledger_form = LedgerForm(request.POST or None,instance=ledger)
+    ledger_line_form = LedgerLineForm(request.POST or None,instance=ledger.ledger_line.first())
+    if request.method == "POST":
+        if ledger_form.is_valid() and ledger_line_form.is_valid():
+            ledger = ledger_form.save()
+            ledger_line = ledger_line_form.save(commit=False)
+            ledger_line.ledger = ledger
+            ledger_line.save()
+            messages.success(request, f"Your Ledger has been Updated")
+            return redirect('list_of_ledgers',type=ledger.ledger_type)
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+
+    return render(request,'staffs/pages/create_other_ledger.html',{'ledger_form':ledger_form,'ledger_line_form':ledger_line_form})

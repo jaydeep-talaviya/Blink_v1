@@ -3,6 +3,7 @@ from django.forms import BaseModelFormSet
 
 from products.models import (Products, ProductChangePriceAttributes,
                              Stocks, AttributeValue, AttributeName, Vouchers, Warehouse, Delivery)
+from staffs.models import Ledger, LedgerLine
 from users.models import User, Employee
 
 
@@ -168,3 +169,32 @@ class DeliveryForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-select formset-field'
+
+class LedgerForm(forms.ModelForm):
+    class Meta:
+        model = Ledger
+        fields = ['ledger_type']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['ledger_type'].choices =  (
+               ('product_making_expense','Product Making Expense'), # to pay carpenters for product making for admin
+               ('raw_material_expense','Raw Material Expense'), # to pay raw materials expense to market place
+               ('other_expense','Other Expense'), # to pay amount to move one place to another place
+               )
+
+class LedgerLineForm(forms.ModelForm):
+    class Meta:
+        model = LedgerLine
+        fields = ['type_of_transaction','amount','description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['type_of_transaction'].widget.attrs['class'] = 'form-select formset-field'
+        self.fields['description'].widget.attrs['class'] = 'form-control formset-field'
+        self.fields['description'].widget.attrs['rows'] = 3  # Set the number of rows
+

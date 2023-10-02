@@ -1,0 +1,36 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Create Other Expenses {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5 col-md-8 offset-md-2">
+        <div class="text-center">
+            <h3 class="text-decoration-underline text-dark fw-bold">Create Expense</h3>
+
+        </div>
+             <form method="POST" class="py-5">
+                  <div class="form-row">
+                        <div class="form-group col-md-4 mb-0">
+                          {{ ledger_form.ledger_type|as_crispy_field }}
+                        </div>
+                          <div class="form-group col-md-4 mb-0">
+                          {{ ledger_line_form.type_of_transaction|as_crispy_field }}
+                        </div>
+                       <div class="form-group col-md-4 mb-0">
+                          {{ ledger_line_form.amount|as_crispy_field }}
+                        </div>
+                      <div class="form-group col-md-12 mb-0">
+                          {{ ledger_line_form.description|as_crispy_field }}
+                        </div>
+                  </div>
+		{% csrf_token %}
+                  <div class="col-md-2 offset-md-5">
+                        <button type="submit" class="btn-sm btn-primary">Apply</button>
+                 </div>
+             </form>
+    </div>
+
+{% endblock main-content %}

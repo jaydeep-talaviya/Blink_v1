@@ -1,0 +1,130 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block title %}Stock List{% endblock title %}
+{% block main-content %}
+{% load product_attribute_names %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+<div class="container mb-5">
+        <div class="d-flex justify-content-center my-5">
+        <div class="card" style="width: 60rem;">
+            <div class="card-body bg-dark">
+                <div class="row text-center">
+                    <div class="col-sm-4">
+                      <a href="{% url 'list_of_ledgers' type='order' %}" class="text-decoration-none btn-sm {% if type == 'order' %} btn-light {% else %} btn-primary {% endif %}">Prepare Order</a>
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="{% url 'list_of_ledgers' type='employee_salary' %}" class="text-decoration-none btn-sm {% if type == 'employee_salary' %} btn-light {% else %} btn-primary {% endif %}">Employee Salary</a>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="{% url 'list_of_ledgers' type='product_making_expense' %}" class="text-decoration-none btn-sm {% if type == 'product_making_expense' %} btn-light {% else %} btn-primary {% endif %}">Product Making Expense</a>
+                    </div>
+                </div>
+                <div class="row text-center mt-2">
+                     <div class="col-sm-4">
+                        <a href="{% url 'list_of_ledgers' type='raw_material_expense' %}" class="text-decoration-none btn-sm {% if type == 'raw_material_expense' %} btn-light {% else %} btn-primary {% endif %}">Raw Material Expense</a>
+                    </div>
+                     <div class="col-sm-4">
+                        <a href="{% url 'list_of_ledgers' type='other_expense' %}" class="text-decoration-none btn-sm {% if type == 'other_expense' %} btn-light {% else %} btn-primary {% endif %}">Other Expense</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 50rem;">
+            <div class="d-sm-flex align-items-center justify-content-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">All Expenses </h1>
+              </div>
+            <div class="p-3 text-center">
+                <a href="{% url 'create_other_ledgers' %}" class="btn btn-primary text-decoration-none">Add New expense</a>
+            </div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Creation Date</th>
+                      {% if type == 'order' %}
+                         <th scope="col">Order ID</th>
+                      {% endif %}
+                       {% if type == 'employee_salary' %}
+                         <th scope="col">Employee Name</th>
+                      {% endif %}
+                    <th scope="col" class="text-center">Action</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for ledger in ledgers %}
+                    <tr>
+                        <td> {{ forloop.counter }}</td>
+                        <td> {{ledger.creation_date}}</td>
+                         {% if type == 'order' %}
+                         <td>
+
+                             {{ledger.order_id.order.first.product_id.p_name}}
+                            {% if ledger.order_id.order.count != 1 %} + {{ledger.order_id.order.count |add:"-1" }}
+                              others
+                              {% endif %}
+                         </td>
+                          {% endif %}
+                        {% if type == 'employee_salary' %}
+                         <td>
+                              {{ledger.ledger_line.first.employee_id.user.username}}
+                         </td>
+                         {% endif %}
+                        <td>
+                            <div class="d-flex justify-content-around">
+                               <div>
+                                <a href="{% url 'update_other_ledgers' id=ledger.id %}" class="btn-sm text-decoration-none btn-primary ">Edit</a>
+                               </div>
+                               <div>
+                                  <button class="accordion-button py-0 rounded fs-6 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo_{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseTwo_{{forloop.counter}}">
+                                        View
+                                  </button>
+                               </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                   <tr id="flush-collapseTwo_{{forloop.counter}}" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                            <td colspan="4" class="accordion-body">
+                                {% for ledger_line in ledger.ledger_line.all %}
+                                 <div class="row border border-3">
+                                    {% if ledger_line.orderline %}
+                                    <div class="col-md-4">
+                                        <h6><span class="fw-bold">Product</span> : <span>{{ledger_line.orderline.product_id.p_name}}</span></h6>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="col-md-4">
+                                        <h6><span class="fw-bold">Type of Transaction</span> : <span>{{ledger_line.type_of_transaction}}</span></h6>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6><span class="fw-bold">Amount</span> : <span>{{ledger_line.amount}}</span></h6>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <h6><span class="fw-bold">Description</span> : <span>{{ledger_line.description}}</span></h6>
+                                    </div>
+
+
+                                </div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+
+                {% endfor %}
+
+                </tbody>
+              </table>
+          </div>
+    </div>
+
+</div>
+
+{% endblock main-content %}
