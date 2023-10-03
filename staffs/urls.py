@@ -16,7 +16,8 @@ from .views import (home, product_list, product_update, product_delete,
                     prepare_order,prepare_order_dynamic_content,
                     get_product_by_warehouse,get_product_attrs_by_product_warehouse,
                     list_prepare_orders,create_delivery,update_prepare_order,
-                    list_of_ledgers,create_other_ledgers,update_other_ledgers
+                    list_of_ledgers,create_other_ledgers,update_other_ledgers,
+                    custom_log_view
                     )
 
 urlpatterns = [
@@ -108,4 +109,8 @@ urlpatterns = [
     path('product/ledger/list/<str:type>',list_of_ledgers,name='list_of_ledgers'),
     path('product/ledger/create/', create_other_ledgers, name='create_other_ledgers'),
     path('product/ledger/update/<int:id>', update_other_ledgers, name='update_other_ledgers'),
+
+    path('user/logs', custom_log_view, name='custom_log_view'),
+
+
 ]

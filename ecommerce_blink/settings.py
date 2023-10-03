@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'crispy_forms',
     'notifications_app',
+    'easyaudit',
 ]
 
 MIDDLEWARE = [
@@ -81,8 +82,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',  
-    
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
+
 ]
 
 ROOT_URLCONF = 'ecommerce_blink.urls'
@@ -302,3 +304,7 @@ INDUSTRY_TYPE_ID="Retail"
 WEBSITE="WEBSTAGING"
 CHANNEL_ID="WEB"
 CALLBACK_URL="'http://127.0.0.1:8000/handlerequest"
+
+
+DJANGO_EASY_AUDIT_WATCH_REQUEST_EVENTS=False
+DJANGO_EASY_AUDIT_WATCH_AUTH_EVENTS=False

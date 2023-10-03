@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
+from easyaudit.models import CRUDEvent
 
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
@@ -22,6 +23,7 @@ from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict
 from itertools import chain
+from django.contrib.admin.models import LogEntry
 
 from .models import OrderPrepare, Ledger
 
@@ -815,3 +817,8 @@ def update_other_ledgers(request,id):
             messages.warning(request, f"Please Check Again,Invalid Data")
 
     return render(request,'staffs/pages/create_other_ledger.html',{'ledger_form':ledger_form,'ledger_line_form':ledger_line_form})
+
+
+def custom_log_view(request):
+    logs = CRUDEvent.objects.all()  # Retrieve all audit log entries
+    return render(request, 'staffs/pages/custom_log_view.html', {'logs': logs,'CUD':[1,2,3]})
