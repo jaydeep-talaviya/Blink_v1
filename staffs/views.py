@@ -6,7 +6,7 @@ from easyaudit.models import CRUDEvent
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
-                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse)
+                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse, Delivery)
 from users.forms import EmployeeSalaryForm
 from users.models import User, EmployeeSalary
 from datetime import date
@@ -822,3 +822,35 @@ def update_other_ledgers(request,id):
 def custom_log_view(request):
     logs = CRUDEvent.objects.all()  # Retrieve all audit log entries
     return render(request, 'staffs/pages/custom_log_view.html', {'logs': logs,'CUD':[1,2,3]})
+
+def dashboard(request):
+    stocks = Stocks.objects.count()
+    warehouses = Warehouse.objects.count()
+    employees = Employee.objects.count()
+    user_orders = Orders.objects.count()
+    prepare_orders = OrderPrepare.objects.count()
+    vouchers = Vouchers.objects.count()
+    other_expenses = Ledger.objects.filter(ledger_type__in=['product_making_expense','raw_material_expense','other_expense']).count()
+    payments = Payment.objects.count()
+    deliveries = Delivery.objects.count()
+    product_attribute_names = AttributeName.objects.count()
+    product_attributes = AttributeValue.objects.count()
+    product_categories = Category.objects.count()
+    product_sub_categories = Subcategory.objects.count()
+    products = Products.objects.count()
+    return render(request, 'staffs/pages/dashboard.html',{
+        'stocks':stocks,
+        'warehouses':warehouses,
+        'employees':employees,
+        'user_orders':user_orders,
+        'prepare_orders':prepare_orders,
+        'vouchers':vouchers,
+        'other_expenses':other_expenses,
+        'payments':payments,
+        'deliveries':deliveries,
+        'product_attribute_names':product_attribute_names,
+        'product_attributes':product_attributes,
+        'product_categories':product_categories,
+        'product_sub_categories':product_sub_categories,
+        'products':products
+    })

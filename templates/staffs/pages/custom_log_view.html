@@ -1,0 +1,60 @@
+{% extends '../base_layout.html' %}
+{% load static %}
+{% block title %} Logs {% endblock title %}
+{% block main-content %}
+{% load get_log_type %}
+
+   <h1 class="text-center">Audit Log Entries</h1>
+            <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                CRUD Logs
+                            </div>
+                            <div class="card-body">
+                                <table id="datatablesSimple">
+                                    <thead>
+                                        <tr>
+                                            <th>Created At</th>
+                                            <th>Description</th>
+                                            <th>Event Type</th>
+                                            <th>Performed By</th>
+                                            <th>Model</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for log in logs %}
+
+                                        <tr>
+                                            <td> {{ log.datetime }} </td>
+                                            <td>
+                                                {% if log.event_type == 1 %}
+                                                    created a new {{ log.content_type.model }} with ID {{ log.object_id }}
+                                                {% elif log.event_type == 2 %}
+                                                    updated {{ log.content_type.model }} with ID {{ log.object_id }}:
+                                                    {% with changed_fields=log.changed_fields|get_changed_fields %}
+                                                            {% for field, values in changed_fields.items %}
+                                                            <br>{{ field }} changed from {{ values.0 }} to {{ values.1 }}
+                                                        {% endfor %}
+                                                    {% endwith %}
+
+                                                {% elif log.event_type == 3 %}
+                                                    deleted {{ log.content_type.model }} with ID {{ log.object_id }}
+                                                {% elif log.event_type not in CUD %}
+                                                    {% with m2m_type=LOG_ENTRY_M2M_TYPES|get_item:log.event_type %}
+                                                        performed a Many-to-Many {{ m2m_type }} action on {{ log.content_type.model }} with ID {{ log.object_id }}
+                                                    {% endwith %}
+                                                {% endif %}
+
+                                            </td>
+                                            <td>{{log.event_type|get_event_type}}</td>
+                                            <td>{{log.user}}</td>
+                                            <td>{{ log.content_type.model }}</td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+{% endblock main-content %}
