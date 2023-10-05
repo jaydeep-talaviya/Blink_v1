@@ -106,7 +106,8 @@ TEMPLATES = [
                 'social_django.context_processors.login_redirect', # add this
                 "dynamic_breadcrumbs.context_processors.breadcrumbs",
 
-                'notifications_app.custom_context_processors.notifications'
+                'notifications_app.custom_context_processors.notifications',
+                'staffs.context_processors.breadcrumbs',
 
             ],
         },

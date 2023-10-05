@@ -9,7 +9,7 @@ from users.models import EmployeeSalary
 def create_ledger_for_order(sender, instance, created, **kwargs):
     create_ledger = Ledger(ledger_type='order',order_id_id=instance.order_id.id)
     create_ledger.save()
-    if instance.order_id.payment_set.last.payment_method == 'Online':
+    if instance.order_id.payment_set.last().payment_method == 'Online':
         for orderline in instance.order_id.order.all():
             LedgerLine.objects.create(ledger_id=create_ledger.id, orderline_id=orderline.id, type_of_transaction='credit',
                                       amount=orderline.sub_total_amount,

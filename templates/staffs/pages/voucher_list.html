@@ -43,14 +43,14 @@
                             <p class="text-dark">{% if voucher.expire_at %} <span class="fw-bold">Promocode-Expired at : </span>{{voucher.expire_at}} {% endif %}</p>
                         </td>
                         <td>
-                            <div class="d-flex justify-content-around">
+                            <div class="d-flex justify-content-around align-items-center">
                             {% if voucher.stop %}
                                 <div>
                                     <a href="{% url 'update_status_voucher' id=voucher.id type=0 %}" class="btn-sm btn-primary  text-decoration-none">Start</a>
                                </div>
                                 {% else %}
                                  <div>
-                                <a href="{% url 'update_voucher' id=voucher.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'update_voucher' id=voucher.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
                                      {% with idx=voucher.id model_name='Voucher' %}

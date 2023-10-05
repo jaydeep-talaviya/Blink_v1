@@ -30,9 +30,9 @@
                         <td> {{product.price}} Rs.</td>
                         <td> {{product.p_category}}</td>
                         <td>
-                            <div class="d-flex justify-content-around">
+                            <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'product_update' id=product.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'product_update' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
                                      {% with idx=product.id model_name='Product' %}

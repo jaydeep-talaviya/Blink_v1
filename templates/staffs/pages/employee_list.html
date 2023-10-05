@@ -36,9 +36,9 @@
                         <td> {{employee.type|paymentstype|title}}</td>
                         <td> {{employee.salary}}</td>
                         <td>
-                            <div class="d-flex justify-content-around">
+                            <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'update_employee' id=employee.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'update_employee' id=employee.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
                                    {% with idx=employee.id model_name='Employee' %}

@@ -37,9 +37,9 @@
                         <td> {{warehouse.mobile_no}}</td>
                         <td> {{warehouse.salary}}</td>
                         <td>
-                            <div class="d-flex justify-content-around">
+                            <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'update_warehouse' id=warehouse.id %}" class="btn-sm btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'update_warehouse' id=warehouse.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
                                      {% with idx=warehouse.id model_name='Warehouse' %}

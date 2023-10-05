@@ -94,7 +94,7 @@
                 method: 'GET',
                 data:{"warehouse_id":selectedValue_warehouse_id,'product_id':selectedValue_product_id},
                 success: function (result) {
-                console.log(result,">>>>>result\n\n\n");
+                console.log(result,">>>>>result11111111111\n\n\n");
                  var selectElement = document.getElementById('id_product_attributes');
 
                 // Remove all existing options
@@ -114,8 +114,23 @@
             });
         }
 
+        function removeOptionsExceptSelected(selectId) {
+            var select = document.getElementById(selectId);
+
+            // Get the selected option
+            var selectedOption = select.options[select.selectedIndex];
+
+            // Remove all options except the selected one
+            for (var i = select.options.length - 1; i >= 0; i--) {
+                var option = select.options[i];
+                if (option !== selectedOption) {
+                    select.remove(i);
+                }
+            }
+        }
+
             window.onload = function() {
-                handleSelectionChangeByProduct();
+                removeOptionsExceptSelected('id_product_attributes');
         };
 </script>
 {% endblock main-content %}

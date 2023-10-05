@@ -102,16 +102,6 @@ def remove_category(request,id):
     messages.success(request, f"Your Category has been removed")
     return redirect('list_category')
 
-############ Sub Category ################3
-
-@staff_member_required(login_url='/')
-def create_attribute_name(request):
-    if request.is_ajax and request.method == "POST":
-        attribute_name=AttributeName(a_name=request.POST.get('a_name',False))
-        attribute_name.save()
-        return JsonResponse({'attribute_name_id':attribute_name.id,'attribute_name_a_name':attribute_name.a_name})
-    else:
-        return JsonResponse({"error": "please enter valid"}, status=400)
 
 
 ########### Product Sub Category #########
@@ -478,6 +468,7 @@ def get_product_attrs_by_product_warehouse(request):
         if stocks:
             product_attributes_ids = stocks.values_list('product_attributes', flat=True)
             product_attributes = selected_product.productchangepriceattributes_set.filter(~Q(id__in=[product_attributes_ids]))
+        print((">>>>>>>>>>>>>\n\n\n"))
         return JsonResponse({'product_attributes': [(product_attribute.id,str(product_attribute)) for product_attribute in product_attributes]})
     else:
         return JsonResponse({'product_attributes':[]})

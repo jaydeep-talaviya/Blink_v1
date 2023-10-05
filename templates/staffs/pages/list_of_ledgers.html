@@ -78,9 +78,9 @@
                          </td>
                          {% endif %}
                         <td>
-                            <div class="d-flex justify-content-around">
+                            <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'update_other_ledgers' id=ledger.id %}" class="btn-sm text-decoration-none btn-primary ">Edit</a>
+                                <a href="{% url 'update_other_ledgers' id=ledger.id %}" class="btn-sm p-2 text-decoration-none btn-primary ">Edit</a>
                                </div>
                                <div>
                                   <button class="accordion-button py-0 rounded fs-6 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo_{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseTwo_{{forloop.counter}}">
