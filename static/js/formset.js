@@ -12,9 +12,12 @@ function updateElementIndex(el, prefix, ndx) {
 
 function addForm(btn, prefix) {
     var formCount = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+
     if (formCount < 1000) {
         // Clone a form (without event handlers) from the first form
+
         var row = $(".item:last").clone(false).get(0);
+        console.log(">>>>>>>formset-field",row)
 
         // Insert it after the last form
         $(row).removeAttr('id').hide().insertAfter(".item:last").slideDown(300);
@@ -23,7 +26,6 @@ function addForm(btn, prefix) {
         // e.g. error messages
         $(".errorlist", row).remove();
         $(row).children().removeClass("error");
-
         // Relabel or rename all the relevant bits
         $(row).find('.formset-field').each(function () {
             updateElementIndex(this, prefix, formCount);
