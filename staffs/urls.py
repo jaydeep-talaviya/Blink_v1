@@ -17,7 +17,7 @@ from .views import (home, product_list, product_update, product_delete,
                     get_product_by_warehouse,get_product_attrs_by_product_warehouse,
                     list_prepare_orders,create_delivery,update_prepare_order,
                     list_of_ledgers,create_other_ledgers,update_other_ledgers,
-                    custom_log_view,dashboard
+                    custom_log_view,dashboard,get_employees_download
                     )
 
 urlpatterns = [
@@ -112,8 +112,6 @@ urlpatterns = [
 
     path('user/admin/logs', custom_log_view, name='custom_log_view'),
     path('user/admin/dashboard', dashboard, name='dashboard'),
-
-
-
+    path('user/employee_report',get_employees_download,name='get_employees_download')
 
 ]

@@ -1,4 +1,4 @@
-{% extends '../../base.html' %}
+{% extends '../base_layout.html' %}
 {% load static %}
 {% block title %} Payment List {% endblock title %}
 {% block main-content %}
@@ -57,7 +57,7 @@
                               {% endif %}
                         </div>
                         <div class="col-sm-4">
-                            <span class="fw-bold">Created At:</span> {{payment.created_at.time }}
+                            <span class="fw-bold">Created At:</span> {{payment.created_at }}
                         </div>
                     </div>
                     <div class="row">

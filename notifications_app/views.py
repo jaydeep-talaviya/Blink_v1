@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render, HttpResponse
 from channels.layers import get_channel_layer
 import json
@@ -30,12 +32,16 @@ def single_delivery(request,delivery_id):
         delivery_status=request.POST.get('delivery_status')
         if delivery_status == 'Confirm' and delivery.state not in ['Confirm','Delivering','Shipped']:
             delivery.state=delivery_status
+            delivery.updated_at = datetime.datetime.now()
             delivery.save()
         elif delivery_status == 'Delivering' and delivery.state not in ['Delivering','Shipped']:
             delivery.state = delivery_status
+            delivery.updated_at = datetime.datetime.now()
             delivery.save()
         elif delivery_status == 'Shipped' and delivery.state not in ['Shipped'] and delivery.state == 'Delivering':
             delivery.state = delivery_status
+            # delivery.updated_at = datetime.datetime.now()
+            delivery.delivered_at = datetime.datetime.now()
             delivery.save()
         else:
             messages.warning(request,('You must select Delivery status based on previous delivery'))

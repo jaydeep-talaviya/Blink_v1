@@ -1,4 +1,4 @@
-{% extends '../../base.html' %}
+{% extends '../base_layout.html' %}
 {% load static %}
 {% block title %} Orders List {% endblock title %}
 {% block main-content %}
@@ -58,7 +58,7 @@
                             <span class="fw-bold">User :</span> {{order.user.username}}
                         </div>
                         <div class="col-sm-4">
-                            <span class="fw-bold">Created At:</span> {{order.created_at.time }}
+                            <span class="fw-bold">Created At:</span> {{order.created_at }}
                         </div>
                     </div>
                     <div class="row">

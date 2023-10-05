@@ -211,6 +211,7 @@ class Delivery(models.Model):
     delivery_id=models.CharField(max_length=50,default=uuid.uuid4)
     delivery_person = models.ForeignKey(Employee,on_delete=models.CASCADE)
     state=models.CharField(max_length=100,choices=delivery_state,default='Confirm')
+    updated_at=models.DateTimeField(auto_now=True)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
 
@@ -225,5 +226,5 @@ class Payment(models.Model):
     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     payment_method=models.CharField(max_length=100,choices=[('Online','Online'),('Offline','Offline')])
-    status=models.CharField(max_length=100)
+    status=models.CharField(max_length=100,choices=(('SUCCESS','Success'),('Pending','Pending'),('Cancel','Cancel')))
     txnId=models.CharField(max_length=150,null=True,blank=True)

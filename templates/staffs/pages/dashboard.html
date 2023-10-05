@@ -129,6 +129,24 @@
 
                           </div>
                         </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                     <div class="col-xl-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header d-flex justify-content-between">
+                                                   <div> <i class="fas fa-chart-area me-1"></i>Total Employees</div>
+                                                    <div >
+                                                        <a href="{% url 'get_employees_download' %}" ><i class="fas fa-download"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+
                          <div class="card">
                             <div class="card-body">
                                 <div class="row">
@@ -196,29 +214,431 @@
                             </div>
                          </div>
 
+                        <div class="card">
+                            <div class="card-body">
+                                <div >
+                                    <form action="{% url 'dashboard' %}" class="row" id="dateForm" method="post">
+                                        {% csrf_token %}
+                                        <div class="col-md-3">
+                                            <label for="startDate">Start Date:</label>
+                                            <input type="date" class="form-control" id="startDate" name="start_date" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="endDate">End Date:</label>
+                                            <input type="date" class="form-control" id="endDate" name="end_date" required>
+                                        </div>
+                                        <div class="col-md-3 align-items-end d-flex">
+                                            <button type="submit" class="btn-sm btn-primary" >Submit</button>
+                                        </div>
+                                        </form>
 
-                        <div class="row">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
                             <div class="col-xl-6">
                                 <div class="card mb-4">
                                     <div class="card-header">
                                         <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
+                                        Order Per Day
                                     </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                                    <div class="card-body">
+                                        <canvas id="OrderPerChart" width="100%" height="40"></canvas>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-xl-6">
-                                <div class="card mb-4">
+                                 <div class="card mb-4">
                                     <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
+                                        <i class="fas fa-chart-area me-1"></i>
+                                        Prepared Orders Per Day
                                     </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                                    <div class="card-body"><canvas id="PrepareOrderPerChart" width="100%" height="40"></canvas></div>
                                 </div>
+                            </div>
+                            <div class="col-xl-6">
+                                 <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-area me-1"></i>
+                                        Expenses Per Day
+                                    </div>
+                                    <div class="card-body"><canvas id="ExpensesPerChart" width="100%" height="40"></canvas></div>
+                                </div>
+                            </div>
+
+                             <div class="col-xl-6">
+                                 <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-area me-1"></i>
+                                        Payment Received Per Day
+                                    </div>
+                                    <div class="card-body"><canvas id="PaymentReceivePerDay" width="100%" height="40"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                 <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-area me-1"></i>
+                                        Delivery Per Day
+                                    </div>
+                                    <div class="card-body"><canvas id="DeliveryPerDay" width="100%" height="40"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
                             </div>
                         </div>
                     </div>
                 </main>
             </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script >
+    // Set new default font family and font color to mimic Bootstrap's default styling
+Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = '#292b2c';
+var order_chart = {{ order_chart|safe }};
+var order_chart_keys = Object.keys(order_chart);
+var order_chart_values = Object.values(order_chart);
+
+var ctx = document.getElementById("OrderPerChart");
+
+var OrderPerChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: order_chart_keys,
+    datasets: [{
+      label: "Orders",
+      lineTension: 0.3,
+      backgroundColor: "rgba(2,117,216,0.2)",
+      borderColor: "rgba(2,117,216,1)",
+      pointRadius: 5,
+      pointBackgroundColor: "rgba(2,117,216,1)",
+      pointBorderColor: "rgba(255,255,255,0.8)",
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: "rgba(2,117,216,1)",
+      pointHitRadius: 50,
+      pointBorderWidth: 2,
+      data: order_chart_values,
+    }],
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'date'
+        },
+        gridLines: {
+          display: false
+        },
+        ticks: {
+          maxTicksLimit: 7
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          min: Math.min(...order_chart_values),
+          max: Math.max(...order_chart_values),
+          maxTicksLimit: 5
+        },
+        gridLines: {
+          color: "rgba(0, 0, 0, .125)",
+        }
+      }],
+    },
+    legend: {
+      display: false
+    }
+  }
+});
+<!--    PrepareOrder -->
+var ctx2 = document.getElementById("PrepareOrderPerChart");
+
+var orderprepare_chart = {{ orderprepare_chart|safe }};
+var orderprepare_chart_keys = Object.keys(orderprepare_chart);
+var orderprepare_chart_values = Object.values(orderprepare_chart);
+
+var PrepareOrderPerChart = new Chart(ctx2, {
+  type: 'line',
+  data: {
+    labels: orderprepare_chart_keys,
+    datasets: [{
+      label: "Prepare Orders",
+      lineTension: 0.3,
+      backgroundColor: "rgba(2,117,216,0.2)",
+      borderColor: "rgba(2,117,216,1)",
+      pointRadius: 5,
+      pointBackgroundColor: "rgba(2,117,216,1)",
+      pointBorderColor: "rgba(255,255,255,0.8)",
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: "rgba(2,117,216,1)",
+      pointHitRadius: 50,
+      pointBorderWidth: 2,
+      data: orderprepare_chart_values,
+    }],
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'date'
+        },
+        gridLines: {
+          display: false
+        },
+        ticks: {
+          maxTicksLimit: 7
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          min: Math.min(...orderprepare_chart_values),
+          max: Math.max(...orderprepare_chart_values),
+          maxTicksLimit: 5
+        },
+        gridLines: {
+          color: "rgba(0, 0, 0, .125)",
+        }
+      }],
+    },
+    legend: {
+      display: false
+    }
+  }
+});
+
+
+<!--    ExpensesPerChart -->
+var ctx3 = document.getElementById("ExpensesPerChart");
+
+var expenses_credit_chart = {{ expenses_credit_count_by_date|safe }};
+var expenses_credit_keys = Object.keys(expenses_credit_chart);
+var expenses_credit_values = Object.values(expenses_credit_chart);
+
+var expenses_debit_chart = {{ expenses_debit_count_by_date|safe }};
+var expenses_debit_keys = Object.keys(expenses_debit_chart);
+var expenses_debit_values = Object.values(expenses_debit_chart);
+
+var ExpensesPerChart = new Chart(ctx3, {
+  type: 'line',
+  data: {
+    labels: expenses_credit_keys,
+    datasets: [
+      {
+        label: "Credit",
+        lineTension: 0.3,
+        backgroundColor: "rgba(2,117,216,0.2)",
+        borderColor: "rgba(2,117,216,1)",
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(2,117,216,1)",
+        pointBorderColor: "rgba(255,255,255,0.8)",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(2,117,216,1)",
+        pointHitRadius: 50,
+        pointBorderWidth: 2,
+        data: expenses_credit_values,
+      },
+      {
+        label: "Debit",
+        lineTension: 0.3,
+        backgroundColor: "rgba(255, 0, 0, 0.2)", // Example color
+        borderColor: "rgba(255, 0, 0, 1)", // Example color
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(255, 0, 0, 1)", // Example color
+        pointBorderColor: "rgba(255,255,255,0.8)",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(255, 0, 0, 1)", // Example color
+        pointHitRadius: 50,
+        pointBorderWidth: 2,
+        data: expenses_debit_values, // Replace with your actual data
+      }
+    ],
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'date'
+        },
+        gridLines: {
+          display: false
+        },
+        ticks: {
+          maxTicksLimit: 7
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          min: Math.min(...expenses_credit_values.concat(expenses_debit_values)),
+          max: Math.max(...expenses_credit_values.concat(expenses_debit_values)),
+          maxTicksLimit: 5
+        },
+        gridLines: {
+          color: "rgba(0, 0, 0, .125)",
+        }
+      }],
+    },
+    legend: {
+      display: true, // Set to true to display legend
+    }
+  }
+});
+
+<!--    Payments -->
+
+var payment_chart = {{ payment_by_date|safe }};
+console.log(">>>>>>>>",payment_chart)
+var payment_chart_keys = Object.keys(payment_chart);
+var payment_chart_values = Object.values(payment_chart);
+
+var ctx4 = document.getElementById("PaymentReceivePerDay");
+
+var OrderPerChart = new Chart(ctx4, {
+  type: 'line',
+  data: {
+    labels: payment_chart_keys,
+    datasets: [{
+      label: "Payments",
+      lineTension: 0.3,
+      backgroundColor: "rgba(2,117,216,0.2)",
+      borderColor: "rgba(2,117,216,1)",
+      pointRadius: 5,
+      pointBackgroundColor: "rgba(2,117,216,1)",
+      pointBorderColor: "rgba(255,255,255,0.8)",
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: "rgba(2,117,216,1)",
+      pointHitRadius: 50,
+      pointBorderWidth: 2,
+      data: payment_chart_values,
+    }],
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'date'
+        },
+        gridLines: {
+          display: false
+        },
+        ticks: {
+          maxTicksLimit: 7
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          min: Math.min(...payment_chart_values),
+          max: Math.max(...payment_chart_values),
+          maxTicksLimit: 5
+        },
+        gridLines: {
+          color: "rgba(0, 0, 0, .125)",
+        }
+      }],
+    },
+    legend: {
+      display: false
+    }
+  }
+});
+
+
+<!--    ExpensesPerChart -->
+var ctx5 = document.getElementById("DeliveryPerDay");
+
+var delivery_confirm_by_date = {{ delivery_confirm_by_date|safe }};
+var delivery_confirm_keys = Object.keys(delivery_confirm_by_date);
+var delivery_confirm_values = Object.values(delivery_confirm_by_date);
+
+var delivery_delivering_by_date = {{ delivery_delivering_by_date|safe }};
+var delivery_delivering_keys = Object.keys(delivery_delivering_by_date);
+var delivery_delivering_values = Object.values(delivery_delivering_by_date);
+
+var delivery_shipped_by_date = {{ delivery_shipped_by_date|safe }};
+var delivery_shipped_keys = Object.keys(delivery_shipped_by_date);
+var delivery_shipped_values = Object.values(delivery_shipped_by_date);
+
+console.log(delivery_confirm_by_date,delivery_delivering_by_date,delivery_shipped_by_date)
+var ExpensesPerChart = new Chart(ctx5, {
+  type: 'line',
+  data: {
+    labels: delivery_confirm_keys,
+    datasets: [
+      {
+        label: "Confirm Delivery",
+        lineTension: 0.3,
+        backgroundColor: "rgba(2,117,216,0.2)",
+        borderColor: "rgba(2,117,216,1)",
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(2,117,216,1)",
+        pointBorderColor: "rgba(255,255,255,0.8)",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(2,117,216,1)",
+        pointHitRadius: 50,
+        pointBorderWidth: 2,
+        data: delivery_confirm_values,
+      },
+      {
+        label: "Delivering",
+        lineTension: 0.3,
+        backgroundColor: "rgba(255, 0, 0, 0.2)", // Example color
+        borderColor: "rgba(255, 0, 0, 1)", // Example color
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(255, 0, 0, 1)", // Example color
+        pointBorderColor: "rgba(255,255,255,0.8)",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(255, 0, 0, 1)", // Example color
+        pointHitRadius: 50,
+        pointBorderWidth: 2,
+        data: delivery_delivering_values, // Replace with your actual data
+      },
+        {
+        label: "Shipped",
+        lineTension: 0.3,
+        backgroundColor: "rgba(69, 25, 82, 0.2)", // Example color
+        borderColor: "rgba(69, 25, 82, 1)", // Example color
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(69, 25, 82, 1)", // Example color
+        pointBorderColor: "rgba(69, 25, 82,0.8)",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(69, 25, 82, 1)", // Example color
+        pointHitRadius: 50,
+        pointBorderWidth: 2,
+        data: delivery_shipped_values, // Replace with your actual data
+      }
+    ],
+  },
+  options: {
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'date'
+        },
+        gridLines: {
+          display: false
+        },
+        ticks: {
+          maxTicksLimit: 7
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          min: Math.min(...delivery_confirm_values.concat(delivery_delivering_values,delivery_shipped_values)),
+          max: Math.max(...delivery_confirm_values.concat(delivery_delivering_values,delivery_shipped_values)),
+          maxTicksLimit: 5
+        },
+        gridLines: {
+          color: "rgba(0, 0, 0, .125)",
+        }
+      }],
+    },
+    legend: {
+      display: true, // Set to true to display legend
+    }
+  }
+});
+
+
+</script>
 {% endblock main-content %}

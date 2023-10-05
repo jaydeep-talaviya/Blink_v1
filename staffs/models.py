@@ -2,6 +2,7 @@ from django.db import models
 
 from products.models import Orders, Warehouse, Stocks, OrderLines
 from users.models import Employee
+from datetime import datetime
 
 
 # Create your models here.
@@ -16,6 +17,7 @@ class OrderPrepare(models.Model):
     stock_id = models.ForeignKey(Stocks, on_delete=models.DO_NOTHING)
     purchase_qty = models.IntegerField(default=1)
     status = models.CharField(max_length=50,choices=choices)
+    created_at=models.DateTimeField(auto_now_add=datetime.now)
 
 
 class Ledger(models.Model):
@@ -31,6 +33,13 @@ class Ledger(models.Model):
 
     def __str__(self):
         return f"Ledger Entry ID: {self.id}, Type: {self.ledger_type}"
+
+    def get_total_ledger_debit(self):
+        return sum(self.ledger_line.filter(type_of_transaction='credit').values_list('amount',flat=True))
+
+    def get_total_ledger_credit(self):
+        return sum(self.ledger_line.filter(type_of_transaction='debit').values_list('amount',flat=True))
+
 class LedgerLine(models.Model):
     ledger = models.ForeignKey(Ledger, on_delete=models.CASCADE,related_name='ledger_line')
     orderline = models.ForeignKey(OrderLines, on_delete=models.DO_NOTHING,null=True,blank=True)

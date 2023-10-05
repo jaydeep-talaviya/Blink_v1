@@ -1,3 +1,5 @@
+import csv
+
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
@@ -10,6 +12,7 @@ from products.models import (Products, Category, Stocks,
 from users.forms import EmployeeSalaryForm
 from users.models import User, EmployeeSalary
 from datetime import date
+import datetime
 from django.db.models import Q
 from users.models import Employee
 from .forms import (ProductForm, ProductChangePriceAttributesForm,
@@ -17,11 +20,11 @@ from .forms import (ProductForm, ProductChangePriceAttributesForm,
                     ProductChangePriceAttributesFormSet, VouchersForm, WarehouseForm, EmployeeForm, UserForm,
                     DeliveryForm, LedgerForm, LedgerLineForm)
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
-from utils.helper_functions import get_attribute_full_name, get_warehouse_dict
+from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date
 from itertools import chain
 from django.contrib.admin.models import LogEntry
 
@@ -527,8 +530,7 @@ def stock_finish(request, id):
 
 @staff_member_required(login_url='/')
 def orderlists(request,status='order_confirm'):
-    orders=Orders.objects.filter(created_at__year=today.year, created_at__month=today.month, created_at__day=today.day,order_status=status)
-    # orders=Orders.objects.filter(order_status=status)
+    orders=Orders.objects.filter(order_status=status)
     return render(request,'staffs/pages/orderlists.html',{'orderlist':orders,'Status':status})
 
 @staff_member_required(login_url='/')
@@ -538,7 +540,7 @@ def single_order(request,order_id):
 
 @staff_member_required(login_url='/')
 def paymentlists(request,status='SUCCESS'):
-    payments=Payment.objects.filter(created_at__year=today.year, created_at__month=today.month, created_at__day=today.day,status=status)
+    payments=Payment.objects.filter(status=status)
     # payments=Payment.objects.filter(status=status)
     return render(request,'staffs/pages/paymentlists.html',{'paymentlist':payments,'Status':status})
 
@@ -824,6 +826,7 @@ def custom_log_view(request):
     return render(request, 'staffs/pages/custom_log_view.html', {'logs': logs,'CUD':[1,2,3]})
 
 def dashboard(request):
+    print(">>>>>>>>>",request.POST)
     stocks = Stocks.objects.count()
     warehouses = Warehouse.objects.count()
     employees = Employee.objects.count()
@@ -838,6 +841,19 @@ def dashboard(request):
     product_categories = Category.objects.count()
     product_sub_categories = Subcategory.objects.count()
     products = Products.objects.count()
+
+    # order chart
+    now = datetime.datetime.now()
+    start_date = datetime.datetime(now.year, now.month, 1)  # Replace with your desired start date
+    end_date = datetime.datetime.now()  # Replace with your desired end date
+
+    data_dict = dict(request.POST)
+    if data_dict.get('start_date',None) and data_dict.get('end_date',None):
+        start_date = datetime.datetime.strptime(data_dict.get('start_date')[0], '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(data_dict.get('end_date')[0], '%Y-%m-%d')
+
+    order_chart,orderprepare_chart,expenses_credit_count_by_date,expenses_debit_count_by_date,payment_by_date,delivery_confirm_by_date,delivery_delivering_by_date,delivery_shipped_by_date= get_orders_count_by_date([Orders,OrderPrepare,Ledger,Payment,Delivery],start_date,end_date)
+
     return render(request, 'staffs/pages/dashboard.html',{
         'stocks':stocks,
         'warehouses':warehouses,
@@ -852,5 +868,40 @@ def dashboard(request):
         'product_attributes':product_attributes,
         'product_categories':product_categories,
         'product_sub_categories':product_sub_categories,
-        'products':products
+        'products':products,
+        'order_chart':order_chart,
+        'orderprepare_chart':orderprepare_chart,
+        'expenses_credit_count_by_date':expenses_credit_count_by_date,
+        'expenses_debit_count_by_date':expenses_debit_count_by_date,
+        'payment_by_date':payment_by_date,
+        'delivery_confirm_by_date':delivery_confirm_by_date,
+        'delivery_delivering_by_date':delivery_delivering_by_date,
+        'delivery_shipped_by_date':delivery_shipped_by_date,
     })
+
+def get_employees_download(request,type=None):
+    queryset = Employee.objects.all()
+    if type is not None:
+        queryset = queryset.filter(type=type)
+        # Assuming you have filtered out the records you want
+
+    # Create the response object with appropriate CSV headers
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'''attachment; filename="employee_{type if type else 'all'}.csv"'''
+
+    # Create a CSV writer
+    csv_writer = csv.writer(response)
+
+    # Write header row
+    header_row = [field.name for field in Employee._meta.fields]  # Replace with actual field names
+    csv_writer.writerow(header_row)
+
+    # Write data rows
+    for record in queryset:
+        data_row = [getattr(record, field) if field != 'user' else getattr(record, field).username for field in
+                    header_row]
+        csv_writer.writerow(data_row)
+
+    return response
+
+
