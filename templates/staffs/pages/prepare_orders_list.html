@@ -7,9 +7,12 @@
     {%include '../partials/breadcrumbs.html'%}
   </div>
 <div class="container mb-5">
-    <div class="text-center p-5">
+         <h3 class="text-center">Prepare Orders </h3>
+    <div class="d-flex justify-content-around py-2">
         <a href="{% url 'prepare_order' %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
+        <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
     </div>
+
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
             <table class="table">
@@ -35,13 +38,15 @@
                         <td> {{order.total_discount}}</td>
 
                         <td >
+                            {% if order.orderprepare_set.exists %}
                             <div class="d-flex justify-content-around align-items-center">
                                <div>
                                 <a href="{% url 'update_prepare_order' orderid=order.orderid %}" class="btn-sm p-2  btn-primary text-decoration-none">Edit</a>
                                </div>
+                            {% endif %}
 
                             </div>
-                            {% if not order.delivery_set.exists %}
+                            {% if order.orderprepare_set.exists and not order.delivery_set.exists %}
                              <div class="pt-2 text-center">
                                     <a href="{% url 'create_delivery' orderid=order.orderid %}" class="btn-sm btn-info text-decoration-none">Start Delivery</a>
                                </div>

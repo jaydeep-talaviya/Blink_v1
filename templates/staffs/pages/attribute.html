@@ -7,6 +7,11 @@
   </div>
 {%load crispy_forms_tags %}
  <div class="container mt-5">
+     <h3 class="text-center">Create Product's Attributes</h3>
+         <div class="d-flex justify-content-around ">
+             <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
+        </div>
+
         {% if forms %}
              <form method="POST" class="py-5">
 		{% csrf_token %}
@@ -17,7 +22,7 @@
                                 <th>Attribute Name</th>
                                 <th>Attribute Value</th>
 
-                                <th></th>
+                                <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -50,7 +55,7 @@
                                 <th>Attribute Name</th>
                                 <th>Attribute Value</th>
 
-                                <th></th>
+                                <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>

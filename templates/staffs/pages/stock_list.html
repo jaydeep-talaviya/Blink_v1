@@ -9,11 +9,10 @@
 <div class="container mb-5">
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
-            <div class="d-sm-flex align-items-center justify-content-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Today's Stock </h1>
-              </div>
-            <div class="p-3 text-center">
+            <h3 class="text-center py-2"> Stock </h3>
+            <div class="d-flex justify-content-around py-2">
                 <a href="{% url 'stock_create' %}" class="btn btn-primary text-decoration-none">Add New Stock</a>
+                <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
             </div>
             <table class="table">
                 <thead>

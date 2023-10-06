@@ -8,8 +8,9 @@
 <div class="container mb-5">
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
-            <div class="p-3 text-cfenter">
-                <a href="{% url 'product_add' %}" class="btn btn-primary text-decoration-none">Add New Product</a>
+            <div class="d-flex justify-content-around py-2">
+                <a href="{% url 'product_add' %}" class="btn-sm p-2 btn-primary text-decoration-none">Add New Product</a>
+                <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
             </div>
             <table class="table">
                 <thead>

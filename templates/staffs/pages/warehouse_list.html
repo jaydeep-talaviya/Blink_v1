@@ -8,9 +8,11 @@
     {%include '../partials/breadcrumbs.html'%}
   </div>
 <div class="container mb-5">
-    <div class="text-center p-5">
-        <a href="{% url 'create_warehouse' %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
-    </div>
+
+        <div class="d-flex justify-content-around py-2">
+            <a href="{% url 'create_warehouse' %}" type="button" class="btn-sm text-decoration-none btn-primary">Add New </a>
+            <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
+        </div>
     <div class="d-flex justify-content-center">
         <div class="card" style="width: 50rem;">
             <table class="table">

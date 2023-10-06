@@ -10,17 +10,15 @@
 <div class="container mb-5">
 
             {% load crispy_forms_tags %}
-            <div class="d-sm-flex align-items-center justify-content-center mb-4">
               {% if pid %}
-              <h1 class="h3 mb-0 text-gray-800">Update {{forms.p_name.value}}</h1>
-
+              <h3 class="text-center py-2">Update {{forms.p_name.value}}</h3>
               {% else %}
-
-
-              <h1 class="h3 mb-0 text-gray-800">Add New Product</h1>
+              <h3 class="text-center py-2">Add New Product</h3>
               {% endif %}
-
+             <div class="d-flex justify-content-around py-2">
+                <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
             </div>
+
             <div class="d-flex justify-content-center pb-2">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
