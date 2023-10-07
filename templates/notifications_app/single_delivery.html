@@ -1,4 +1,5 @@
-{% extends '../base.html' %}
+{% extends '../staffs/base_layout.html' %}
+
 {% load static %}
 {% block title %} Delivery Detail{% endblock title %}
 {% block main-content %}
@@ -6,6 +7,10 @@
 <div class="container mt-5">
 			<!-- Title text -->
 			<h3 class="text-center py-2">Delivery</h3>
+	    <div class="d-flex justify-content-around py-2">
+                    <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
+                </div>
+
 </div>
 	<!-- Container End -->
 <section class=" my-3">
