@@ -33,10 +33,7 @@ def create_otp(sender, instance, created, **kwargs):
             for c in cart:
                 OrderLines.objects.create(product_id=c.product_id,qty=c.qty,unit_price=c.price,sub_total_amount=c.qty*c.price,order_id=orders,selected_product_varient=c.selected_product_varient)
                 amount+=c.qty*c.price
-                # change into stock of any products
-                # stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
-                # stock.left_qty=stock.left_qty-c.qty
-                # stock.save()
+
             voucher=cart.last().vouchers
             discount_amount = 0
             try:
@@ -99,10 +96,14 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
     if instance.order_status == 'order_cancel':
         orderlines=instance.order.all()
 
-        # for orderline in orderlines:
-        #     last_stock=orderline.product_id.stocks_set.last()
-        #     last_stock.left_qty+=orderline.qty
-        #     last_stock.save()
+        for orderline in orderlines:
+            last_stock = orderline.product_id.stocks_set.last()
+            last_stock = orderline.product_id.stocks_set.filter(warehouse_id_id=warehouse.get('id'),
+                                                   product_attributes=product_attribute,
+                                                   finished=False)
+            orderline.product
+            last_stock.left_qty+=orderline.qty
+            last_stock.save()
         if instance.payment_set.all():
             instance.delivery_set.all().delete()
             payment=instance.payment_set.last()

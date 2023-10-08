@@ -272,13 +272,13 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
 # Let's make things happen 
-CELERY_BEAT_SCHEDULE = {
-    # Executes every Friday at 4pm
-    'remove-cart-on-everynight': { 
-         'task': 'products.tasks.remove_all_cart_products', 
-         'schedule': crontab(hour=23,minute=54),
-        },            
-}
+# CELERY_BEAT_SCHEDULE = {
+#     # Executes every Friday at 4pm
+#     'remove-cart-on-everynight': {
+#          'task': 'products.tasks.remove_all_cart_products',
+#          'schedule': crontab(hour=23,minute=54),
+#         },
+# }
 
 CHANNEL_LAYERS = {
     "default": {

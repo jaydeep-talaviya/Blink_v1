@@ -21,10 +21,10 @@ from .views import (home, product_list, product_update, product_delete,
                     )
 
 urlpatterns = [
-    path('',home,name='staff_homepage'),
+    # path('',home,name='staff_homepage'),
 
+    path('', dashboard, name='dashboard'),
     path('user/admin/logs/', custom_log_view, name='custom_log_view'),
-    path('user/admin/dashboard/', dashboard, name='dashboard'),
     path('user/employee_report/', get_employees_download, name='get_employees_download'),
 
     path('product/',product_list,name='product_list'),

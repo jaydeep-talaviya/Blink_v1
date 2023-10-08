@@ -128,7 +128,7 @@
                 <li><a class="dropdown-item" href="{% url 'profileshow' %}">Profile</a></li>
 
                 {% if user.is_staff  %}
-                <li><a class="dropdown-item" href="{% url 'staff_homepage' %}">Go To Admin Panel</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard' %}">Go To Admin Panel</a></li>
                 {% endif %}
 
                 <li><a class="dropdown-item" href="{% url 'userorders' %}">Orders</a></li>

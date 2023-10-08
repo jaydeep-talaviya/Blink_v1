@@ -1,4 +1,5 @@
 from django.core.mail import EmailMessage
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.template.loader import get_template
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -106,3 +107,21 @@ def get_orders_count_by_date(models,start_date, end_date):
         delivery_shipped_by_date[date.strftime('%Y-%m-%d')] = shipped_deliveries.count()
 
     return orders_count_by_date,orderprepare_count_by_date,expenses_credit_count_by_date,expenses_debit_count_by_date,payment_by_date,delivery_confirm_by_date,delivery_delivering_by_date,delivery_shipped_by_date
+
+
+def get_pagination_records(request,records):
+    # Number of categories to display per page
+    per_page = 2  # Adjust as needed
+    # Paginate the categories
+    paginator = Paginator(records, per_page)
+    page = request.GET.get('page')
+
+    try:
+        records = paginator.page(page)
+    except PageNotAnInteger:
+        # If the page parameter is not an integer, deliver the first page
+        records = paginator.page(1)
+    except EmptyPage:
+        # If the page is out of range (e.g., 9999), deliver the last page
+        records = paginator.page(paginator.num_pages)
+    return records

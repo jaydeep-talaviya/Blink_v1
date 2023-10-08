@@ -24,7 +24,8 @@ from django.http import JsonResponse, HttpResponse
 from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
-from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date
+from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
+    get_pagination_records
 from itertools import chain
 from django.contrib.admin.models import LogEntry
 
@@ -76,6 +77,7 @@ def create_category(request):
 
 def list_category(request):
     categories = Category.objects.all()
+    categories = get_pagination_records(request,categories)
     return render(request,'staffs/pages/category_list.html',{'categories':categories})
 
 def update_category(request,id):
@@ -130,6 +132,7 @@ def create_sub_category(request):
 
 def list_sub_category(request):
     subcategories = Subcategory.objects.all()
+    subcategories = get_pagination_records(request,subcategories)
     return render(request,'staffs/pages/sub_category_list.html',{'subcategories':subcategories})
 
 def update_sub_category(request,id):
@@ -202,6 +205,7 @@ def update_attribute_names(request,id):
 @staff_member_required(login_url='/')
 def list_attribute_name(request):
     attribute_names=AttributeName.objects.all()
+    attribute_names = get_pagination_records(request,attribute_names)
     return render(request,'staffs/pages/attribute_name_list.html',{'attribute_names':attribute_names})
 
 @staff_member_required(login_url='/')
@@ -263,6 +267,7 @@ def remove_attribute(request,id):
 @staff_member_required(login_url='/')
 def product_attribute_list(request):
     product_attributes=AttributeValue.objects.all()
+    product_attributes = get_pagination_records(request,product_attributes)
     return render(request,'staffs/pages/product_attribute_list.html',{'product_attributes':product_attributes})
 
 
@@ -317,6 +322,7 @@ def product_update_attribute(request,pid,id):
 @staff_member_required(login_url='/')
 def product_list(request):
     products=Products.objects.all()
+    products = get_pagination_records(request,products)
     return render(request,'staffs/pages/product_list.html',{'products':products})
 
 
@@ -391,6 +397,7 @@ def create_voucher(request):
 @staff_member_required(login_url='/')
 def list_vouchers(request):
     vouchers=Vouchers.objects.all()
+    vouchers = get_pagination_records(request,vouchers)
     return render(request,'staffs/pages/voucher_list.html',{'vouchers':vouchers})
 
 @staff_member_required(login_url='/')
@@ -427,6 +434,7 @@ def delete_voucher(request, id):
 def stock_list(request):
     # stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
     stocks=Stocks.objects.all()
+    stocks = get_pagination_records(request,stocks)
     return render(request,'staffs/pages/stock_list.html',{'stocks':stocks})
 
 def get_differenced_ids(list1,list2):
@@ -522,6 +530,7 @@ def stock_finish(request, id):
 @staff_member_required(login_url='/')
 def orderlists(request,status='order_confirm'):
     orders=Orders.objects.filter(order_status=status)
+    orders = get_pagination_records(request,orders)
     return render(request,'staffs/pages/orderlists.html',{'orderlist':orders,'Status':status})
 
 @staff_member_required(login_url='/')
@@ -532,7 +541,7 @@ def single_order(request,order_id):
 @staff_member_required(login_url='/')
 def paymentlists(request,status='SUCCESS'):
     payments=Payment.objects.filter(status=status)
-    # payments=Payment.objects.filter(status=status)
+    payments = get_pagination_records(request,payments)
     return render(request,'staffs/pages/paymentlists.html',{'paymentlist':payments,'Status':status})
 
 
@@ -557,6 +566,8 @@ def create_employee(request):
 @staff_member_required(login_url='/')
 def list_employees(request):
     employees=Employee.objects.all()
+    employees = get_pagination_records(request,employees)
+
     return render(request,'staffs/pages/employee_list.html',{'employees':employees})
 
 @staff_member_required(login_url='/')
@@ -606,6 +617,7 @@ def create_employee_salary(request,id):
 @staff_member_required(login_url='/')
 def employee_salary_list(request,id):
     employee_salary = EmployeeSalary.objects.filter(employee_id=id)
+    employee_salary = get_pagination_records(request,employee_salary)
     return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary,'employee_id':id})
 @staff_member_required(login_url='/')
 def update_employee_salary(request,id):
@@ -655,6 +667,7 @@ def create_warehouse(request):
 @staff_member_required(login_url='/')
 def list_warehouses(request):
     warehouses=Warehouse.objects.all()
+    warehouses = get_pagination_records(request,warehouses)
     return render(request,'staffs/pages/warehouse_list.html',{'warehouses':warehouses})
 
 @staff_member_required(login_url='/')
@@ -712,13 +725,13 @@ def prepare_order(request):
 
                         stock_obj = stock.first()
                         stock_obj.left_qty = stock_obj.left_qty - int(qty)
-                        # stock_obj.save()
+                        stock_obj.save()
                         # create OrderPrepare for admin so that he/she can send products to user.
                         order_prepare = OrderPrepare(order_id_id=order_id,warehouse_id_id=warehouses[id_idx],stock_id_id=stock_obj.id,purchase_qty=qty,status='preparing')
-                        # order_prepare.save()
+                        order_prepare.save()
                     current_order = Orders.objects.get(id=order_id)
                     current_order.order_status = 'order_prepared'
-                    # current_order.save()
+                    current_order.save()
                     messages.success(request,"You have successfully Started Prepared Order")
                 else:
                     messages.warning(request, f"Please check if stock for the current data is available")
@@ -748,6 +761,8 @@ def update_prepare_order(request,orderid):
 
 def list_prepare_orders(request):
     orders = Orders.objects.all().order_by('-created_at')
+    orders = get_pagination_records(request,orders)
+
     return render(request,'staffs/pages/prepare_orders_list.html',{'orders':orders})
 
 def create_delivery(request,orderid):
@@ -770,11 +785,12 @@ def create_delivery(request,orderid):
 
 
 def list_of_ledgers(request,type=None):
-    print(">>>>>type\n\n\n\n\n\n",type)
     ledgers = Ledger.objects.all()
 
     if type is not None:
         ledgers=ledgers.filter(ledger_type=type)
+    ledgers = get_pagination_records(request,ledgers)
+
     return render(request,'staffs/pages/list_of_ledgers.html',{'ledgers':ledgers,'type':type})
 
 def create_other_ledgers(request):

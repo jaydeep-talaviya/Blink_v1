@@ -9,6 +9,10 @@ from django.contrib import messages
 # Create your views here.
 
 from asgiref.sync import async_to_sync
+
+from utils.helper_functions import get_pagination_records
+
+
 def test(request):
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -49,4 +53,6 @@ def single_delivery(request,delivery_id):
 
 def delivery_list(request,status='Confirm'):
     deliveries=Delivery.objects.filter(state=status)
+    deliveries = get_pagination_records(request,deliveries)
+
     return render(request,'notifications_app/delivery_lists.html',{'deliveries':deliveries,'Status':status})

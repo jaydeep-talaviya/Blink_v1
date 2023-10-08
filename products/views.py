@@ -31,7 +31,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib import messages
 from datetime import date
-from .tasks import remove_all_cart_products
 today = date.today()
 
 
@@ -414,11 +413,6 @@ def createorder(request):
                                       sub_total_amount=c.qty * c.price, order_id=orders,selected_product_varient=c.selected_product_varient)
             amount += c.qty * c.price
 
-            # stock=c.product_id.stocks_set.filter(stock_day__day=today.day,stock_day__month=today.month,stock_day__year=today.year,left_qty__gt=0)[0]
-            # stock.left_qty=stock.left_qty-c.qty
-            # stock.save()
-            # c.delete()
-
         voucher = cart.last().vouchers
         discount_amount = 0
         try:
@@ -585,7 +579,6 @@ def userorders(request,order_by=None):
 
 @login_required
 def orderviews(request,orderid):
-    # order = get_object_or_404(Orders,orderid=orderid)
     order=Orders.objects.get(orderid=orderid)
     orderlines=OrderLines.objects.filter(order_id=order.id)
     today=datetime.now()
@@ -605,9 +598,7 @@ def html_to_pdf_view(request,orderid):
     order=Orders.objects.get(orderid=orderid)
     orderlines=OrderLines.objects.filter(order_id=order.id)
     html_string = render_to_string('products/pdf_template.html', {'order':order,'orderlines':orderlines })
-    # temp = render(request,'products/pdf_template.html', {'order':order,'orderlines':orderlines })
 
-    # return temp
     html = HTML(string=html_string)
     html.write_pdf(target='/tmp/receipt.pdf')
 
