@@ -141,9 +141,9 @@ def productdetail(request,p_id):
         i['user_id']=get_user
         i['rate']=['orange' for i in range(int(i['rate']))]+['black' for i in range(5-int(i['rate']))]
 
-    on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
-    deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day',products__id=products.id)
-    product_together_voucher = Vouchers.objects.filter(voucher_type='product_together',products__id=products.id)
+    on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',is_deleted=False)
+    deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day',products__id=products.id,is_deleted=False)
+    product_together_voucher = Vouchers.objects.filter(voucher_type='product_together',products__id=products.id,is_deleted=False)
 
     return render(request, 'products/productdetail.html',{'products':products,
                                                             'product_attr_list':product_attr_dict,
@@ -199,11 +199,11 @@ def get_total_vouchers(request):
     if cart:
         products = list(cart.values_list('product_id', flat=True))
         user_cart_total_sum = sum([i['qty'] * i['price'] for i in request.user.cart_set.values('qty', 'price')])
-        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',on_above_purchase__lt=user_cart_total_sum)
-        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products)
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',on_above_purchase__lt=user_cart_total_sum,is_deleted=False)
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products,is_deleted=False)
         # promocode
         fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id,
-                             stop=False)  # Add your other fixed conditions here
+                             stop=False,is_deleted=False)  # Add your other fixed conditions here
         expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
         user_used_conditions = ~Q(user_who_have_used=request.user.id)
         combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
@@ -231,7 +231,7 @@ def productcart(request):
 
         if len(x)!=0:
             price = x[0].price
-            deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=product.id)
+            deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=product.id,is_deleted=False)
             if deals_of_day_voucher:
                 price = x[0].price - (price * deals_of_day_voucher.first().percent_off) / 100
             if len(Cart.objects.filter(Q(product_id=product) & Q(user_id=request.user) & Q(selected_product_varient=selected_varient)))==0:
@@ -246,10 +246,10 @@ def productcart(request):
             return redirect('productdetail',product.id)
         cart=Cart.objects.filter(user_id=request.user)
 
-        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
-        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=[product.id])
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',is_deleted=False)
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=[product.id],is_deleted=False)
         # promocode
-        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False)  # Add your other fixed conditions here
+        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,is_deleted=False)  # Add your other fixed conditions here
         expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
         user_used_conditions = ~Q(user_who_have_used = request.user.id)
         combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
@@ -262,10 +262,10 @@ def productcart(request):
     else:
         cart=Cart.objects.filter(user_id=request.user)
         products = list(cart.values_list('product_id',flat=True))
-        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase')
-        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products)
+        on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',is_deleted=False)
+        product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products,is_deleted=False)
         # promocode
-        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False)  # Add your other fixed conditions here
+        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,is_deleted=False)  # Add your other fixed conditions here
         expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
         user_used_conditions = ~Q(user_who_have_used = request.user.id)
         combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions

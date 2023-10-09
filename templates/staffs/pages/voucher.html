@@ -113,7 +113,35 @@
         var expirable = `<th class="text-start pl-3">{{ forms.expirable.label }}</th><td>{{ forms.expirable }}</td>`
         var expire_at = `<th class="text-start pl-3">{{ forms.expire_at.label }}</th><td>{{ forms.expire_at }}</td>`
 
-        $('#OnAbovePurchase,#OffPrice,#Products,#PercentOff,#WithProduct,#PromocodeName,#Users,#UserWhoHaveUsed,#Expirable,#ExpireAt').empty();
+            console.log(voucherType.length,">>>>voucherType")
+            if (voucherType.length == 0){
+
+                $('#OnAbovePurchase,#OffPrice,#Products,#PercentOff,#WithProduct,#PromocodeName,#Users,#UserWhoHaveUsed,#Expirable,#ExpireAt').empty();
+            console.log(">>>>>>First")
+            }
+            else{
+
+             var formFields = document.querySelectorAll('#OnAbovePurchase,#OffPrice,#Products,#PercentOff,#WithProduct,#PromocodeName,#Users,#UserWhoHaveUsed,#Expirable,#ExpireAt');
+
+            // Loop through each form field
+            formFields.forEach(function (field) {
+                // Check if the field has a value
+<!--                    console.log(">>>>>>fields11111111",$(field))-->
+
+
+                if ($(field).find('input').length > 0 && !($(field).find('input').val().trim())) {
+                    // Empty the field only if it doesn't have a value
+                    console.log(">>>>>>fields11111111",field.id)
+                   $('#'+field.id).empty();
+                }
+
+                if ($(field).find('select').length>0 && $(field).find('select')[0].selectedOptions.length <= 0){
+                        console.log(">>>>>>fields22222",field.id)
+                        $('#'+field.id).empty();
+                }
+            });
+            }
+
 
         // Show or hide fields based on selected voucher_type
         if (voucherType === 'on_above_purchase') {

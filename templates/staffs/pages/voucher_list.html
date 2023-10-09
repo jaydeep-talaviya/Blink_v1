@@ -43,9 +43,9 @@
                             <p class="text-dark">{% if voucher.with_product %} <span class="fw-bold">With Product : </span>{{voucher.with_product}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.promocode_name %} <span class="fw-bold">Promocode Name : </span>{{voucher.promocode_name}} {% endif %}</p>
                             <p class="text-dark">{% if voucher.users.count %} <span class="fw-bold">Promocode User : </span>{{voucher.users.all|voucher_multiple_records_value}} {% endif %}</p>
-                            <p class="text-dark">{% if voucher.user_who_have_used.count %} <span class="fw-bold">Voucher Used By : </span>{{voucher.user_who_have_used}} {% endif %}</p>
+                            <p class="text-dark">{% if voucher.user_who_have_used.count %} <span class="fw-bold">Voucher Used By : {{ voucher.user_who_have_used.all|voucher_multiple_records_value}} {% endif %}</span></p>
                             <p class="text-dark">{% if voucher.expirable %} <span class="fw-bold">Promocode/Voucher Expirable? : </span>{{voucher.expirable}} {% endif %}</p>
-                            <p class="text-dark">{% if voucher.expire_at %} <span class="fw-bold">Promocode-Expired at : </span>{{voucher.expire_at}} {% endif %}</p>
+                            <p class="text-dark">{% if voucher.expire_at %} <span class="fw-bold">Promocode-Expire at : </span>{{voucher.expire_at}} {% endif %}</p>
                         </td>
                         <td>
                             <div class="d-flex justify-content-around align-items-center">

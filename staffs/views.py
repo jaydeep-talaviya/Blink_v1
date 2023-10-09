@@ -396,7 +396,7 @@ def create_voucher(request):
 
 @staff_member_required(login_url='/')
 def list_vouchers(request):
-    vouchers=Vouchers.objects.all()
+    vouchers=Vouchers.objects.filter(is_deleted=False)
     vouchers = get_pagination_records(request,vouchers)
     return render(request,'staffs/pages/voucher_list.html',{'vouchers':vouchers})
 
@@ -411,21 +411,24 @@ def update_status_voucher(request,id,type):
 @staff_member_required(login_url='/')
 def update_voucher(request,id):
     voucher_instance=get_object_or_404(Vouchers,id=id)
-    forms = VouchersForm(request.POST, instance=voucher_instance)
     if request.method=="POST":
+        forms = VouchersForm(request.POST, instance=voucher_instance)
+
         if forms.is_valid():
             forms.save()
             messages.success(request, f"Your Voucher is Updated")
             return redirect('list_vouchers')
         else:
             messages.warning(request, f"Please Check Again,Invalid Data")
+    forms = VouchersForm(instance=voucher_instance)
     return render(request,'staffs/pages/voucher.html',{'forms':forms})
 
 @staff_member_required(login_url='/')
 def delete_voucher(request, id):
-    voucher_instance = Vouchers.objects.filter(id=id)
-    voucher_instance.delete()
-    messages.success(request, f"Your Vouhcer has been removed")
+    voucher_instance = Vouchers.objects.get(id=id)
+    voucher_instance.is_deleted =True
+    voucher_instance.save()
+    messages.success(request, f"Your Voucher has been removed")
     return redirect('list_vouchers')
 
 
@@ -830,6 +833,8 @@ def update_other_ledgers(request,id):
 
 def custom_log_view(request):
     logs = CRUDEvent.objects.all()  # Retrieve all audit log entries
+    logs = get_pagination_records(request,logs)
+
     return render(request, 'staffs/pages/custom_log_view.html', {'logs': logs,'CUD':[1,2,3]})
 
 def dashboard(request):
@@ -839,7 +844,7 @@ def dashboard(request):
     employees = Employee.objects.count()
     user_orders = Orders.objects.count()
     prepare_orders = OrderPrepare.objects.count()
-    vouchers = Vouchers.objects.count()
+    vouchers = Vouchers.objects.filter(is_deleted=False).count()
     other_expenses = Ledger.objects.filter(ledger_type__in=['product_making_expense','raw_material_expense','other_expense']).count()
     payments = Payment.objects.count()
     deliveries = Delivery.objects.count()

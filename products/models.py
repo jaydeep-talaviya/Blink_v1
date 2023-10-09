@@ -83,7 +83,7 @@ class Products(models.Model):
             imag3.save(self.photo_3.path)
 
     def get_product_deals_of_date(self):
-        deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=self.id)
+        deals_of_day_voucher = Vouchers.objects.filter(voucher_type='deals_of_day', products__id=self.id,is_deleted=False)
         return deals_of_day_voucher.first() or None
 
 class ProductChangePriceAttributes(models.Model):
@@ -173,6 +173,7 @@ class Vouchers(models.Model):
     expirable=models.BooleanField(null=True,blank=True) # promocode
     expire_at=models.DateTimeField(null=True,blank=True)# promocode
     stop = models.BooleanField(null=True,blank=True,default=False) #on_above_purchase + #product_together +# promocode + #deals_of_day
+    is_deleted = models.BooleanField(null=True,blank=True,default=False)
 
 class Orders(models.Model):
     

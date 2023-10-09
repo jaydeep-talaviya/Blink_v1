@@ -103,8 +103,14 @@ class VouchersForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['expire_at'].widget = forms.TextInput(attrs={'type': 'datetime-local'})
+
         for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-select formset-field'
+            self.fields[field].widget.attrs['class'] = 'form-control formset-field'
+            if self.instance.id:
+                self.fields['voucher_type'].widget.attrs['readonly'] = True
+                self.fields['voucher_type'].choices = list(filter(lambda x:x[0] == self.instance.voucher_type, self.fields['voucher_type'].choices))
+
 
 
 class StocksForm(forms.ModelForm):
