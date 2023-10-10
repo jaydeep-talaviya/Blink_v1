@@ -11,13 +11,20 @@ print("....aaaaaabbbbcc111111111............\n\n\n\n\n")
 
 @shared_task(bind = True)
 def broadcast_notification(self, data):
+    print(">>>>>>>>>step 11111111111111")
     try:
         notification = Notification.objects.filter(id = int(data))
+        print(">>>>>>>>>step 2222222222",notification)
+
         if len(notification)>0:
+            print(">>>>>>>>>step 333333333333", notification)
+
             notification = notification.first()
             channel_layer = get_channel_layer()
+            print(">>>>>>>>>step channel_layer", channel_layer,channel_layer.group_send)
+
             async_to_sync(channel_layer.group_send)(
-                "notification_"+notification.seller.username,
+                "notification_"+notification.buyer.username,
                 {
                     'type': 'send_notification',
                     'message': json.dumps(

@@ -4,8 +4,10 @@ from datetime import datetime
 
 def notifications(request):
     if request.user.is_authenticated:
-        allnotifications = Notification.objects.filter(seller=request.user,created_at__date=datetime.now().today())
-        # hour = instance.created_at.hour, minute = int(instance.created_at.minute+2 % 60), day_of_month = instance.created_at.day, month_of_year = instance.created_at.month
-        return {'notifications': allnotifications}
+        admin = User.objects.filter(is_superuser=True).first()
+        admin_notifications = Notification.objects.filter(seller=admin)
+        end_user_notifications = Notification.objects.filter(buyer=request.user)
+
+        return {'admin_notifications': admin_notifications,'end_user_notifications':end_user_notifications}
     else:
         return {'notifications':[]}

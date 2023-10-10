@@ -82,35 +82,58 @@
          {% if user.is_authenticated %}
           {% if user.is_staff  %}
 
-         <div class="px-4">
+            <div class="px-4">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown dropleft">
+                  <a href="#" class="nav-link notification dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button"
+                     data-bs-toggle="dropdown" aria-expanded="false">
+                    <span><i class='fa fa-bell text-white'></i></span>
+                    <span class="badge" id="notification-badge">0</span>
+                  </a>
+
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% for i in admin_notifications %}
+                      <li >
+                        <a class="dropdown-item " href="{% url 'single_delivery' delivery_id=i.delivery.delivery_id  %}">
+                        <div class="alert alert-success" role="alert">
+                           {{i.message}}
+                        </div>
+                        </a>
+                      </li>
+                      <hr class="dropdown-divider">
+                    {% endfor %}
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+           {% else %}
+        <div class="px-4">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown notification-section">
-              <a href="#" class="notification dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button"
-                  data-bs-toggle="dropdown" aria-expanded="true">
-                  <span><i class='fa fa-bell text-white'></i></span>
-                  <span class="badge" id="notification-badge">0</span>
+            <li class="nav-item dropdown dropleft">
+              <a href="#" class="nav-link dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span><i class='fa fa-bell text-white'></i></span>
+                <span class="badge" id="notification-badge">0</span>
               </a>
-              
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="notifications-dropdown"
-                  data-popper-placement="bottom-end"
-                  style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(-70px, 42px, 0px);">
-                  
-                  {% for i in notifications %}
-                  <!-- add condition based on color -->
-                  <li class="dropdown-item "> 
-                    
-                    
-                  <a class="text-decoration-none" href="{% url 'single_delivery' delivery_id=i.delivery.delivery_id  %}">{{i.message}}</a>
-                    
-                  </li>
-                  <hr class="dropdown-divider">
-                  {% endfor %}
-                  
+
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {% for i in end_user_notifications %}
+                <!-- add condition based on color -->
+                <li >
+                <a class="dropdown-item p-0" href="{% url 'orderviews' orderid=i.delivery.order.orderid  %}">
+                        <div class="alert alert-success" role="alert">
+                           {{i.message}}
+                        </div>
+                    </a>
+
+                </li>
+                <hr class="dropdown-divider">
+                {% endfor %}
               </ul>
             </li>
           </ul>
-       
-         </div>
+        </div>
+
          {% endif %}
 
          {% endif %}
@@ -166,7 +189,7 @@
       if (document.getElementById('profileDropdown') !== null){
 
         const roomName = document.getElementById('profileDropdown').innerHTML.replaceAll(" ","").replaceAll("\n","")
-
+        console.log(">>>>>>>>>roomName",roomName)
         const notificationSocket = new WebSocket(
             'ws://'
             + window.location.host

@@ -56,7 +56,8 @@
 
             <h2 class="text-center"><span class="text-muted"> {{order.order_status|paymentstype|title}} </span></h2>
             <hr />
-            <table class="table table-responsive">
+            <div class="table-responsive">
+                <table class="table">
               <thead>
                     <tr>
                       <th scope="col">Product Name</th>
@@ -83,11 +84,11 @@
                   {% endfor %}
               </tbody>
             </table>
-
+            </div>
             <div class="d-flex justify-content-between">
-                <h5>Total Pay: {{order.amount|floatformat:"2"}} Rs.</h5>
+                <h6>Total Pay: {{order.amount|floatformat:"2"}} Rs.</h6>
                  {% if order.vouchers %}
-                    <h5>Total Discount: {{order.total_discount}} Rs.</h5>
+                    <h6>Total Discount: {{order.total_discount}} Rs.</h6>
                 {% endif %}
             </div>
 
@@ -137,11 +138,11 @@
         <div class="row px-3">
             <div class="col">
                 <ul id="progressbar">
-                    <li class="step0 {% if order.delivery_set.last.state == 'Confirm' or order.delivery_set.last.state  == 'Delivering' or order.delivery_set.last.state == 'Shipped' %} active {% endif %}"
+                    <li class="step0 {% if order.delivery_set.first.state == 'Confirm' or order.delivery_set.first.state  == 'Delivering' or order.delivery_set.first.state == 'Shipped' %} active {% endif %}"
                         id="step1">Confirmed</li>
-                    <li class="step0 {% if order.delivery_set.last.state  == 'Delivering' or order.delivery_set.last.state == 'Shipped' %} active {% endif %} text-center"
+                    <li class="step0 {% if order.delivery_set.first.state  == 'Delivering' or order.delivery_set.first.state == 'Shipped' %} active {% endif %} text-center"
                         id="step2">Deliverying</li>
-                    <li class="step0 text-muted text-right {% if order.delivery_set.last.state == 'Shipped'%} active {% endif %}" id="
+                    <li class="step0 text-muted text-right {% if order.delivery_set.first.state == 'Shipped'%} active {% endif %}" id="
                         step3">Shipped</li>
                 </ul>
             </div>

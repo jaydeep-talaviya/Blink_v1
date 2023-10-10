@@ -4,8 +4,10 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class NotificationChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
+
         self.room_group_name = 'notification_%s' % self.room_name
-        print(">>>>>>>>",self.scope['user'],self.channel_name)
+        print(">>>>>>>>step 444444455555",self.scope['url_route']['kwargs'])
+
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -38,6 +40,7 @@ class NotificationChatConsumer(AsyncWebsocketConsumer):
     # Receive message from room group
     async def send_notification(self, event):
         message = json.loads(event['message'])
+        print(">>>>>>>>>>>>>> step 44444444444444")
         # delivery_id=json.loads(event['delivery_id'])
         # Send message to WebSocket
         # new_message={'message':message,'delivery':delivery_id}
