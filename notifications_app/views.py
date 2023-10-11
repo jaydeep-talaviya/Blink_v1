@@ -1,8 +1,11 @@
 import datetime
 
-from django.shortcuts import render, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, HttpResponse, redirect
 from channels.layers import get_channel_layer
 import json
+
+from notifications_app.models import Notification
 from products.models import Delivery
 from django.contrib import messages
 
@@ -27,6 +30,15 @@ def test(request):
         }
     )
     return HttpResponse("Done")
+
+
+@login_required
+def change_notifications_status(request,notification_id):
+    notification = Notification.objects.get(id = notification_id)
+    notification.is_checked = True
+    notification.save()
+    orderid = notification.delivery.order.orderid
+    return redirect('orderviews',orderid=orderid)
 
 
 def single_delivery(request,delivery_id):

@@ -70,3 +70,10 @@ ul.pagination li a{
     max-height:70vh;
 
 }
+
+.dropdown-menu.show{
+    max-height: 80vh;
+    overflow-y: scroll;
+    border-radius: 3%;
+
+}
