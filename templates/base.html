@@ -88,14 +88,14 @@
                   <a href="#" class="nav-link notification dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button"
                      data-bs-toggle="dropdown" aria-expanded="false">
                     <span><i class='fa fa-bell text-white'></i></span>
-                    <span class="badge" id="notification-badge">0</span>
+                    <span class="badge" id="notification-badge">{{read_admin_notifications_count}}</span>
                   </a>
 
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     {% for i in admin_notifications %}
                       <li >
-                        <a class="dropdown-item " href="{% url 'single_delivery' delivery_id=i.delivery.delivery_id  %}">
-                        <div class="alert alert-success" role="alert">
+                        <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">
+                           <div class="alert {% if i.is_checked %} alert-success {% else %} alert-danger {% endif %}" role="alert">
                            {{i.message}}
                         </div>
                         </a>
@@ -214,7 +214,7 @@
               + 
               "</li><hr class='dropdown-divider'>"
                + document.getElementById("notifications-dropdown").innerHTML;
-<!--            document.getElementById("notification-badge").innerHTML = {{read_end_user_notifications_count}};-->
+            document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
 
           };
 

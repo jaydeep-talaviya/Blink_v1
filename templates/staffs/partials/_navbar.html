@@ -6,12 +6,36 @@
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
             <!-- Navbar Search-->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+            {% if user.is_staff  %}
+                <div class="px-4">
+                  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown dropleft">
+                      <a href="#" class="nav-link notification dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button"
+                         data-bs-toggle="dropdown" aria-expanded="false">
+                        <span><i class='fa fa-bell text-white'></i></span>
+                        <span class="badge" id="notification-badge">{{read_admin_notifications_count}}</span>
+                      </a>
+
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% for i in admin_notifications %}
+                          <li >
+                            <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">
+                               <div class="alert {% if i.is_checked %} alert-success {% else %} alert-danger {% endif %}" role="alert">
+                               {{i.message}}
+                            </div>
+                            </a>
+                          </li>
+                          <hr class="dropdown-divider">
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  </ul>
                 </div>
+           {% endif %}
+            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+
             </form>
+
             <!-- Navbar-->
             <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
                 <li class="nav-item dropdown">

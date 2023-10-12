@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
+from notifications_app.models import Notification
 from staffs.models import LedgerLine, Ledger
 from users.models import User
 from utils.helper_functions import get_voucher_discount
@@ -88,22 +89,19 @@ def change_order_status(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Orders)
 def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
+    admin = User.objects.filter(is_superuser=True).first()
+
     if instance.order_status == 'order_confirm':
         if instance.vouchers:
             voucher = instance.vouchers
-            voucher.user_who_have_used.add(instance.user)
+            if voucher.voucher_type == 'promocode':
+                voucher.user_who_have_used.add(instance.user)
+        # notification to admin for create prepare order
+        Notification.objects.create(buyer=instance.user,seller=admin, user_order=instance,
+                                    message='Prepare Order for Order Id: ' + str(instance.orderid),
+                                    for_admin=True)
 
     if instance.order_status == 'order_cancel':
-        orderlines=instance.order.all()
-
-        for orderline in orderlines:
-            last_stock = orderline.product_id.stocks_set.last()
-            last_stock = orderline.product_id.stocks_set.filter(warehouse_id_id=warehouse.get('id'),
-                                                   product_attributes=product_attribute,
-                                                   finished=False)
-            orderline.product
-            last_stock.left_qty+=orderline.qty
-            last_stock.save()
         if instance.payment_set.all():
             instance.delivery_set.all().delete()
             payment=instance.payment_set.last()
@@ -111,7 +109,11 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             payment.save()
         if instance.vouchers:
             voucher = instance.vouchers
-            voucher.user_who_have_used.remove(instance.user)
+            if voucher.voucher_type == 'promocode':
+                voucher.user_who_have_used.remove(instance.user)
+        Notification.objects.create(buyer=instance.user, seller=admin, user_order=instance,
+                                    message='Order cancelled for Order Id: ' + str(instance.orderid),
+                                    for_admin=True)
 
 @receiver(post_save, sender=Payment)
 def on_payment_cancel(sender, instance, created, **kwargs):

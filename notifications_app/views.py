@@ -37,8 +37,11 @@ def change_notifications_status(request,notification_id):
     notification = Notification.objects.get(id = notification_id)
     notification.is_checked = True
     notification.save()
-    orderid = notification.delivery.order.orderid
-    return redirect('orderviews',orderid=orderid)
+    if notification.for_customer:
+        orderid = notification.delivery.order.orderid
+        return redirect('orderviews',orderid=orderid)
+    else:
+        return redirect('prepare_order')
 
 
 def single_delivery(request,delivery_id):
@@ -56,7 +59,6 @@ def single_delivery(request,delivery_id):
             delivery.save()
         elif delivery_status == 'Shipped' and delivery.state not in ['Shipped'] and delivery.state == 'Delivering':
             delivery.state = delivery_status
-            # delivery.updated_at = datetime.datetime.now()
             delivery.delivered_at = datetime.datetime.now()
             delivery.save()
         else:

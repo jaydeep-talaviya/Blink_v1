@@ -2,6 +2,8 @@ from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 
+from ecommerce_blink.settings import MERCHANT_KEY
+from notifications_app.models import Notification
 from utils.helper_functions import get_voucher_discount
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
     Vouchers
@@ -362,17 +364,18 @@ def contact(request):
         user_msg=request.POST.get('message')
         
         try:
-            SUBJECT=f"User {name}'s Query"
-            TEXT=user_msg
-            message = 'Subject: {}\n\n{}'.format(SUBJECT, TEXT)
+            subject = f"User {name}'s Query"
+            message = 'Subject: {}\n\n{}'.format(subject, user_msg)
 
-            s = smtplib.SMTP("smtp.gmail.com" , 587)  # 587 is a port number
-            s.starttls()
-            s.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-            s.sendmail("<"+email+">" , settings.EMAIL_HOST_USER, message)
-            # print("Message SuccessFully sent to admin")
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [email,]
+            send_mail(subject, message, email_from, recipient_list)
+            admin = User.objects.filter(is_superuser=True).first()
+
+            Notification.objects.create(seller=admin,
+                                        message=' Please Check your mail, Someone with named ' + str(name) +' have reached out you',
+                                        for_admin=True)
             messages.success(request, "Message SuccessFully sent to admin,Thank You!")
-            s.quit()
         except:
             messages.error(request, "Something Went Wrong! Please Try again, Thank You")
         return render(request,"products/contact.html")

@@ -22,9 +22,11 @@ def broadcast_notification(self, data):
             notification = notification.first()
             channel_layer = get_channel_layer()
             print(">>>>>>>>>step channel_layer", channel_layer,channel_layer.group_send)
+            # condition to check send notification to user or admin
+            username = notification.seller.username if notification.for_admin else notification.buyer.username
 
             async_to_sync(channel_layer.group_send)(
-                "notification_"+notification.buyer.username,
+                "notification_"+username,
                 {
                     'type': 'send_notification',
                     'message': json.dumps(
