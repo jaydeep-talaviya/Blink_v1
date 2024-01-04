@@ -8,7 +8,7 @@ from .views import (productlist,productdetail, return_policy,
                     cancelorder,
                     return_policy,terms_and_conditions,about,contact,createorder,
                     handlerequest,update_order,
-                    send_otp,match_otp,order_failed,order_created,get_discounted_price,
+                    send_otp,match_otp,otp_order_failed,verified_created_order,get_discounted_price,
                     get_total_vouchers)
 
 urlpatterns = [
@@ -35,8 +35,8 @@ urlpatterns = [
     
     path('send_otp',send_otp,name='send_otp'),
     path('match_otp',match_otp,name='match_otp'),
-    path('order-failed',order_failed,name='order_failed'),
-    path('order-created',order_created,name='order_created'),
+    path('order-failed',otp_order_failed,name='otp_order_failed'),
+    path('order-created',verified_created_order,name='verified_created_order'),
     
     path('return_policy',return_policy,name="return_policy"),
     path('terms_and_conditions',terms_and_conditions,name="terms_and_conditions"),

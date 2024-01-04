@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 from ecommerce_blink.settings import MERCHANT_KEY
 from notifications_app.models import Notification
-from utils.helper_functions import get_voucher_discount
+from utils.helper_functions import get_voucher_discount, get_paginator
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
     Vouchers
 from django.db.models import Avg,Count,Max,Min
@@ -46,12 +46,8 @@ def search(request):
     maxvalue=all_products.aggregate(Max('price'))
     page = request.GET.get('page',1)   
     paginator = Paginator(all_products, 10)
-    try:
-        all_products = paginator.page(page)
-    except PageNotAnInteger:
-        all_products = paginator.page(1)
-    except EmptyPage:
-        all_products = paginator.page(paginator.num_pages)
+    all_products = get_paginator(paginator,page)
+
     messages.info(request, f"Your Search For: {product_search}")
 
     return render(request, 'products/productlist.html',{'products':all_products,'result_for':subcategory,'minvalue':minvalue,'maxvalue':maxvalue})
@@ -59,7 +55,6 @@ def search(request):
 
 def productlist(request,subcategory=None):
     page = request.GET.get('page',1)
-
     if subcategory == None:
         all_products=Products.objects.all().order_by('price')
         subcategory='All'
@@ -69,14 +64,7 @@ def productlist(request,subcategory=None):
     maxvalue=all_products.aggregate(Max('price'))
 
     paginator = Paginator(all_products, 10)
-    try:
-        all_products = paginator.page(page)
-    except PageNotAnInteger:
-        all_products = paginator.page(1)
-    except EmptyPage:
-        all_products = paginator.page(paginator.num_pages)
-
-    # messages.info(request,")
+    all_products = get_paginator(paginator,page)
     return render(request, 'products/productlist.html',{'products':all_products,'result_for':subcategory,'minvalue':minvalue,'maxvalue':maxvalue})
 
 def productlist_sortby(request):
@@ -101,19 +89,13 @@ def productlist_sortby(request):
                 all_products=all_products.annotate(rating_count=Count('rates__rate')).order_by('-rating_count')
             else:
                 all_products=all_products.order_by(sort_by)
-
         else:
             minvalue=request.GET.get('minvalue',False)
             maxvalue=request.GET.get('maxvalue',False)
             all_products=all_products.filter(price__range=(minvalue, maxvalue))
         paginator = Paginator(all_products,10 )
-        try:
-            all_products = paginator.page(page)
-        except PageNotAnInteger:
-            all_products = paginator.page(1)
-        except EmptyPage:
-            all_products = paginator.page(paginator.num_pages)
-                # print('all_products',all_products)
+        all_products = get_paginator(paginator, page)
+
     return render(request, 'products/productlist_temp.html',{'products':all_products})
 
 def productdetail(request,p_id):
@@ -124,14 +106,14 @@ def productdetail(request,p_id):
     prdct_varient={}
     for i in product_attr_list:
         if i['attribute_values__a_name__a_name'] not in prdct_varient:
-            prdct_varient[i['attribute_values__a_name__a_name']]=[i['attribute_values__a_value']]
+            prdct_varient[i['attribute_values__a_name__a_name']] = [i['attribute_values__a_value']]
         else:
-            prdct_varient[i['attribute_values__a_name__a_name']]+=[i['attribute_values__a_value']]
+            if i['attribute_values__a_value'] not in prdct_varient[i['attribute_values__a_name__a_name']]:
+                prdct_varient[i['attribute_values__a_name__a_name']]+=[i['attribute_values__a_value']]
         if i['attribute_values__a_name__a_name'] not in product_attr_dict:
             product_attr_dict[i['attribute_values__a_name__a_name']]=i['attribute_values__a_value']
         else:
             product_attr_dict[i['attribute_values__a_name__a_name']]+=','+i['attribute_values__a_value']
-
     #avg_rate
     product_avg_rate=products.rates_set.aggregate(Avg('rate'))['rate__avg'] if products.rates_set.values().count() != 0 else 0
     rate_list=['orange' for i in range(int(product_avg_rate))]+['black' for i in range(5-int(product_avg_rate))]
@@ -192,7 +174,6 @@ def get_discounted_price(request):
     if float(discount_amount) > 0:
         applied=True
         request.user.cart_set.update(vouchers= voucher)
-
     return JsonResponse({"discount_price": round(discount_amount,2),'applied':applied,"user_cart_total_sum":round(user_cart_total_sum,2)})
 
 def get_total_vouchers(request):
@@ -210,15 +191,19 @@ def get_total_vouchers(request):
         user_used_conditions = ~Q(user_who_have_used=request.user.id)
         combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
         promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
-
         total_vouchers = on_above_purchase_vouchers.union(product_together_voucher, promocodes_vouchers)
-    print("\n\n\n\n\ vouchers",total_vouchers)
     return render(request, 'products/voucher_temp.html', {'vouchers': total_vouchers})
 
 
 @login_required
 def productcart(request):
-    # category=Category.objects.all()
+    # promocode
+    fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,
+                         is_deleted=False)  # Add your other fixed conditions here
+    expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
+    user_used_conditions = ~Q(user_who_have_used=request.user.id)
+    combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+    promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
     if request.method=="POST":
         requestdata=dict(request.POST)
         product=Products.objects.get(id=int(requestdata.get('p_id')[0]))
@@ -250,13 +235,6 @@ def productcart(request):
 
         on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',is_deleted=False)
         product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=[product.id],is_deleted=False)
-        # promocode
-        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,is_deleted=False)  # Add your other fixed conditions here
-        expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
-        user_used_conditions = ~Q(user_who_have_used = request.user.id)
-        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
-        promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
-
         total_vouchers = on_above_purchase_vouchers.union(product_together_voucher,promocodes_vouchers)
 
         return render(request,"products/cart.html",{'cart':cart,'vouchers':total_vouchers})
@@ -266,53 +244,33 @@ def productcart(request):
         products = list(cart.values_list('product_id',flat=True))
         on_above_purchase_vouchers = Vouchers.objects.filter(voucher_type='on_above_purchase',is_deleted=False)
         product_together_voucher = Vouchers.objects.filter(voucher_type='product_together', products__id__in=products,is_deleted=False)
-        # promocode
-        fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,is_deleted=False)  # Add your other fixed conditions here
-        expirable_conditions = Q(expirable=True,expire_at__lt=datetime.now())
-        user_used_conditions = ~Q(user_who_have_used = request.user.id)
-        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
-        promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
-
         total_vouchers = on_above_purchase_vouchers.union(product_together_voucher,promocodes_vouchers)
-
         return render(request,"products/cart.html",{'cart':cart,'vouchers':total_vouchers})
 
 @login_required
 def match_otp(request):
     otpmodel=OtpModel.objects.filter(user=request.user)
-    if otpmodel.count() == 0:
-        otpmodel=OtpModel.objects.create(user=request.user,otp_number=otp)
-    else:
-        otpmodel=otpmodel[0]
+
     if request.method == "POST":
         usr_otp=request.POST.get('otp_value')
         if usr_otp != False and usr_otp !='' and usr_otp==otpmodel.otp_number:
-            otpmodel.verified=True
-            otpmodel.times=1
-            otpmodel.save()
+            otpmodel.update({'verified':True,'times':1})
             messages.success(request, f"Your Order is created! Please Check Your Orders")
-            return redirect(order_created)
+            return redirect(verified_created_order)
         else:
-            # messages.warning(request, f"Please Try Again,Otp doesn't Matched")
-            # print("both are different! try again!!!!!!!")
             return JsonResponse({"warning":"Otp doesn't Matched,Please Try Again,"})
     else:
         return JsonResponse({"response":'okay'})
     # return render(request,"products/otp_validation.html")
 
 @login_required
-def order_failed(request):
+def otp_order_failed(request):
     otpmodel=OtpModel.objects.filter(user=request.user)
-    if otpmodel.count() == 0:
-        otpmodel=OtpModel.objects.create(user=request.user,otp_number=otp)
-    else:
-        otpmodel=otpmodel[0]
-    otpmodel.times=0
-    otpmodel.save()
-    return render(request,'products/order_failed.html')
+    otpmodel.update({'times':0})
+    return render(request,'products/otp_order_failed.html')
 
 @login_required
-def order_created(request):
+def verified_created_order(request):
     order=Orders.objects.filter(user=request.user).last()
     total_discount=[]
     orderlines=OrderLines.objects.filter(order_id__orderid=order.orderid)
@@ -572,12 +530,7 @@ def userorders(request,order_by=None):
     else:
         allorders=Orders.objects.filter(user=request.user).filter(order_status=order_by)
     paginator = Paginator(allorders, 5)
-    try:
-        allorders = paginator.page(page)
-    except PageNotAnInteger:
-        allorders = paginator.page(1)
-    except EmptyPage:
-        allorders = paginator.page(paginator.num_pages)
+    allorders = get_paginator(paginator, page)
     return render(request,'products/allorders.html',{'allorder':allorders,'order_not_confirms':order_not_confirms,'order_confirms':order_confirms,'order_cancels':order_cancels,'order_deliverings':order_deliverings,'order_shippeds':order_shippeds})
 
 @login_required

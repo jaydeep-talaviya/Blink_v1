@@ -23,13 +23,13 @@ from django.conf.urls import handler404, handler500
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('',include('users.urls')),
     path('accounts/', include('allauth.urls')),
     
     path('',include('products.urls')),
-    path('staff/',include('staffs.urls')),
-    path('staff/',include('notifications_app.urls')),
+    path('admin/',include('staffs.urls')),
+    path('admin/',include('notifications_app.urls')),
 
     # path('social-auth/', include('social_django.urls', namespace="social")),
 

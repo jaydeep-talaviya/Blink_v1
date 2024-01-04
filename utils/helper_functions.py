@@ -3,6 +3,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.template.loader import get_template
 from django.conf import settings
 from datetime import datetime, timedelta
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def send_email_with_template(username, email):
@@ -111,7 +112,7 @@ def get_orders_count_by_date(models,start_date, end_date):
 
 def get_pagination_records(request,records):
     # Number of categories to display per page
-    per_page = 2  # Adjust as needed
+    per_page = 10  # Adjust as needed
     # Paginate the categories
     paginator = Paginator(records, per_page)
     page = request.GET.get('page')
@@ -123,5 +124,15 @@ def get_pagination_records(request,records):
         records = paginator.page(1)
     except EmptyPage:
         # If the page is out of range (e.g., 9999), deliver the last page
+        records = paginator.page(paginator.num_pages)
+    return records
+
+
+def get_paginator(paginator,page):
+    try:
+        records = paginator.page(page)
+    except PageNotAnInteger:
+        records = paginator.page(1)
+    except EmptyPage:
         records = paginator.page(paginator.num_pages)
     return records
