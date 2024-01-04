@@ -237,7 +237,7 @@ class Delivery(models.Model):
 class OtpModel(models.Model):
     otp_number=models.CharField(max_length=6)
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    varified=models.BooleanField(default=False)
+    verified=models.BooleanField(default=False)
     times=models.IntegerField(default=1)
     
 class Payment(models.Model):

@@ -64,7 +64,6 @@ def create_category(request):
                         category.save()
                 messages.success(request, f"Your Category is Created")
             except Exception as e:
-                print(">>>>e",e)
                 messages.warning(request, f"Please Check Again,Invalid Data")
             return redirect('list_category')
         else:
@@ -96,15 +95,12 @@ def update_category(request,id):
         return render(request,'staffs/pages/category.html',{"forms":forms})
     return render(request,'staffs/pages/category.html',{'forms':forms})
 
-
 @staff_member_required(login_url='/')
 def remove_category(request,id):
     category_instance=Category.objects.filter(id=id)
     category_instance.delete()
     messages.success(request, f"Your Category has been removed")
     return redirect('list_category')
-
-
 
 ########### Product Sub Category #########
 

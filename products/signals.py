@@ -25,7 +25,7 @@ today = date.today()
 
 @receiver(post_save, sender=OtpModel) 
 def create_otp(sender, instance, created, **kwargs):
-    if instance.varified == True:
+    if instance.verified == True:
         cart=Cart.objects.filter(user_id=instance.user)
         checkout=instance.user.checkout_set.get()
         if len(cart)!=0 and checkout.payment_type == 'case_on_delivery':

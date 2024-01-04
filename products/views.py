@@ -287,7 +287,7 @@ def match_otp(request):
     if request.method == "POST":
         usr_otp=request.POST.get('otp_value')
         if usr_otp != False and usr_otp !='' and usr_otp==otpmodel.otp_number:
-            otpmodel.varified=True
+            otpmodel.verified=True
             otpmodel.times=1
             otpmodel.save()
             messages.success(request, f"Your Order is created! Please Check Your Orders")
@@ -331,7 +331,7 @@ def send_otp(request):
         otpmodel=otpmodel[0]
         otpmodel.otp_number=otp
         
-    otpmodel.varified=False
+    otpmodel.verified=False
     otpmodel.save()
     try:
         subject = f"Use OTP {otp} Dear {request.user.username}"

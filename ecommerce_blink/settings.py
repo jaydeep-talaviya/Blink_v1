@@ -214,13 +214,18 @@ ACCOUNT_USERNAME_REQURIED=True
 
 SITE_ID=2
 
-AUTHENTICATION_BACKENDS = (
-    # 'social_core.backends.linkedin.LinkedinOAuth2',
-    # 'social_core.backends.instagram.InstagramOAuth2',
-    # 'social_core.backends.facebook.FacebookOAuth2',
-    'allauth.account.auth_backends.AuthenticationBackend',
-#     'users.EmailBackendAuthenticate.DualAuthentication',
-)
+# AUTHENTICATION_BACKENDS = (
+#     # 'social_core.backends.linkedin.LinkedinOAuth2',
+#     # 'social_core.backends.instagram.InstagramOAuth2',
+#     # 'social_core.backends.facebook.FacebookOAuth2',
+#     'allauth.account.auth_backends.AuthenticationBackend',
+# #     'users.EmailBackendAuthenticate.DualAuthentication',
+# )
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    # Other backends as needed
+]
 
 SOCIAL_AUTH_PIPELINE = (
   'social_core.pipeline.social_auth.social_details',
