@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import (home, product_list, product_update, product_delete,
+from .views import (product_list, product_update, product_delete,
                     product_add, create_product_attribute, product_update_attribute,
                     create_attribute, update_attribute, remove_attribute,
-                    create_attribute_name, product_attribute_list,
+                    create_attr_name, product_attribute_list,
                     stock_list, stock_update, stock_create,stock_finish,
                     orderlists, single_order, paymentlists,
                     create_attribute_names, update_attribute_names, remove_attribute_names, list_attribute_name,
@@ -21,7 +21,6 @@ from .views import (home, product_list, product_update, product_delete,
                     )
 
 urlpatterns = [
-    # path('',home,name='staff_homepage'),
 
     path('', dashboard, name='dashboard'),
     path('user/admin/logs/', custom_log_view, name='custom_log_view'),
@@ -42,7 +41,7 @@ urlpatterns = [
     path('attribute/attribute/delete/<int:id>/',remove_attribute,name='remove_attribute'),
 
     path('attribute/name/', list_attribute_name, name='list_attribute_name'),
-    path('attribute/name/create/',create_attribute_name,name='create_attribute_name'),
+    path('attribute/name/create/',create_attr_name,name='create_attr_name'),
     path('attribute/name/update/<int:id>',update_attribute_names,name='update_attribute_names'),
     path('attribute/name/remove/<int:id>',remove_attribute_names,name='remove_attribute_names'),
 

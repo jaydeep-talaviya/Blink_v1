@@ -27,9 +27,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
     get_pagination_records
 from itertools import chain
-from django.contrib.admin.models import LogEntry
-
 from .models import OrderPrepare, Ledger
+from .wrapper import custom_staff_member_required
+
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -37,19 +37,60 @@ geolocator = Nominatim(user_agent="Blink")
 today = date.today()
 
 # Create your views here.
-@staff_member_required(login_url='/')
-def home(request):
-    return render(request,'staffs/pages/homepage.html')
 
-@staff_member_required(login_url='/')
-def create_attribute_name(request):
-    if request.is_ajax and request.method == "POST":
-        attribute_name=AttributeName(a_name=request.POST.get('a_name',False))
-        attribute_name.save()
-        return JsonResponse({'attribute_name_id':attribute_name.id,'attribute_name_a_name':attribute_name.a_name})
-    else:
-        return JsonResponse({"error": "please enter valid"}, status=400)
+@custom_staff_member_required
+def dashboard(request):
+    stocks = Stocks.objects.count()
+    warehouses = Warehouse.objects.count()
+    employees = Employee.objects.count()
+    user_orders = Orders.objects.count()
+    prepare_orders = OrderPrepare.objects.count()
+    vouchers = Vouchers.objects.filter(is_deleted=False).count()
+    other_expenses = Ledger.objects.filter(ledger_type__in=['product_making_expense','raw_material_expense','other_expense']).count()
+    payments = Payment.objects.count()
+    deliveries = Delivery.objects.count()
+    product_attribute_names = AttributeName.objects.count()
+    product_attributes = AttributeValue.objects.count()
+    product_categories = Category.objects.count()
+    product_sub_categories = Subcategory.objects.count()
+    products = Products.objects.count()
 
+    # order chart
+    now = datetime.datetime.now()
+    start_date = datetime.datetime(now.year, now.month, 1)  # Replace with your desired start date
+    end_date = datetime.datetime.now()  # Replace with your desired end date
+
+    data_dict = dict(request.POST)
+    if data_dict.get('start_date',None) and data_dict.get('end_date',None):
+        start_date = datetime.datetime.strptime(data_dict.get('start_date')[0], '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(data_dict.get('end_date')[0], '%Y-%m-%d')
+
+    order_chart,orderprepare_chart,expenses_credit_count_by_date,expenses_debit_count_by_date,payment_by_date,delivery_confirm_by_date,delivery_delivering_by_date,delivery_shipped_by_date= get_orders_count_by_date([Orders,OrderPrepare,Ledger,Payment,Delivery],start_date,end_date)
+
+    return render(request, 'staffs/pages/dashboard.html',{
+        'stocks':stocks,
+        'warehouses':warehouses,
+        'employees':employees,
+        'user_orders':user_orders,
+        'prepare_orders':prepare_orders,
+        'vouchers':vouchers,
+        'other_expenses':other_expenses,
+        'payments':payments,
+        'deliveries':deliveries,
+        'product_attribute_names':product_attribute_names,
+        'product_attributes':product_attributes,
+        'product_categories':product_categories,
+        'product_sub_categories':product_sub_categories,
+        'products':products,
+        'order_chart':order_chart,
+        'orderprepare_chart':orderprepare_chart,
+        'expenses_credit_count_by_date':expenses_credit_count_by_date,
+        'expenses_debit_count_by_date':expenses_debit_count_by_date,
+        'payment_by_date':payment_by_date,
+        'delivery_confirm_by_date':delivery_confirm_by_date,
+        'delivery_delivering_by_date':delivery_delivering_by_date,
+        'delivery_shipped_by_date':delivery_shipped_by_date,
+    })
 
 ########### Product Category #########
 
@@ -157,6 +198,15 @@ def remove_sub_category(request,id):
 
 
 ##################### Attrbiute Names ######3
+@staff_member_required(login_url='/')
+def create_attr_name(request):
+    if request.is_ajax and request.method == "POST":
+        attribute_name=AttributeName(a_name=request.POST.get('a_name',False))
+        attribute_name.save()
+        return JsonResponse({'attribute_name_id':attribute_name.id,'attribute_name_a_name':attribute_name.a_name})
+    else:
+        return JsonResponse({"error": "please enter valid"}, status=400)
+
 @staff_member_required(login_url='/')
 def create_attribute_names(request):
     AttributeNameFormset = modelformset_factory(AttributeName, form=AttributeNameForm,formset=AttributeNameFormSet)
@@ -833,59 +883,6 @@ def custom_log_view(request):
 
     return render(request, 'staffs/pages/custom_log_view.html', {'logs': logs,'CUD':[1,2,3]})
 
-def dashboard(request):
-    print(">>>>>>>>>",request.POST)
-    stocks = Stocks.objects.count()
-    warehouses = Warehouse.objects.count()
-    employees = Employee.objects.count()
-    user_orders = Orders.objects.count()
-    prepare_orders = OrderPrepare.objects.count()
-    vouchers = Vouchers.objects.filter(is_deleted=False).count()
-    other_expenses = Ledger.objects.filter(ledger_type__in=['product_making_expense','raw_material_expense','other_expense']).count()
-    payments = Payment.objects.count()
-    deliveries = Delivery.objects.count()
-    product_attribute_names = AttributeName.objects.count()
-    product_attributes = AttributeValue.objects.count()
-    product_categories = Category.objects.count()
-    product_sub_categories = Subcategory.objects.count()
-    products = Products.objects.count()
-
-    # order chart
-    now = datetime.datetime.now()
-    start_date = datetime.datetime(now.year, now.month, 1)  # Replace with your desired start date
-    end_date = datetime.datetime.now()  # Replace with your desired end date
-
-    data_dict = dict(request.POST)
-    if data_dict.get('start_date',None) and data_dict.get('end_date',None):
-        start_date = datetime.datetime.strptime(data_dict.get('start_date')[0], '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(data_dict.get('end_date')[0], '%Y-%m-%d')
-
-    order_chart,orderprepare_chart,expenses_credit_count_by_date,expenses_debit_count_by_date,payment_by_date,delivery_confirm_by_date,delivery_delivering_by_date,delivery_shipped_by_date= get_orders_count_by_date([Orders,OrderPrepare,Ledger,Payment,Delivery],start_date,end_date)
-
-    return render(request, 'staffs/pages/dashboard.html',{
-        'stocks':stocks,
-        'warehouses':warehouses,
-        'employees':employees,
-        'user_orders':user_orders,
-        'prepare_orders':prepare_orders,
-        'vouchers':vouchers,
-        'other_expenses':other_expenses,
-        'payments':payments,
-        'deliveries':deliveries,
-        'product_attribute_names':product_attribute_names,
-        'product_attributes':product_attributes,
-        'product_categories':product_categories,
-        'product_sub_categories':product_sub_categories,
-        'products':products,
-        'order_chart':order_chart,
-        'orderprepare_chart':orderprepare_chart,
-        'expenses_credit_count_by_date':expenses_credit_count_by_date,
-        'expenses_debit_count_by_date':expenses_debit_count_by_date,
-        'payment_by_date':payment_by_date,
-        'delivery_confirm_by_date':delivery_confirm_by_date,
-        'delivery_delivering_by_date':delivery_delivering_by_date,
-        'delivery_shipped_by_date':delivery_shipped_by_date,
-    })
 
 def get_employees_download(request,type=None):
     queryset = Employee.objects.all()
