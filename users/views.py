@@ -42,7 +42,8 @@ def loginpage(request):
                 messages.success(request, 'You are now logged in')
                 if next_url:
                     return redirect(next_url)
-                return redirect('home')
+                user_type = 'dashboard' if user.is_superuser or (hasattr(request.user, 'employee') and request.user.employee.type != 'other') else 'home'
+                return redirect(user_type)
             else:
                 messages.error(request, 'Invalid username or password')
     else:
@@ -110,3 +111,5 @@ def page_not_found(request,exception):
 
 def server_error(request,exception=None):
     return render(request,'global/page_500.html',{})
+
+

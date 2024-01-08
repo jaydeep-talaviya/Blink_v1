@@ -1,10 +1,15 @@
+import hashlib
+
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.template.loader import get_template
 from django.conf import settings
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
 
 def send_email_with_template(username, email):
     """Sends an email to the specified user with an HTML template.
@@ -30,6 +35,68 @@ def send_email_with_template(username, email):
     email_message.content_subtype = 'html'
     email_message.send()
 
+
+def send_employee_join_email(request,user):
+    """Sends an email to the specified user with an HTML template.
+
+    Args:
+    username: The username of the user to send the email to.
+    email: The email address of the user to send the email to.
+    """
+    protocol = 'https' if request.is_secure() else 'http'
+    domain = request.get_host()
+    print(">>>step 1",protocol,domain)
+
+    template = get_template('passwordreset/password_reset_email.html')
+    context = {
+    'username': user.username,
+    'CUSTOMER_SUPPORT_EMAIL':settings.CUSTOMER_SUPPORT_EMAIL,
+    'user': user,
+    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+    'token': default_token_generator.make_token(user),
+    'protocol': protocol,
+    'domain': domain,
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+    subject='Welcome to The Wooden!',
+    body=message,
+    from_email=settings.EMAIL_HOST_USER,
+    to=[user.email],
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
+
+
+def notify_to_warehouser_owner_email(request,user):
+    """Sends an email to the specified user with an HTML template.
+
+    Args:
+    username: The username of the user to send the email to.
+    email: The email address of the user to send the email to.
+    """
+    protocol = 'https' if request.is_secure() else 'http'
+    domain = request.get_host()
+
+    template = get_template('emails/welcome_warehouser_owner.html')
+    context = {
+    'username': user.username,
+    'CUSTOMER_SUPPORT_EMAIL':settings.CUSTOMER_SUPPORT_EMAIL,
+    'user': user,
+    'protocol': protocol,
+    'domain': domain,
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+    subject='Welcome to The Wooden!',
+    body=message,
+    from_email=settings.EMAIL_HOST_USER,
+    to=[user.email],
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
 
 def get_voucher_discount(voucher,user,user_cart_total_sum):
     discount_amount=0
@@ -136,3 +203,23 @@ def get_paginator(paginator,page):
     except EmptyPage:
         records = paginator.page(paginator.num_pages)
     return records
+
+def encrypt_value(value):
+    # Combine username and id into a single string
+    combined_string = value.encode('utf-8')
+
+    # Use SHA-256 for hashing
+    hashed_value = hashlib.sha256(combined_string).hexdigest()
+
+    return hashed_value
+
+def get_related_url(request,purpose):
+    base_url = request.build_absolute_uri(reverse('dashboard'))
+    if purpose == 'warehouse':
+        base_url = request.build_absolute_uri(reverse('list_warehouses'))
+    if purpose == 'stock':
+        base_url = request.build_absolute_uri(reverse('stock_list'))
+    # if purpose == 'product_create':
+    #     # baki che
+    #     base_url = request.build_absolute_uri(reverse('stock_list'))
+    return base_url

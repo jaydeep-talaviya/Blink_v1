@@ -147,8 +147,17 @@ class EmployeeForm(forms.ModelForm):
         model = Employee
         fields = ['type','salary']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        print("<<<<<<<<user\n\n\n",user.is_superuser)
+        print("<<<<<<<<user\n\n\n",hasattr(user, 'employee') and user.employee.type)
+        if user and user.is_authenticated:
+            if user.is_superuser:
+                # Add all options for admin
+                self.fields['type'].widget.choices = Employee.choices
+            elif hasattr(user, 'employee') and user.employee.type == 'manager':
+                # Add limited options for manager
+                self.fields['type'].widget.choices = Employee.manager_create_choice
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control formset-field'
 

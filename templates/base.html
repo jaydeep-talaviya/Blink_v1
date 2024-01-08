@@ -1,5 +1,6 @@
 <!doctype html>
 {% load static %}
+{% load encrypted_room %}
 <html lang="en">
   <head>
     <!-- Required meta tags -->
@@ -81,21 +82,20 @@
          </form>
          {% if user.is_authenticated %}
           {% if user.is_staff  %}
-
             <div class="px-4">
               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item dropdown dropleft">
                   <a href="#" class="nav-link notification dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button"
                      data-bs-toggle="dropdown" aria-expanded="false">
                     <span><i class='fa fa-bell text-white'></i></span>
-                    <span class="badge" id="notification-badge">{{read_admin_notifications_count}}</span>
+                    <span class="badge" id="notification-badge">{{read_notifications_count}}</span>
                   </a>
 
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    {% for i in admin_notifications %}
+                    {% for i in notifications %}
                       <li >
                         <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">
-                           <div class="alert {% if i.is_checked %} alert-success {% else %} alert-danger {% endif %}" role="alert">
+                           <div class="alert {% if i.is_read %} alert-success {% else %} alert-danger {% endif %}" role="alert">
                            {{i.message}}
                         </div>
                         </a>
@@ -106,34 +106,6 @@
                 </li>
               </ul>
             </div>
-
-           {% else %}
-        <div class="px-4">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown dropleft">
-              <a href="#" class="nav-link dropdown-toggle text-decoration-none text-white" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span><i class='fa fa-bell text-white'></i></span>
-                <span class="badge" id="notification-badge">{{read_end_user_notifications_count}}</span>
-              </a>
-
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                {% for i in end_user_notifications %}
-                <!-- add condition based on color -->
-                <li >
-                <a class="dropdown-item p-0" href="{% url 'change_notifications_status' notification_id=i.id  %}">
-                        <div class="alert {% if i.is_checked %} alert-success {% else %} alert-danger {% endif %}" role="alert">
-                           {{i.message}}
-                        </div>
-                    </a>
-
-                </li>
-                <hr class="dropdown-divider">
-                {% endfor %}
-              </ul>
-            </li>
-          </ul>
-        </div>
-
          {% endif %}
 
          {% endif %}
@@ -186,10 +158,12 @@
   {% endblock navbar %}
     {{ room_name|json_script:"room-name" }}
     <script>
+        {% if user.is_authenticated %}
       if (document.getElementById('profileDropdown') !== null){
-
-        const roomName = document.getElementById('profileDropdown').innerHTML.replaceAll(" ","").replaceAll("\n","")
+        {% with room_name=user %}
+        const roomName = "{{ room_name|encrypt_value }}";
         console.log(">>>>>>>>>roomName",roomName)
+        {% endwith %}
         const notificationSocket = new WebSocket(
             'ws://'
             + window.location.host
@@ -224,6 +198,7 @@
         };
       
       }
+        {% endif %}
     </script>
     {% include './messages.html' %}
 

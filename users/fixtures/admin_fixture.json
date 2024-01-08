@@ -1,0 +1,20 @@
+[
+    {
+        "model": "users.user",
+        "fields": {
+            "username": "admin1",
+            "password": "pbkdf2_sha256$320000$keGtqj2awTJrdrhP4FCqxD$UBxKiFyvqdgcZ+DHafuEKO0CWEmVEu6MpAfCsZqHwEY=",
+               "is_staff": true,
+                "is_active": true,
+                "is_superuser": true,
+                "email": "jaydeeptalaviya8@gmail.com",
+                "phone_number": null,
+                "profile_pic": "default.png",
+                "date_of_birth": null,
+                "city": "",
+                "groups": [],
+                "user_permissions": [],
+                "date_joined": "2022-01-01T00:00:00Z"
+        }
+    }
+]

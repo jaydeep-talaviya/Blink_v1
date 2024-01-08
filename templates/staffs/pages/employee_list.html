@@ -40,7 +40,7 @@
                         <td>
                             <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'update_employee' id=employee.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
+                                <a href="{% url 'update_employee' id=employee.id %}" class="btn-sm p-2 m-2 btn-primary text-decoration-none">Edit</a>
                                </div>
                                <div>
                                    {% with idx=employee.id model_name='Employee' %}
@@ -51,8 +51,8 @@
                                     {% endwith %}
                                </div>
                             </div>
-                                 <div>
-                                    <a href="{% url 'employee_salary_list' id=employee.id %}" class="btn-sm btn-info text-decoration-none">Salary</a>
+                                 <div class="text-center m-2">
+                                    <a href="{% url 'employee_salary_list' id=employee.id %}" class="btn-sm btn-info m-2 text-decoration-none">Salary</a>
                                </div>
                         </td>
                     </tr>

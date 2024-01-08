@@ -16,32 +16,28 @@ from asgiref.sync import async_to_sync
 from utils.helper_functions import get_pagination_records
 
 
-def test(request):
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "notification_jay",
-        {
-            'type': 'send_notification',
-            'message': json.dumps(
-                        {'message':'asdfasdfasd',
-                        'delivery_id':'asdfas2121'
-                        }
-                        ),
-        }
-    )
-    return HttpResponse("Done")
+# def test(request):
+#     channel_layer = get_channel_layer()
+#     async_to_sync(channel_layer.group_send)(
+#         "notification_jay",
+#         {
+#             'type': 'send_notification',
+#             'message': json.dumps(
+#                         {'message':'asdfasdfasd',
+#                         'delivery_id':'asdfas2121'
+#                         }
+#                         ),
+#         }
+#     )
+#     return HttpResponse("Done")
 
 
 @login_required
 def change_notifications_status(request,notification_id):
     notification = Notification.objects.get(id = notification_id)
-    notification.is_checked = True
+    notification.is_read = True
     notification.save()
-    if notification.for_customer:
-        orderid = notification.delivery.order.orderid
-        return redirect('orderviews',orderid=orderid)
-    else:
-        return redirect('prepare_order')
+    return redirect(notification.related_url)
 
 
 def single_delivery(request,delivery_id):

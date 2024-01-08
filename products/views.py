@@ -330,9 +330,9 @@ def contact(request):
             send_mail(subject, message, email_from, recipient_list)
             admin = User.objects.filter(is_superuser=True).first()
 
-            Notification.objects.create(seller=admin,
-                                        message=' Please Check your mail, Someone with named ' + str(name) +' have reached out you',
-                                        for_admin=True)
+            # Notification.objects.create(seller=admin,
+            #                             message=' Please Check your mail, Someone with named ' + str(name) +' have reached out you',
+            #                             for_admin=True)
             messages.success(request, "Message SuccessFully sent to admin,Thank You!")
         except:
             messages.error(request, "Something Went Wrong! Please Try again, Thank You")
@@ -364,7 +364,7 @@ def productcartupdateremove(request):
 @login_required
 def createorder(request):
     cart=Cart.objects.filter(user_id=request.user)
-    checkout=request.user.checkout_set.get()
+    checkout=request.user.checkout_set.last()
     if len(cart)!=0 and checkout.payment_type == 'paytm':
         orders = Orders.objects.create(checkout=checkout, order_status='order_confirm', user=request.user, amount=0,
                                        vouchers=cart.last().vouchers if cart.last().vouchers else None)

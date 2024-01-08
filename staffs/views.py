@@ -1,10 +1,12 @@
 import csv
 
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
 from easyaudit.models import CRUDEvent
 
+from notifications_app.models import Notification
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
@@ -25,11 +27,10 @@ from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
-    get_pagination_records
+    get_pagination_records, send_employee_join_email, notify_to_warehouser_owner_email, get_related_url
 from itertools import chain
 from .models import OrderPrepare, Ledger
-from .wrapper import custom_staff_member_required
-
+from .wrapper import custom_staff_member_required, admin_or_manager_required
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -38,8 +39,10 @@ today = date.today()
 
 # Create your views here.
 
-@custom_staff_member_required
+@login_required
+@admin_or_manager_required
 def dashboard(request):
+    print(">>>request",hasattr(request.user, 'employee'))
     stocks = Stocks.objects.count()
     warehouses = Warehouse.objects.count()
     employees = Employee.objects.count()
@@ -92,6 +95,9 @@ def dashboard(request):
         'delivery_shipped_by_date':delivery_shipped_by_date,
     })
 
+
+
+
 ########### Product Category #########
 
 def create_category(request):
@@ -136,7 +142,8 @@ def update_category(request,id):
         return render(request,'staffs/pages/category.html',{"forms":forms})
     return render(request,'staffs/pages/category.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def remove_category(request,id):
     category_instance=Category.objects.filter(id=id)
     category_instance.delete()
@@ -189,7 +196,8 @@ def update_sub_category(request,id):
     return render(request,'staffs/pages/sub_category.html',{'forms':forms})
 
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def remove_sub_category(request,id):
     subcategory_instance=Subcategory.objects.filter(id=id)
     subcategory_instance.delete()
@@ -198,7 +206,8 @@ def remove_sub_category(request,id):
 
 
 ##################### Attrbiute Names ######3
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_attr_name(request):
     if request.is_ajax and request.method == "POST":
         attribute_name=AttributeName(a_name=request.POST.get('a_name',False))
@@ -207,7 +216,8 @@ def create_attr_name(request):
     else:
         return JsonResponse({"error": "please enter valid"}, status=400)
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_attribute_names(request):
     AttributeNameFormset = modelformset_factory(AttributeName, form=AttributeNameForm,formset=AttributeNameFormSet)
     formset = AttributeNameFormset(request.POST or None, queryset=AttributeName.objects.none(), prefix='name')
@@ -231,7 +241,8 @@ def create_attribute_names(request):
     return render(request,'staffs/pages/attribute_name.html',context)
 
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_attribute_names(request,id):
     attribute_name_instance=get_object_or_404(AttributeName,id=id)
     if request.method=="POST":
@@ -248,13 +259,15 @@ def update_attribute_names(request,id):
         return render(request,'staffs/pages/attribute_name.html',{"forms":forms})
     return render(request,'staffs/pages/attribute_name.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def list_attribute_name(request):
     attribute_names=AttributeName.objects.all()
     attribute_names = get_pagination_records(request,attribute_names)
     return render(request,'staffs/pages/attribute_name_list.html',{'attribute_names':attribute_names})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def remove_attribute_names(request,id):
     attribute_name_instance=AttributeName.objects.filter(id=id)
     attribute_name_instance.delete()
@@ -264,7 +277,8 @@ def remove_attribute_names(request,id):
 
 ##################### AttributeValue ##################3
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_attribute(request):
     AttributeValueForm = modelformset_factory(AttributeValue, form=ProductAttributesForm,formset=AttributeNameFormSet)
     formset = AttributeValueForm(request.POST or None, queryset=AttributeValue.objects.none(), prefix='name')
@@ -286,7 +300,8 @@ def create_attribute(request):
     }
     return render(request,'staffs/pages/attribute.html',context)
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_attribute(request,id):
     attribute_instance=get_object_or_404(AttributeValue,id=id)
     if request.method=="POST":
@@ -303,14 +318,16 @@ def update_attribute(request,id):
         return render(request,'staffs/pages/attribute.html',{"forms":forms})
     return render(request,'staffs/pages/attribute.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def remove_attribute(request,id):
     attribute_instance=AttributeValue.objects.filter(id=id)
     attribute_instance.delete()
     messages.success(request, f"Your Attribute has been removed")
     return redirect('product_attribute_list')
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_attribute_list(request):
     product_attributes=AttributeValue.objects.all()
     product_attributes = get_pagination_records(request,product_attributes)
@@ -319,7 +336,8 @@ def product_attribute_list(request):
 
 ##################### ProductAttribute ################
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_product_attribute(request,pid):
     product_instance=get_object_or_404(Products,id=pid)
     if request.method=="POST":
@@ -343,7 +361,8 @@ def create_product_attribute(request,pid):
         return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
     return render(request,'staffs/pages/product_attribute.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_update_attribute(request,pid,id):
     product_instance=get_object_or_404(Products,id=pid)
     product_attribute_instance=get_object_or_404(ProductChangePriceAttributes,id=id)
@@ -365,7 +384,8 @@ def product_update_attribute(request,pid,id):
 
 
 ######################## Product #########################
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_list(request):
     products=Products.objects.all()
     products = get_pagination_records(request,products)
@@ -380,7 +400,8 @@ def get_attribute_values(request):
         return JsonResponse({'values': values})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_add(request):
     formset = ProductChangePriceAttributesFormSet(request.POST or None)
     forms = ProductForm(request.POST or None, request.FILES or None)
@@ -399,7 +420,8 @@ def product_add(request):
         return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
     return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_update(request,id):
     product_instance=get_object_or_404(Products,id=id)
     formset = ProductChangePriceAttributesFormSet(request.POST or None,instance = product_instance,queryset=product_instance.productchangepriceattributes_set.all())
@@ -418,7 +440,8 @@ def product_update(request,id):
             return render(request,'staffs/pages/product_update.html',{"forms":forms,'formset':formset,'pid':id})
     return render(request, 'staffs/pages/product_update.html', {"forms": forms, 'formset': formset,'pid':id})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def product_delete(request, id):
     product_instance = Products.objects.filter(id=id)
     product_instance.delete()
@@ -427,7 +450,8 @@ def product_delete(request, id):
 
 
 ####### Vouchers #####
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_voucher(request):
     forms = VouchersForm(request.POST or None)
     if request.method=="POST":
@@ -440,13 +464,15 @@ def create_voucher(request):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/voucher.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def list_vouchers(request):
     vouchers=Vouchers.objects.filter(is_deleted=False)
     vouchers = get_pagination_records(request,vouchers)
     return render(request,'staffs/pages/voucher_list.html',{'vouchers':vouchers})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_status_voucher(request,id,type):
     voucher = Vouchers.objects.get(id=id)
     voucher.stop = bool(type)
@@ -454,7 +480,8 @@ def update_status_voucher(request,id,type):
     return redirect('list_vouchers')
 
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_voucher(request,id):
     voucher_instance=get_object_or_404(Vouchers,id=id)
     if request.method=="POST":
@@ -469,7 +496,8 @@ def update_voucher(request,id):
     forms = VouchersForm(instance=voucher_instance)
     return render(request,'staffs/pages/voucher.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def delete_voucher(request, id):
     voucher_instance = Vouchers.objects.get(id=id)
     voucher_instance.is_deleted =True
@@ -479,7 +507,8 @@ def delete_voucher(request, id):
 
 
 ########## Stock ######################
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def stock_list(request):
     # stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
     stocks=Stocks.objects.all()
@@ -530,7 +559,8 @@ def get_product_attrs_by_product_warehouse(request):
     else:
         return JsonResponse({'product_attributes':[]})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def stock_create(request):
     if request.method=="POST":
         forms=StocksForm(request.POST)
@@ -547,7 +577,8 @@ def stock_create(request):
     return render(request,'staffs/pages/stock.html',{'forms':forms})
 
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def stock_update(request,id):
     stock_instance=get_object_or_404(Stocks,id=id)
     if request.method=="POST":
@@ -565,7 +596,8 @@ def stock_update(request,id):
     return render(request,'staffs/pages/stock.html',{'forms':forms,'stock_instance':stock_instance})
 
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def stock_finish(request, id):
     stock_instance = Stocks.objects.get(id=id)
     stock_instance.finished=True
@@ -576,18 +608,21 @@ def stock_finish(request, id):
 
  #########################################################
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def orderlists(request,status='order_confirm'):
     orders=Orders.objects.filter(order_status=status)
     orders = get_pagination_records(request,orders)
     return render(request,'staffs/pages/orderlists.html',{'orderlist':orders,'Status':status})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def single_order(request,order_id):
     order=Orders.objects.get(orderid=order_id)
     return render(request,'staffs/pages/single_order.html',{'order':order})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def paymentlists(request,status='SUCCESS'):
     payments=Payment.objects.filter(status=status)
     payments = get_pagination_records(request,payments)
@@ -598,36 +633,43 @@ def paymentlists(request,status='SUCCESS'):
 
 def create_employee(request):
     user_forms = UserForm(request.POST or None)
-    employee_forms = EmployeeForm(request.POST or None)
+    employee_forms = EmployeeForm(request.POST or None,user=request.user)
     if request.method=="POST":
         if user_forms.is_valid() and employee_forms.is_valid():
             user = user_forms.save()
             employee = employee_forms.save(commit=False)
             employee.user = user
             employee.save()
-
+            if employee.type != 'other':
+                user.is_staff = True
+                if employee.type == 'warehouser_owner':
+                    user.is_active = False
+                user.save()
+                send_employee_join_email(request,user)
             messages.success(request, f"Your Employee is Created")
             return redirect('list_employees')
         else:
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/employee.html',{'user_forms':user_forms,'employee_forms':employee_forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def list_employees(request):
     employees=Employee.objects.all()
     employees = get_pagination_records(request,employees)
 
     return render(request,'staffs/pages/employee_list.html',{'employees':employees})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_employee(request,id):
     employee_instance=get_object_or_404(Employee,id=id)
     user_instance=get_object_or_404(User,id=employee_instance.user.id)
     user_form = UserForm(instance=user_instance)
-    employee_form = EmployeeForm(instance=employee_instance)
+    employee_form = EmployeeForm(instance=employee_instance,user=request.user)
     if request.method=="POST":
         user_form = UserForm(request.POST,instance=user_instance)
-        employee_form = EmployeeForm(request.POST,instance=employee_instance)
+        employee_form = EmployeeForm(request.POST,instance=employee_instance,user=request.user)
         if user_form.is_valid() and employee_form.is_valid():
             user = user_form.save()
             employee = employee_form.save(commit=False)
@@ -639,7 +681,8 @@ def update_employee(request,id):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/employee.html',{'user_forms':user_form,'employee_forms':employee_form})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def delete_employee(request, id):
     employee_instance = Employee.objects.filter(id=id)
     employee_instance.delete()
@@ -648,7 +691,8 @@ def delete_employee(request, id):
 
 ######### Employee Salary ##########
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_employee_salary(request,id):
     employee = Employee.objects.get(id=id)
     forms = EmployeeSalaryForm(request.POST or None)
@@ -663,12 +707,14 @@ def create_employee_salary(request,id):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/employee_salary.html',{'forms':forms,'employee':employee})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def employee_salary_list(request,id):
     employee_salary = EmployeeSalary.objects.filter(employee_id=id)
     employee_salary = get_pagination_records(request,employee_salary)
     return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary,'employee_id':id})
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_employee_salary(request,id):
     employee_salary = get_object_or_404(EmployeeSalary,id=id)
     employee = Employee.objects.get(id=employee_salary.employee_id)
@@ -688,7 +734,8 @@ def update_employee_salary(request,id):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/employee_salary.html',{'forms':forms,'employee':employee})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def delete_employee_salary(request,id):
     employee_instance = EmployeeSalary.objects.filter(id=id)
     employee_id = employee_instance.first().employee_id
@@ -700,12 +747,26 @@ def delete_employee_salary(request,id):
 
 ######3 warehouse #########
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def create_warehouse(request):
     forms = WarehouseForm(request.POST or None)
     if request.method=="POST":
         if forms.is_valid():
             forms.save()
+            owner = forms.cleaned_data['owner']
+            owner.is_active = True
+            owner.save()
+            # send email notification
+            notify_to_warehouser_owner_email(request,owner)
+            # send notification in websocket
+            admin = User.objects.get_admin()
+            related_url = get_related_url(request,'warehouse')
+
+            Notification.objects.create(sender=request.user,receiver=admin,
+                                        message='New Warehouse has been created!',
+                                        related_url=related_url
+                                        )
             messages.success(request, f"Your Warehouse is Created")
             return redirect('list_warehouses')
         else:
@@ -713,13 +774,15 @@ def create_warehouse(request):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/warehouse.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def list_warehouses(request):
     warehouses=Warehouse.objects.all()
     warehouses = get_pagination_records(request,warehouses)
     return render(request,'staffs/pages/warehouse_list.html',{'warehouses':warehouses})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def update_warehouse(request,id):
     warehouse_instance=get_object_or_404(Warehouse,id=id)
     forms = WarehouseForm(instance=warehouse_instance)
@@ -733,14 +796,16 @@ def update_warehouse(request,id):
             messages.warning(request, f"Please Check Again,Invalid Data")
     return render(request,'staffs/pages/warehouse.html',{'forms':forms})
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def delete_warehouse(request, id):
-    warehouse_instance = Employee.objects.filter(id=id)
+    warehouse_instance = Warehouse.objects.filter(id=id)
     warehouse_instance.delete()
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
 
-@staff_member_required(login_url='/')
+@login_required
+@admin_or_manager_required
 def prepare_order_dynamic_content(request):
     if request.method == "GET":
         order_id = request.GET.get("order_id", None)

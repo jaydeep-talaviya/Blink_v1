@@ -302,7 +302,8 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SELERLIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
-
+CELERY_WORKER_LOG_PATH = os.path.join(BASE_DIR,'logs','worker.log')
+CELERY_BEAT_LOG_PATH = os.path.join(BASE_DIR,'logs','beat.log')
 
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
@@ -316,3 +317,25 @@ CALLBACK_URL="'http://127.0.0.1:8000/handlerequest"
 
 DJANGO_EASY_AUDIT_WATCH_REQUEST_EVENTS=False
 DJANGO_EASY_AUDIT_WATCH_AUTH_EVENTS=False
+
+
+# settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR,'logs','django_celery.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

@@ -27,7 +27,7 @@ today = date.today()
 def create_otp(sender, instance, created, **kwargs):
     if instance.verified == True:
         cart=Cart.objects.filter(user_id=instance.user)
-        checkout=instance.user.checkout_set.get()
+        checkout=instance.user.checkout_set.last()
         if len(cart)!=0 and checkout.payment_type == 'case_on_delivery':
             orders=Orders.objects.create(checkout=checkout,order_status='order_confirm',user=instance.user,amount=0,vouchers=cart.last().vouchers if cart.last().vouchers else None)
             amount=0
@@ -97,9 +97,9 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.add(instance.user)
         # notification to admin for create prepare order
-        Notification.objects.create(buyer=instance.user,seller=admin, user_order=instance,
-                                    message='Prepare Order for Order Id: ' + str(instance.orderid),
-                                    for_admin=True)
+        # Notification.objects.create(buyer=instance.user,seller=admin, user_order=instance,
+        #                             message='Prepare Order for Order Id: ' + str(instance.orderid),
+        #                             for_admin=True)
 
     if instance.order_status == 'order_cancel':
         if instance.payment_set.all():
@@ -111,9 +111,9 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             voucher = instance.vouchers
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.remove(instance.user)
-        Notification.objects.create(buyer=instance.user, seller=admin, user_order=instance,
-                                    message='Order cancelled for Order Id: ' + str(instance.orderid),
-                                    for_admin=True)
+        # Notification.objects.create(buyer=instance.user, seller=admin, user_order=instance,
+        #                             message='Order cancelled for Order Id: ' + str(instance.orderid),
+        #                             for_admin=True)
 
 @receiver(post_save, sender=Payment)
 def on_payment_cancel(sender, instance, created, **kwargs):

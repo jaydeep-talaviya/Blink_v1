@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
+{% load encrypted_room %}
+
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,9 +30,11 @@
 
 
     <script>
-
-        const roomName = 'admin'
+        {% with room_name=user %}
+        const roomName = "{{ room_name|encrypt_value }}";
         console.log(">>>>>>>>>roomName",roomName)
+        {% endwith %}
+
         const notificationSocket = new WebSocket(
             'ws://'
             + window.location.host
