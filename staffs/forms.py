@@ -5,7 +5,7 @@ from products.models import (Products, ProductChangePriceAttributes,
                              Stocks, AttributeValue, AttributeName, Vouchers, Warehouse, Delivery)
 from staffs.models import Ledger, LedgerLine
 from users.models import User, Employee
-
+from django.db.models import Q
 
 ########## Attribute Name ###########33
 class AttributeNameForm(forms.ModelForm):
@@ -166,6 +166,7 @@ class WarehouseForm(forms.ModelForm):
     class Meta:
         model = Warehouse
         fields = '__all__'
+        exclude = ['is_deleted']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -173,7 +174,20 @@ class WarehouseForm(forms.ModelForm):
             self.fields[field].widget.attrs['class'] = 'form-control formset-field'
         self.fields['owner'].widget.attrs['class'] = 'form-select formset-field'
         self.fields['address'].widget.attrs['rows'] = 1  # Set the number of rows
-        self.fields['owner'].queryset = User.objects.filter(employee__type='warehouse_owner')
+        instance = kwargs.get('instance', None)
+        if instance and instance.pk:
+            # Update mode: Only allow current owner without a warehouse
+            self.fields['owner'].queryset = User.objects.filter(
+                Q(employee__type='warehouse_owner') &
+                Q(warehouse__isnull=True) |
+                Q(pk=instance.owner.pk)  # Allow the current owner
+            ).distinct()
+        else:
+            # Creation mode: Only allow owners without a warehouse
+            self.fields['owner'].queryset = User.objects.filter(
+                employee__type='warehouse_owner',
+                warehouse__isnull=True
+            )
 
 class DeliveryForm(forms.ModelForm):
     class Meta:

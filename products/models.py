@@ -18,6 +18,7 @@ class Warehouse(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     mobile_no=models.CharField(max_length=100)
     name=models.CharField(max_length=100)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name + " owned by " + self.owner.username

@@ -55,6 +55,9 @@
                                         <nav class="sb-sidenav-menu-nested nav">
                                             <a class="nav-link" href="{% url 'stock_list' %}">Stocks</a>
                                             <a class="nav-link" href="{% url 'list_warehouses' %}">Warehouses</a>
+                                            {% if request.user.is_superuser %}
+                                            <a class="nav-link" href="{% url 'list_deleted_warehouses' %}">Deleted Warehouses</a>
+                                            {% endif %}
                                         </nav>
                                     </div>
 

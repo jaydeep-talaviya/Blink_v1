@@ -777,7 +777,7 @@ def create_warehouse(request):
 @login_required
 @admin_or_manager_required
 def list_warehouses(request):
-    warehouses=Warehouse.objects.all()
+    warehouses=Warehouse.objects.filter(is_deleted=False)
     warehouses = get_pagination_records(request,warehouses)
     return render(request,'staffs/pages/warehouse_list.html',{'warehouses':warehouses})
 
@@ -800,9 +800,22 @@ def update_warehouse(request,id):
 @admin_or_manager_required
 def delete_warehouse(request, id):
     warehouse_instance = Warehouse.objects.filter(id=id)
-    warehouse_instance.delete()
+    if not request.user.is_superuser:
+        warehouse_instance.update(is_deleted=True)
+    else:
+        warehouse_instance.delete()
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
+
+@login_required
+@admin_or_manager_required
+def list_deleted_warehouses(request):
+    warehouses=Warehouse.objects.filter(is_deleted=True)
+    warehouses = get_pagination_records(request,warehouses)
+    return render(request,'staffs/pages/warehouse_deleted_list.html',{'warehouses':warehouses})
+
+
+##################################################
 
 @login_required
 @admin_or_manager_required

@@ -12,7 +12,7 @@ from .views import (product_list, product_update, product_delete,
                     create_voucher, list_vouchers, update_voucher, delete_voucher, update_status_voucher,
                     create_employee,list_employees,update_employee,delete_employee,
                     create_employee_salary,employee_salary_list,update_employee_salary,delete_employee_salary,
-                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse,
+                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse,list_deleted_warehouses,
                     prepare_order,prepare_order_dynamic_content,
                     get_product_by_warehouse,get_product_attrs_by_product_warehouse,
                     list_prepare_orders,create_delivery,update_prepare_order,
@@ -99,6 +99,7 @@ urlpatterns = [
     path('warehouse/create/', create_warehouse, name='create_warehouse'),
     path('warehouse/update/<int:id>', update_warehouse, name='update_warehouse'),
     path('warehouse/remove/<int:id>', delete_warehouse, name='delete_warehouse'),
+    path('warehouse/deleted/', list_deleted_warehouses, name='list_deleted_warehouses'),
 
     #### prepare orders
     path('prepare_order/', list_prepare_orders, name='list_prepare_orders'),
