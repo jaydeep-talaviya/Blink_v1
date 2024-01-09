@@ -225,6 +225,10 @@ def get_related_url(request,purpose,id=None):
         base_url = request.build_absolute_uri(reverse('product_list'))
         if id:
             base_url = request.build_absolute_uri(reverse('product_update',kwargs={'id':id}))
+    if purpose == 'order':
+        base_url = request.build_absolute_uri(reverse('orderlists'))
+        if id:
+            base_url = request.build_absolute_uri(reverse('orderlists_with_status',kwargs={'status':'order_cancel'}))
     # if purpose == 'product_create':
     #     # baki che
     #     base_url = request.build_absolute_uri(reverse('stock_list'))

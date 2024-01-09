@@ -40,7 +40,7 @@
                     {% if order.payment_set.count == 0 %}
 
                     <h6 class="ml-auto mr-3"> <a class="btn-sm btn-success text-decoration-none p-2"
-                            href="{% url 'update_order' order.orderid %}">Pay now</a> </h6>
+                            href="{% url 'order_re_payment' order.orderid %}">Pay now</a> </h6>
 
                     {% else %}
                     <h6 class="float-right my-2"> <a class="btn-sm btn-success text-decoration-none p-2"
@@ -126,7 +126,7 @@
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Close</button>
                                         <a type="button" class="btn btn-primary"
-                                            href="{% url 'cancelorder' order.orderid %}">Confirm Cancelation</a>
+                                            href="{% url 'cancle_order' order.orderid %}">Confirm Cancelation</a>
                                     </div>
                                 </div>
                             </div>

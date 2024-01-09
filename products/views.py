@@ -4,11 +4,11 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 from ecommerce_blink.settings import MERCHANT_KEY
 from notifications_app.models import Notification
-from utils.helper_functions import get_voucher_discount, get_paginator
+from utils.helper_functions import get_voucher_discount, get_paginator, get_related_url
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
     Vouchers
 from django.db.models import Avg,Count,Max,Min
-from users.models import User
+from users.models import User, Employee
 from django.urls import reverse
 from .forms import CheckoutForm
 from django.http import JsonResponse
@@ -404,7 +404,7 @@ def createorder(request):
         messages.error(request, "Something Went Wrong! Please Try again, Thank You")
     return redirect('checkout')
             
-def update_order(request,orderid):
+def order_re_payment(request,orderid):
     order=Orders.objects.get(orderid=orderid)
     order.orderid=uuid.uuid4()
     order.save()
@@ -541,11 +541,19 @@ def orderviews(request,orderid):
     return render(request,'products/order_views.html',{'today':today,'order':order,'orderlines':orderlines})
 
 @login_required
-def cancelorder(request,orderid):
+def cancle_order(request,orderid):
     order=Orders.objects.get(orderid=orderid)
     order.order_status='order_cancel'
     order.save()
-    
+    managers = Employee.objects.filter(type='manager').values('user')
+    related_url = get_related_url(request, 'order', id=orderid)
+
+    # notify to each manager.
+    for manager in managers:
+        Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                    message='Order has been cancelled, Please check!',
+                                    related_url=related_url
+                                    )
     messages.error(request, "Your Order is Canceled Successfully!")
     return redirect('orderviews',orderid=order.orderid)
 

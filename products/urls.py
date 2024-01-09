@@ -5,9 +5,9 @@ from .views import (productlist,productdetail, return_policy,
                     checkout_details,userorders,
                     orderviews,html_to_pdf_view,
                     productlist_sortby,search,
-                    cancelorder,
+                    cancle_order,
                     return_policy,terms_and_conditions,about,contact,createorder,
-                    handlerequest,update_order,
+                    handlerequest,order_re_payment,
                     send_otp,match_otp,otp_order_failed,verified_created_order,get_discounted_price,
                     get_total_vouchers)
 
@@ -31,7 +31,7 @@ urlpatterns = [
 
     path('rate_and_comment_submit',submit_rates_and_comments,name='submit_rates_and_comments'),
 
-    path('cancelorder/<str:orderid>',cancelorder,name='cancelorder'),
+    path('cancle_order/<str:orderid>',cancle_order,name='cancle_order'),
     
     path('send_otp',send_otp,name='send_otp'),
     path('match_otp',match_otp,name='match_otp'),
@@ -45,7 +45,7 @@ urlpatterns = [
 
     path('createorder',createorder,name="createorder"),
     path("handlerequest", handlerequest, name="HandleRequest"),
-    path('update_order/<str:orderid>',update_order,name="update_order"),
+    path('order/repayment/<str:orderid>',order_re_payment,name="order_re_payment"),
 
     path("get/vouchers", get_total_vouchers, name="get_total_vouchers"),
 

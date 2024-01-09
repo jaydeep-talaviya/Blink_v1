@@ -56,7 +56,7 @@
 
             <h2 class="text-center"><span class="text-muted"> {{order.order_status|paymentstype|title}} </span></h2>
             <hr />
-            {% for i in orderlines %}
+            {% for i in order.order.all %}
             <div class="media flex-column flex-sm-row">
                 <div class="media-body align-self-center text-center pt-4">
                     <p class="bold"><span>{{i.product_id.p_name}}</span>
@@ -133,7 +133,7 @@
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Close</button>
                                         <a type="button" class="btn btn-primary"
-                                            href="{% url 'cancelorder' order.orderid %}">Confirm Cancelation</a>
+                                            href="{% url 'cancle_order' order.orderid %}">Confirm Cancelation</a>
                                     </div>
                                 </div>
                             </div>

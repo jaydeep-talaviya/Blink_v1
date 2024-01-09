@@ -1,10 +1,11 @@
+from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from notifications_app.models import Notification
 from staffs.models import LedgerLine, Ledger
 from users.models import User, Employee
-from utils.helper_functions import get_voucher_discount
+from utils.helper_functions import get_voucher_discount, get_related_url
 from .models import OtpModel, Orders, OrderLines, Cart, Products, Stocks, Payment, Delivery, Vouchers
 from datetime import datetime
 from datetime import date
@@ -19,8 +20,7 @@ MERCHANT_KEY = 'Z9uzcquqrxUuNErK'
 # import checksum generation utility
 # You can get this utility from https://developer.paytm.com/docs/checksum/
 from paytmchecksum import PaytmChecksum
-from staffs.middleware import get_current_user
-
+from staffs.middleware import get_current_user, get_request
 
 today = date.today()
 
@@ -51,6 +51,16 @@ def create_otp(sender, instance, created, **kwargs):
             cart.delete() 
             instance.times=0
 
+            managers = Employee.objects.filter(Q(type='manager')).values('user')
+            request = get_request()
+            related_url = get_related_url(request, 'order')
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message='New Order has been Updated, Please check!',
+                                            related_url=related_url
+                                            )
 
 
 # @receiver(post_save, sender=Payment)
