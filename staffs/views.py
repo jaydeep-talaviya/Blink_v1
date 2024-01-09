@@ -447,6 +447,18 @@ def product_update(request,id):
             product_obj = forms.save()
             formset.instance = product_obj
             formset.save()
+
+            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            related_url = get_related_url(request, 'product',id=id)
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message=f'{product_obj.p_name} product has been Updated, Please check!',
+                                            related_url=related_url
+                                            )
+
+
             messages.success(request, f"Your Product is Updated")
             return redirect('product_list')
         else:

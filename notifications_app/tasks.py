@@ -25,7 +25,7 @@ def broadcast_notification(self, data):
             channel_layer = get_channel_layer()
             print(">>>>>>>>>step channel_layer", channel_layer,channel_layer.group_send)
             # condition to check send notification to user or admin
-            username = encrypt_value(str(notification.sender.username)+"_"+str(notification.sender.id))
+            username = encrypt_value(str(notification.receiver.username)+"_"+str(notification.receiver.id))
             print(">>>>username",username)
             async_to_sync(channel_layer.group_send)(
                 "notification_"+username,

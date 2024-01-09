@@ -220,10 +220,11 @@ def get_related_url(request,purpose,id=None):
     if purpose == 'stock':
         base_url = request.build_absolute_uri(reverse('stock_list'))
         if id:
-            base_url = request.build_absolute_uri(reverse('stock_update'),id=id)
+            base_url = request.build_absolute_uri(reverse('stock_update',kwargs={'id':id}))
     if purpose == 'product':
         base_url = request.build_absolute_uri(reverse('product_list'))
-
+        if id:
+            base_url = request.build_absolute_uri(reverse('product_update',kwargs={'id':id}))
     # if purpose == 'product_create':
     #     # baki che
     #     base_url = request.build_absolute_uri(reverse('stock_list'))
