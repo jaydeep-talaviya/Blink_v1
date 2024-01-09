@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
+    'staffs.middleware.CurrentUserMiddleware',
 
 ]
 

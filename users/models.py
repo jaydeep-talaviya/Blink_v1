@@ -7,6 +7,7 @@ from datetime import date
 class CustomUserManager(UserManager):
     def get_admin(self):
         return self.filter(is_superuser=True).first()
+
 class User(AbstractUser):
     phone_number=models.BigIntegerField(blank=True,null=True)
     profile_pic=models.ImageField(upload_to='profiles',default='default.png')

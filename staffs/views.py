@@ -27,7 +27,8 @@ from django.db.models import Sum
 from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
-    get_pagination_records, send_employee_join_email, notify_to_warehouser_owner_email, get_related_url
+    get_pagination_records, send_employee_join_email, notify_to_warehouser_owner_email, get_related_url, \
+    send_mail_to_all_managers
 from itertools import chain
 from .models import OrderPrepare, Ledger
 from .wrapper import custom_staff_member_required, admin_or_manager_required
@@ -402,15 +403,29 @@ def get_attribute_values(request):
 
 @login_required
 @admin_or_manager_required
-def product_add(request):
+def product_create(request):
     formset = ProductChangePriceAttributesFormSet(request.POST or None)
     forms = ProductForm(request.POST or None, request.FILES or None)
 
     if request.method=="POST":
         if forms.is_valid() and formset.is_valid():
             product_obj=forms.save()
+            product_obj.product_maker = request.user
+            product_obj.save()
+
+            managers = Employee.objects.filter(type = 'manager').values('user')
+            related_url = get_related_url(request, 'product')
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message='New product has been created!',
+                                            related_url=related_url
+                                            )
+
             formset.instance = product_obj
             formset.save()
+
             messages.success(request, f"Your Product is Created")
             return redirect('product_list')
         else:
@@ -510,7 +525,6 @@ def delete_voucher(request, id):
 @login_required
 @admin_or_manager_required
 def stock_list(request):
-    # stocks=Stocks.objects.filter(stock_day__year=today.year, stock_day__month=today.month, stock_day__day=today.day)
     stocks=Stocks.objects.all()
     stocks = get_pagination_records(request,stocks)
     return render(request,'staffs/pages/stock_list.html',{'stocks':stocks})
@@ -559,6 +573,14 @@ def get_product_attrs_by_product_warehouse(request):
     else:
         return JsonResponse({'product_attributes':[]})
 
+
+@login_required
+def inform_other_managers(request):
+    managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+    emails = list(managers.values_list('user__email',flat=True))
+    send_mail_to_all_managers(request.user,emails)
+    return redirect('stock_create')
+
 @login_required
 @admin_or_manager_required
 def stock_create(request):
@@ -566,6 +588,22 @@ def stock_create(request):
         forms=StocksForm(request.POST)
         if forms.is_valid():
             stock = forms.save()
+            admin = User.objects.get_admin()
+            related_url = get_related_url(request, 'stock')
+
+            Notification.objects.create(sender=request.user, receiver=admin,
+                                        message='New Stock has been created!',
+                                        related_url=related_url
+                                        )
+            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message='New Stock has been created!',
+                                            related_url=related_url
+                                            )
+
             messages.success(request, f"Your Stocks is Created")
             return redirect('stock_list')
         else:
@@ -585,6 +623,19 @@ def stock_update(request,id):
         forms=StocksForm(request.POST,instance=stock_instance)
         if forms.is_valid():
             forms.save()
+            admin = User.objects.get_admin()
+            related_url = get_related_url(request, 'stock',id=id)
+            Notification.objects.create(sender=request.user, receiver=admin,
+                                        message='New Stock has been Updated!',
+                                        related_url=related_url
+                                        )
+            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message='Stock has been updated!',
+                                            related_url=related_url
+                                            )
             messages.success(request, f"Your Stocks is Updated")
             return redirect('stock_list')
         else:
@@ -600,7 +651,7 @@ def stock_update(request,id):
 @admin_or_manager_required
 def stock_finish(request, id):
     stock_instance = Stocks.objects.get(id=id)
-    stock_instance.finished=True
+    stock_instance.left_qty=0
     stock_instance.save()
     messages.success(request, f"Your Stock has been finished successfully")
     return redirect('stock_list')

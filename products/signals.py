@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from notifications_app.models import Notification
 from staffs.models import LedgerLine, Ledger
-from users.models import User
+from users.models import User, Employee
 from utils.helper_functions import get_voucher_discount
 from .models import OtpModel, Orders, OrderLines, Cart, Products, Stocks, Payment, Delivery, Vouchers
 from datetime import datetime
@@ -19,9 +19,10 @@ MERCHANT_KEY = 'Z9uzcquqrxUuNErK'
 # import checksum generation utility
 # You can get this utility from https://developer.paytm.com/docs/checksum/
 from paytmchecksum import PaytmChecksum
+from staffs.middleware import get_current_user
+
 
 today = date.today()
-
 
 @receiver(post_save, sender=OtpModel) 
 def create_otp(sender, instance, created, **kwargs):
@@ -164,3 +165,11 @@ def check_finished_or_not(sender, instance, created, **kwargs):
     if instance.left_qty == 0:
         instance.finished = True
         instance.save()
+        managers = Employee.objects.filter(type='manager').values('user')
+        current_user = get_current_user()
+        # notify to each manager.
+        for manager in managers:
+            Notification.objects.create(sender=current_user, receiver_id=manager.get('user'),
+                                        message='Stock has been updated!',
+                                        related_url=current_user
+                                        )

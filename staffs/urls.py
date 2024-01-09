@@ -1,9 +1,9 @@
 from django.urls import path
 from .views import (product_list, product_update, product_delete,
-                    product_add, create_product_attribute, product_update_attribute,
+                    product_create, create_product_attribute, product_update_attribute,
                     create_attribute, update_attribute, remove_attribute,
                     create_attr_name, product_attribute_list,
-                    stock_list, stock_update, stock_create,stock_finish,
+                    stock_list, stock_update, stock_create,stock_finish,inform_other_managers,
                     orderlists, single_order, paymentlists,
                     create_attribute_names, update_attribute_names, remove_attribute_names, list_attribute_name,
                     get_attribute_values,
@@ -27,7 +27,7 @@ urlpatterns = [
     path('user/employee_report/', get_employees_download, name='get_employees_download'),
 
     path('product/',product_list,name='product_list'),
-    path('product/add/',product_add,name='product_add'),
+    path('product/add/',product_create,name='product_create'),
     path('product/update/<int:id>/',product_update,name='product_update'),
     path('product/delete/<int:id>/', product_delete, name='product_delete'),
     path('product/update/<int:pid>/attribute/create/',create_product_attribute,name='create_product_attribute'),
@@ -69,6 +69,7 @@ urlpatterns = [
     path('stocks/',stock_list,name='stock_list'),
     path('stock/warehouse/select/', get_product_by_warehouse, name='get_product_by_warehouse'),
     path('stock/warehouse/product/select/', get_product_attrs_by_product_warehouse, name='get_product_attrs_by_product_warehouse'),
+    path('stock/info/managers/',inform_other_managers,name='inform_other_managers'),
     path('stocks/create/',stock_create,name='stock_create'),
     path('stocks/update/<int:id>',stock_update,name='stock_update'),
     path('stocks/finish/<int:id>',stock_finish,name='stock_finish'),

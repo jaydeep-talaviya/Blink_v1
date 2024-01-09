@@ -62,6 +62,8 @@ class Products(models.Model):
     photo_5=models.ImageField(upload_to='products',blank=True,null=True)
     photo_6=models.ImageField(upload_to='products',blank=True,null=True)
 
+    product_maker = models.ForeignKey(User,on_delete=models.CASCADE,related_name='products')
+
     def __str__(self):
         return self.p_name + " with "+ self.p_category.category_name
     

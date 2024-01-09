@@ -213,13 +213,34 @@ def encrypt_value(value):
 
     return hashed_value
 
-def get_related_url(request,purpose):
+def get_related_url(request,purpose,id=None):
     base_url = request.build_absolute_uri(reverse('dashboard'))
     if purpose == 'warehouse':
         base_url = request.build_absolute_uri(reverse('list_warehouses'))
     if purpose == 'stock':
         base_url = request.build_absolute_uri(reverse('stock_list'))
+        if id:
+            base_url = request.build_absolute_uri(reverse('stock_update'),id=id)
+    if purpose == 'product':
+        base_url = request.build_absolute_uri(reverse('product_list'))
+
     # if purpose == 'product_create':
     #     # baki che
     #     base_url = request.build_absolute_uri(reverse('stock_list'))
     return base_url
+
+def send_mail_to_all_managers(creater_manager,managers_emails):
+    template = get_template('emails/notify_to_all_manager.html')
+    context = {
+        'creater_manager': creater_manager,
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+        subject='Welcome to Django!',
+        body=message,
+        from_email=settings.EMAIL_HOST_USER,
+        to=managers_emails,
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
