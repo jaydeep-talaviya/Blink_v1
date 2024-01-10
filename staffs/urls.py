@@ -105,7 +105,7 @@ urlpatterns = [
     #### prepare orders
     path('prepare_order/', list_prepare_orders, name='list_prepare_orders'),
     path('prepare_products/select/',prepare_order_dynamic_content,name='prepare_order_dynamic_content'),
-    path('prepare_order/create/',prepare_order,name='prepare_order'),
+    path('prepare_order/create/<str:order_id>',prepare_order,name='prepare_order'),
     path('prepare_order/update/<str:orderid>',update_prepare_order,name='update_prepare_order'),
 
     path('prepare_order/delivery/create/<str:orderid>', create_delivery, name='create_delivery'),

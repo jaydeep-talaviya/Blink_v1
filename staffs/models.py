@@ -1,6 +1,6 @@
 from django.db import models
 
-from products.models import Orders, Warehouse, Stocks, OrderLines
+from products.models import Orders, Warehouse, Stocks, OrderLines, Products, ProductChangePriceAttributes
 from users.models import Employee
 from datetime import datetime
 
@@ -18,6 +18,10 @@ class OrderPrepare(models.Model):
     purchase_qty = models.IntegerField(default=1)
     status = models.CharField(max_length=50,choices=choices)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
+    product=models.ForeignKey(Products,on_delete=models.DO_NOTHING)
+    product_attribute=models.ForeignKey(ProductChangePriceAttributes,on_delete=models.DO_NOTHING)
+
+
 
 
 class Ledger(models.Model):

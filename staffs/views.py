@@ -674,7 +674,7 @@ def stock_finish(request, id):
 @login_required
 @admin_or_manager_required
 def orderlists(request,status='order_confirm'):
-    orders=Orders.objects.filter(order_status=status)
+    orders = Orders.objects.filter(order_status=status)
     orders = get_pagination_records(request,orders)
     return render(request,'staffs/pages/orderlists.html',{'orderlist':orders,'Status':status})
 
@@ -888,8 +888,8 @@ def prepare_order_dynamic_content(request):
         order = Orders.objects.get(id = order_id)
         return render(request,'staffs/pages/prepare_order_temp.html',{'order':order})
 
-def prepare_order(request):
-    orders = Orders.objects.all().order_by('-created_at')
+def prepare_order(request,order_id):
+    orders = Orders.objects.filter(orderid=order_id).order_by('-created_at')
     if request.method == "POST":
         try:
             with transaction.atomic():
@@ -917,7 +917,9 @@ def prepare_order(request):
                         stock_obj.left_qty = stock_obj.left_qty - int(qty)
                         stock_obj.save()
                         # create OrderPrepare for admin so that he/she can send products to user.
-                        order_prepare = OrderPrepare(order_id_id=order_id,warehouse_id_id=warehouses[id_idx],stock_id_id=stock_obj.id,purchase_qty=qty,status='preparing')
+                        order_prepare = OrderPrepare(order_id_id=order_id,warehouse_id_id=warehouses[id_idx],
+                                                     stock_id_id=stock_obj.id,purchase_qty=qty,
+                                                     status='preparing',product_id=product,product_attribute_id=product_attribute)
                         order_prepare.save()
                     current_order = Orders.objects.get(id=order_id)
                     current_order.order_status = 'order_prepared'
