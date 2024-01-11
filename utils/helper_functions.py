@@ -229,9 +229,10 @@ def get_related_url(request,purpose,id=None):
         base_url = request.build_absolute_uri(reverse('orderlists'))
         if id:
             base_url = request.build_absolute_uri(reverse('orderlists_with_status',kwargs={'status':'order_cancel'}))
-    # if purpose == 'product_create':
-    #     # baki che
-    #     base_url = request.build_absolute_uri(reverse('stock_list'))
+    if purpose == 'delivery':
+        base_url = request.build_absolute_uri(reverse('delivery_list'))
+        if id:
+            base_url = request.build_absolute_uri(reverse('orderlists_with_status',kwargs={'status':'order_shipped'}))
     return base_url
 
 def send_mail_to_all_managers(creater_manager,managers_emails):
@@ -246,6 +247,42 @@ def send_mail_to_all_managers(creater_manager,managers_emails):
         body=message,
         from_email=settings.EMAIL_HOST_USER,
         to=managers_emails,
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
+
+
+def send_mail_to_delivery_person(delivery_person,prepared_orders):
+    template = get_template('emails/notify_delivery_person.html')
+    context = {
+        'prepared_orders': prepared_orders,
+        'delivery_person':delivery_person
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+        subject='Notification to Pick up Delivery',
+        body=message,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[delivery_person.email],
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
+
+def send_email_to_notify_customer(customer,prepared_orders):
+    template = get_template('emails/notify_customer_to_delivery.html')
+    context = {
+        'customer': customer,
+        'prepared_orders': prepared_orders,
+
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+        subject='Notification to Pick up Delivery',
+        body=message,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[delivery_person.email],
     )
     email_message.content_subtype = 'html'
     email_message.send()

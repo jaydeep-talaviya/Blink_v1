@@ -39,7 +39,7 @@
                 {% endfor %}
                 <div class="card-footer">
                     <div class="d-flex text-center">
-                        Grand Total : <h5 class="text-success">{{order.amount}}</h5>
+                        Grand Total : <h5 class="text-success">{{order.amount|floatformat:2 }}</h5>
                     </div>
                 </div>
             </div>

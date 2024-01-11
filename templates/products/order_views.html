@@ -138,12 +138,14 @@
         <div class="row px-3">
             <div class="col">
                 <ul id="progressbar">
-                    <li class="step0 {% if order.delivery_set.first.state == 'Confirm' or order.delivery_set.first.state  == 'Delivering' or order.delivery_set.first.state == 'Shipped' %} active {% endif %}"
+                    <li class="step0 {% if order.delivery_set.last.state == 'Confirm' or order.delivery_set.last.state == 'Started' or order.delivery_set.last.state  == 'Delivering' or order.delivery_set.last.state == 'Shipped' %} active {% endif %}"
                         id="step1">Confirmed</li>
-                    <li class="step0 {% if order.delivery_set.first.state  == 'Delivering' or order.delivery_set.first.state == 'Shipped' %} active {% endif %} text-center"
-                        id="step2">Deliverying</li>
-                    <li class="step0 text-muted text-right {% if order.delivery_set.first.state == 'Shipped'%} active {% endif %}" id="
-                        step3">Shipped</li>
+                    <li class="step0 {% if order.delivery_set.last.state == 'Started' or order.delivery_set.last.state  == 'Delivering' or order.delivery_set.last.state == 'Shipped' %} active {% endif %}"
+                        id="step2">Started</li>
+                    <li class="step0 {% if order.delivery_set.last.state  == 'Delivering' or order.delivery_set.last.state == 'Shipped' %} active {% endif %} text-center"
+                        id="step3">Deliverying</li>
+                    <li class="step0 text-muted text-right {% if order.delivery_set.last.state == 'Shipped'%} active {% endif %}" id="
+                        step4">Shipped</li>
                 </ul>
             </div>
         </div>

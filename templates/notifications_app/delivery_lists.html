@@ -18,14 +18,16 @@
         <div class="card" style="width: 60rem;">
             <div class="card-body bg-dark">
                 <div class="row text-center">
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                       <a href="{% url 'delivery_list_with_status' status='Confirm' %}" class="text-decoration-none btn-sm {% if Status == 'Confirm' %} btn-light {% else %} btn-primary {% endif %}">Confirmed</a>
                     </div>
-                    <div class="col-sm-4">
-                        <a href="{% url 'delivery_list_with_status' status='Delivering' %}" class="text-decoration-none btn-sm {% if Status == 'Delivering' %} btn-light {% else %} btn-primary {% endif %}">Delivering</a>
-
+                     <div class="col-sm-3">
+                      <a href="{% url 'delivery_list_with_status' status='Started' %}" class="text-decoration-none btn-sm {% if Status == 'Started' %} btn-light {% else %} btn-primary {% endif %}">Started</a>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
+                        <a href="{% url 'delivery_list_with_status' status='Delivering' %}" class="text-decoration-none btn-sm {% if Status == 'Delivering' %} btn-light {% else %} btn-primary {% endif %}">Delivering</a>
+                    </div>
+                    <div class="col-sm-3">
                         <a href="{% url 'delivery_list_with_status' status='Shipped' %}" class="text-decoration-none btn-sm {% if Status == 'Shipped' %} btn-light {% else %} btn-primary {% endif %}">Shipped</a>
 
                     </div>

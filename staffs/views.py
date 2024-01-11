@@ -28,7 +28,7 @@ from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
     get_pagination_records, send_employee_join_email, notify_to_warehouser_owner_email, get_related_url, \
-    send_mail_to_all_managers
+    send_mail_to_all_managers, send_mail_to_delivery_person
 from itertools import chain
 from .models import OrderPrepare, Ledger
 from .wrapper import custom_staff_member_required, admin_or_manager_required
@@ -961,12 +961,18 @@ def create_delivery(request,orderid):
     order = Orders.objects.get(orderid=orderid)
     forms = DeliveryForm(request.POST or None)
     forms.instance.order_id = order.id
-
     if request.method=="POST":
         if forms.is_valid():
             if not order.delivery_set.exists():
                 order.orderprepare_set.update(status='prepared')
+                delivery_person = forms.cleaned_data['delivery_person']
                 forms.save()
+                related_url = get_related_url(request, 'warehouse')
+                Notification.objects.create(sender=request.user, receiver=delivery_person,
+                                            message='Please Pick-up Items,Delivery has been Assigned to you!',
+                                            related_url=related_url
+                                            )
+                send_mail_to_delivery_person(delivery_person,order.delivery_set.all())
                 messages.success(request, f"Your Delivery is Started")
             else:
                 messages.warning(request, f"Already Your Delivery for the order is created")

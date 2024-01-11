@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Delivery Notification</title>
+    <style>
+        /* Add your custom styles here */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        p {
+            line-height: 1.5;
+        }
+
+        /* Add more styles as needed */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Order Delivery Notification</h2>
+        <p>Hello {{ customer.username }},</p>
+
+        <p>We are pleased to inform you that your order is currently in the process of being delivered.</p>
+
+         <p><strong>Order Details:</strong></p>
+
+        {% for prepare_order in prepared_orders %}
+            <ul>
+                <li><strong>Product Name:</strong> {{ prepare_order.product.p_name }} - {{prepare_order.product.product_attribute.}} </li>
+                <li><strong>Quantity:</strong> {{ prepare_order.purchase_qty }}</li>
+            </ul>
+        {% endfor %}
+
+        <p>Your product is on its way to the specified delivery address. Please ensure that someone is available to receive the delivery.</p>
+
+        <p>If you have any questions or concerns regarding your order, feel free to contact our customer support.</p>
+
+        <p>Thank you for choosing us!</p>
+
+        <p>Best regards,</p>
+        <p>The Blink The Wood Studio Team</p>
+    </div>
+</body>
+</html>

@@ -209,15 +209,17 @@ class OrderLines(models.Model):
     selected_product_varient = models.CharField(max_length=100)
 class Delivery(models.Model):
     delivery_state = (('Confirm','Confirm'),
+                      ('Started', 'Started'),
                       ('Delivering','Delivering'),
                       ('Shipped','Shipped'),)
     order = models.ForeignKey(Orders,on_delete=models.CASCADE)
     delivery_id=models.CharField(max_length=50,default=uuid.uuid4)
-    delivery_person = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    delivery_person = models.ForeignKey(User,on_delete=models.CASCADE)
     state=models.CharField(max_length=100,choices=delivery_state,default='Confirm')
     updated_at=models.DateTimeField(auto_now=True)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
+
 
     def save(self, *args, **kwargs):
         if self.pk:

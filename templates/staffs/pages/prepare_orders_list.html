@@ -20,7 +20,7 @@
                     {% for order in orders %}
 
                     <tr class="table-light border-4">
-                        <td class="card"> {{forloop.counter}}</td>
+                        <td><div class="card p-2">{{forloop.counter}}</div> </td>
                         <td colspan="6">
                          {% for prepare_order in order.orderprepare_set.all %}
 
@@ -33,16 +33,16 @@
                                     </div>
                                     {% with orderline_record=prepare_order|get_price_from_prepare_order %}
                                     <div class="row">
-                                         <div class="col-12">
+                                         <div class="col-5">
                                              <h6><span class="fw-bold">Warehouse Name:</span><span> {{prepare_order.warehouse_id.name}}</span></h6>
                                         </div>
-                                         <div class="col-6">
+                                         <div class="col-3">
                                              <h6><span class="fw-bold">Quantity:</span><span>{{prepare_order.purchase_qty}}</span></h6>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-3">
                                             <h6><span class="fw-bold">Unit Price:</span><span>{{orderline_record.unit_price}} Rs.</span></h6>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-3">
                                             <h6><span class="fw-bold">Sub Total :</span><span>{{orderline_record.sub_total_amount}} Rs.</span></h6>
                                         </div>
                                         <div class="col-6">
@@ -53,12 +53,14 @@
                             </div>
 
                         {% endfor %}
-                        </td>
-                        <td>
-                            <div class="col-4">
+                            <div class="d-flex justify-content-around py-2">
                                 <a href="{% url 'update_prepare_order' orderid=order.orderid %}" type="button" class="btn btn-sm btn-primary">Edit</a>
+                                {% if not order.delivery_set.exists %}
+                                 <a href="{% url 'create_delivery' orderid=order.orderid %}" type="button" class="btn btn-sm btn-success">Delivery</a>
+                                {% endif %}
                             </div>
                         </td>
+
                     </tr>
 
                 {% endfor %}

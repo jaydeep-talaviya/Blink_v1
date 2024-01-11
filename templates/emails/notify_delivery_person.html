@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Pickup Notification</title>
+    <style>
+        /* Add your custom styles here */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        p {
+            line-height: 1.5;
+        }
+
+        /* Add more styles as needed */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Product Pickup Notification</h2>
+        <p>Hello {{ delivery_person.username }},</p>
+
+        <p>We hope this message finds you well. You have been assigned to pick up a product from our warehouse for delivery.</p>
+
+        <p><strong>Product Details:</strong></p>
+
+        {% for prepare_order in prepared_orders %}
+        <h5>Order No:- {{forloop.counter}}</h5>
+            <ul>
+                <li><strong>Product Name:</strong> {{ prepare_order.product.p_name }} - {{prepare_order.product.product_attribute.}} </li>
+                <li><strong>Quantity:</strong> {{ prepare_order.purchase_qty }}</li>
+                <li><strong>Warehouse Location:</strong> {{ prepare_order.warehouse_id.name }} - {{ prepare_order.warehouse_id.address }}</li>
+            </ul>
+        {% endfor %}
+
+
+        <p>Please arrive at the warehouse at your earliest convenience to pick up the product and initiate the delivery process.</p>
+
+        <p>If you have any questions or concerns, feel free to contact our customer support.</p>
+
+        <p>Thank you for your dedication and service!</p>
+
+         <p>Best regards,</p>
+        <p>The Blink The Wood Studio Team</p>
+    </div>
+</body>
+</html>
