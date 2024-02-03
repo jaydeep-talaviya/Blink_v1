@@ -54,7 +54,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model=Products
         fields='__all__'
-        exclude = ['product_maker']
+        exclude = ['product_maker','is_qa_verified','is_product_finest']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

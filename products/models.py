@@ -63,6 +63,8 @@ class Products(models.Model):
     photo_6=models.ImageField(upload_to='products',blank=True,null=True)
 
     product_maker = models.ForeignKey(User,on_delete=models.CASCADE,related_name='products')
+    is_qa_verified = models.BooleanField(default=False)
+    is_product_finest = models.BooleanField(default=True) # make it to false on product reject from Qa
 
     def __str__(self):
         return self.p_name + " with "+ self.p_category.category_name

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (product_list, product_update, product_delete,
-                    product_create, create_product_attribute, product_update_attribute,
+                    product_create,product_initialy_create,product_update_by_product_maker,
                     create_attribute, update_attribute, remove_attribute,
                     create_attr_name, product_attribute_list,
                     stock_list, stock_update, stock_create, stock_finish, inform_other_managers,
@@ -28,11 +28,14 @@ urlpatterns = [
     path('user/employee_report/', get_employees_download, name='get_employees_download'),
 
     path('product/',product_list,name='product_list'),
+    path('product/<str:type>',product_list,name='product_list_with_type'),
     path('product/add/',product_create,name='product_create'),
-    path('product/update/<int:id>/',product_update,name='product_update'),
+    path('product/create/', product_initialy_create,name='product_initialy_create'),
+    path('product/edit/<int:id>/',product_update,name='product_update'),
+    path('product/update/<int:id>/',product_update_by_product_maker,name='product_update_by_product_maker'),
     path('product/delete/<int:id>/', product_delete, name='product_delete'),
-    path('product/update/<int:pid>/attribute/create/',create_product_attribute,name='create_product_attribute'),
-    path('product/update/<int:pid>/attribute/update/<int:id>/',product_update_attribute,name='product_update_attribute'),
+    # path('product/update/<int:pid>/attribute/create/',create_product_attribute,name='create_product_attribute'),
+    # path('product/update/<int:pid>/attribute/update/<int:id>/',product_update_attribute,name='product_update_attribute'),
 
     path('attribute/attribute/name/create/',create_attribute_names,name='create_attribute_names'),
 

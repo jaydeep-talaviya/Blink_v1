@@ -87,6 +87,7 @@
                               </div>
                           </div>
                       </div>
+                    {% if formset %}
 		            <table class="table  form-table table-bordered table-sm">
                             <thead class="text-center">
                             <tr>
@@ -123,7 +124,8 @@
                             </tr>
                             </tbody>
                         </table>
-            {{ formset.management_form }}
+                        {{ formset.management_form }}
+                    {% endif %}
 
 
                     <button type="submit" class="btn btn-success"> Submit </button>

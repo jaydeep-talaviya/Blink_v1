@@ -43,7 +43,6 @@ today = date.today()
 @login_required
 @admin_or_manager_required
 def dashboard(request):
-    print(">>>request",hasattr(request.user, 'employee'))
     stocks = Stocks.objects.count()
     warehouses = Warehouse.objects.count()
     employees = Employee.objects.count()
@@ -58,6 +57,12 @@ def dashboard(request):
     product_categories = Category.objects.count()
     product_sub_categories = Subcategory.objects.count()
     products = Products.objects.count()
+
+    product_in_qa = Products.objects.filter(is_qa_verified=False).count()
+    product_qa_verified = Products.objects.filter(is_qa_verified=True).count()
+    product_need_update = Products.objects.filter(is_product_finest=False).count()
+
+
 
     # order chart
     now = datetime.datetime.now()
@@ -86,6 +91,9 @@ def dashboard(request):
         'product_categories':product_categories,
         'product_sub_categories':product_sub_categories,
         'products':products,
+        'product_in_qa':product_in_qa,
+        'product_qa_verified':product_qa_verified,
+        'product_need_update':product_need_update,
         'order_chart':order_chart,
         'orderprepare_chart':orderprepare_chart,
         'expenses_credit_count_by_date':expenses_credit_count_by_date,
@@ -334,61 +342,69 @@ def product_attribute_list(request):
     product_attributes = get_pagination_records(request,product_attributes)
     return render(request,'staffs/pages/product_attribute_list.html',{'product_attributes':product_attributes})
 
-
-##################### ProductAttribute ################
-
-@login_required
-@admin_or_manager_required
-def create_product_attribute(request,pid):
-    product_instance=get_object_or_404(Products,id=pid)
-    if request.method=="POST":
-        forms=ProductChangePriceAttributesForm(request.POST)
-        if forms.is_valid():
-            forms.save(commit=False)
-            attribute_values=forms.cleaned_data['attribute_values']
-            price=forms.cleaned_data['price']
-            product_attribute=ProductChangePriceAttributes(price=price,p_id=product_instance)
-            product_attribute.save()
-            product_attribute.attribute_values.add(*attribute_values)
-            product_attribute.save()
-
-            messages.success(request, f"Your Product is Created")
-            return redirect(product_update,id=pid)
-        else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
-    else:
-        forms=ProductChangePriceAttributesForm()
-        return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
-    return render(request,'staffs/pages/product_attribute.html',{'forms':forms})
-
-@login_required
-@admin_or_manager_required
-def product_update_attribute(request,pid,id):
-    product_instance=get_object_or_404(Products,id=pid)
-    product_attribute_instance=get_object_or_404(ProductChangePriceAttributes,id=id)
-    if request.method=="POST":
-        forms=ProductChangePriceAttributesForm(request.POST,instance=product_attribute_instance)
-        if forms.is_valid():
-            obj=forms.save()
-            obj.p_id_id=pid
-            obj.save()
-            messages.success(request, f"Your Product's Attribute is Updated")
-            return redirect(product_update,id=pid)
-        else:
-            messages.warning(request, f"Please Check Again.Invalid Data")
-            return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
-    else:
-        forms=ProductChangePriceAttributesForm(instance=product_attribute_instance)
-        return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
-    return render(request,'staffs/pages/product_attribute.html',{'forms':forms})
+#
+# ##################### ProductAttribute ################
+#
+# @login_required
+# @admin_or_manager_required
+# def create_product_attribute(request,pid):
+#     product_instance=get_object_or_404(Products,id=pid)
+#     if request.method=="POST":
+#         forms=ProductChangePriceAttributesForm(request.POST)
+#         if forms.is_valid():
+#             forms.save(commit=False)
+#             attribute_values=forms.cleaned_data['attribute_values']
+#             price=forms.cleaned_data['price']
+#             product_attribute=ProductChangePriceAttributes(price=price,p_id=product_instance)
+#             product_attribute.save()
+#             product_attribute.attribute_values.add(*attribute_values)
+#             product_attribute.save()
+#
+#             messages.success(request, f"Your Product is Created")
+#             return redirect(product_update,id=pid)
+#         else:
+#             messages.warning(request, f"Please Check Again.Invalid Data")
+#             return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
+#     else:
+#         forms=ProductChangePriceAttributesForm()
+#         return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
+#     return render(request,'staffs/pages/product_attribute.html',{'forms':forms})
+#
+# @login_required
+# @admin_or_manager_required
+# def product_update_attribute(request,pid,id):
+#     product_instance=get_object_or_404(Products,id=pid)
+#     product_attribute_instance=get_object_or_404(ProductChangePriceAttributes,id=id)
+#     if request.method=="POST":
+#         forms=ProductChangePriceAttributesForm(request.POST,instance=product_attribute_instance)
+#         if forms.is_valid():
+#             obj=forms.save()
+#             obj.p_id_id=pid
+#             obj.save()
+#             messages.success(request, f"Your Product's Attribute is Updated")
+#             return redirect(product_update,id=pid)
+#         else:
+#             messages.warning(request, f"Please Check Again.Invalid Data")
+#             return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
+#     else:
+#         forms=ProductChangePriceAttributesForm(instance=product_attribute_instance)
+#         return render(request,'staffs/pages/product_attribute.html',{"forms":forms})
+#     return render(request,'staffs/pages/product_attribute.html',{'forms':forms})
 
 
 ######################## Product #########################
 @login_required
 @admin_or_manager_required
-def product_list(request):
-    products=Products.objects.all()
+def product_list(request,type=None):
+    if type == None:
+        products=Products.objects.all()
+    elif type == 'in_qa':
+        products = Products.objects.filter(is_qa_verified=False)
+    elif type == 'qa_verified':
+        products = Products.objects.filter(is_qa_verified=True)
+    elif type == 'is_finest':
+        products = Products.objects.filter(is_product_finest=False)
+
     products = get_pagination_records(request,products)
     return render(request,'staffs/pages/product_list.html',{'products':products})
 
@@ -474,6 +490,83 @@ def product_delete(request, id):
     product_instance.delete()
     messages.success(request, f"Your Product has been removed")
     return redirect('product_list')
+
+
+@login_required
+@admin_or_manager_required
+def product_initialy_create(request):
+    forms = ProductForm(request.POST or None, request.FILES or None)
+
+    if request.method=="POST":
+        if forms.is_valid():
+            product_obj=forms.save(commit=False)
+            product_obj.product_maker = request.user
+            product_obj.save()
+
+            managers = Employee.objects.filter(type = 'manager').values('user')
+            related_url = get_related_url(request, 'product',id=id)
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message='New product has been created!',
+                                            related_url=related_url
+                                            )
+
+            qa_employees = Employee.objects.filter(type = 'qa').values('user')
+            related_url = get_related_url(request, 'product_qa')
+            for qa_employee in qa_employees:
+                Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
+                                            message='New product has been created!Please Verify it',
+                                            related_url=related_url
+                                            )
+
+            messages.success(request, f"Your Product is Created")
+            return redirect('product_list')
+        else:
+            messages.warning(request, f"Please Check Again,Invalid Data")
+            return render(request,'staffs/pages/product_update.html',{"forms":forms})
+    else:
+        return render(request,'staffs/pages/product_update.html',{"forms":forms})
+    return render(request,'staffs/pages/product_update.html',{"forms":forms})
+
+@login_required
+@admin_or_manager_required
+def product_update_by_product_maker(request,id):
+    product_instance=get_object_or_404(Products,id=id)
+    forms = ProductForm(request.POST or None, request.FILES or None,instance=product_instance)
+
+    if request.method=="POST":
+        if forms.is_valid():
+            product_obj = forms.save()
+            product_obj.is_qa_verified = False
+            product_obj.is_product_finest=True
+            product_obj.save()
+
+            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            related_url = get_related_url(request, 'product',id=id)
+
+            # notify to each manager.
+            for manager in managers:
+                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                            message=f'{product_obj.p_name} product has been Updated, Please check!',
+                                            related_url=related_url
+                                            )
+
+            qa_employees = Employee.objects.filter(type='qa').values('user')
+            related_url = get_related_url(request, 'product_qa')
+            for qa_employee in qa_employees:
+                Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
+                                            message='New product has been Updated!Please Verify it',
+                                            related_url=related_url
+                                            )
+
+            messages.success(request, f"Your Product is Updated")
+            return redirect('product_list')
+        else:
+            messages.warning(request, f"Please Check Again.Invalid Data")
+            return render(request,'staffs/pages/product_update.html',{"forms":forms,'pid':id})
+    return render(request, 'staffs/pages/product_update.html', {"forms": forms, 'pid':id})
 
 
 ####### Vouchers #####
@@ -600,13 +693,15 @@ def stock_create(request):
         forms=StocksForm(request.POST)
         if forms.is_valid():
             stock = forms.save()
-            admin = User.objects.get_admin()
-            related_url = get_related_url(request, 'stock')
 
-            Notification.objects.create(sender=request.user, receiver=admin,
-                                        message='New Stock has been created!',
-                                        related_url=related_url
-                                        )
+            if not request.user.is_superuser:
+                admin = User.objects.get_admin()
+                related_url = get_related_url(request, 'stock')
+
+                Notification.objects.create(sender=request.user, receiver=admin,
+                                            message='New Stock has been created!',
+                                            related_url=related_url
+                                            )
             managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
 
             # notify to each manager.
@@ -635,12 +730,14 @@ def stock_update(request,id):
         forms=StocksForm(request.POST,instance=stock_instance)
         if forms.is_valid():
             forms.save()
-            admin = User.objects.get_admin()
-            related_url = get_related_url(request, 'stock',id=id)
-            Notification.objects.create(sender=request.user, receiver=admin,
-                                        message='New Stock has been Updated!',
-                                        related_url=related_url
-                                        )
+            if not request.user.is_superuser:
+
+                admin = User.objects.get_admin()
+                related_url = get_related_url(request, 'stock',id=id)
+                Notification.objects.create(sender=request.user, receiver=admin,
+                                            message='Stock has been Updated!',
+                                            related_url=related_url
+                                            )
             managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
             # notify to each manager.
             for manager in managers:
@@ -824,10 +921,8 @@ def create_warehouse(request):
             # send email notification
             notify_to_warehouser_owner_email(request,owner)
             # send notification in websocket
-            manager = Employee.objects.filter(type='manager', user=request.user)
-            if manager:
-                warehouse.is_approved = False
-                warehouse.save()
+
+            if not request.user.is_superuser:
                 admin = User.objects.get_admin()
                 related_url = get_related_url(request,'warehouse')
 
@@ -835,6 +930,9 @@ def create_warehouse(request):
                                             message='New Warehouse has been created!',
                                             related_url=related_url
                                             )
+            else:
+                warehouse.is_approved = True
+                warehouse.save()
             messages.success(request, f"Your Warehouse is Created")
             return redirect('list_warehouses')
         else:

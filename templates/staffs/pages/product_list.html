@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Home{% endblock title %}
 {% block main-content %}
+{% load user_type %}
 <div class="my-5">
     {%include '../partials/breadcrumbs.html'%}
   </div>
@@ -9,7 +10,9 @@
     <div class="d-flex justify-content-center">
         <div class="card table-responsive" style="width: 50rem;">
             <div class="d-flex justify-content-around py-2">
-                <a href="{% url 'product_create' %}" class="btn-sm p-2 btn-primary text-decoration-none">Add New Product</a>
+                {% if request.user|employee_type == 'product_maker' %}
+                <a href="{% url 'product_initialy_create' %}" class="btn-sm p-2 btn-primary text-decoration-none">Add New Product</a>
+                {% endif %}
                 <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
             </div>
             <table class="table ">
@@ -33,8 +36,14 @@
                         <td>
                             <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'product_update' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
+
+                           {% if request.user|employee_type == 'product_maker' %}
+                                   <a href="{% url 'product_update_by_product_maker' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
+                            {% elif request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' %}
+                                   <a href="{% url 'product_update' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
+                            {% endif %}
                                </div>
+                            {% if request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' %}
                                <div>
                                      {% with idx=product.id model_name='Product' %}
                                         {% with dynamic_url='product_delete' %}
@@ -44,6 +53,7 @@
                                     {% endwith %}
 
                                </div>
+                            {% endif %}
                             </div>
                         </td>
                     </tr>
