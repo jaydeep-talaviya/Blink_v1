@@ -167,7 +167,7 @@ class WarehouseForm(forms.ModelForm):
     class Meta:
         model = Warehouse
         fields = '__all__'
-        exclude = ['is_deleted']
+        exclude = ['is_deleted','is_approved']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

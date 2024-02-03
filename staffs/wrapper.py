@@ -19,8 +19,18 @@ def admin_or_manager_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         # Check if the user is an admin or an employee with type 'manager'
-        print('>>>>>>>>step q',hasattr(request.user, 'employee') and request.user.employee.type != 'other')
         if request.user.is_staff or (request.user.is_authenticated and (hasattr(request.user, 'employee') and request.user.employee.type != 'other')):
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "You do not have permission to access this page.")
+            return redirect('home')  # Replace 'home' with the actual URL you want to redirect unauthorized users to
+    return _wrapped_view
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        # Check if the user is an admin or an employee with type 'manager'
+        if request.user.is_staff and request.user.is_authenticated:
             return view_func(request, *args, **kwargs)
         else:
             messages.error(request, "You do not have permission to access this page.")

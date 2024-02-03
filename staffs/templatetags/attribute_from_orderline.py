@@ -43,5 +43,5 @@ def get_warehouse_from_orderline(record):
 
 @register.filter(name='get_selected_warehouses')
 def get_selected_warehouses(orderprepare):
-    warehouses = Warehouse.objects.filter(stocks__product_id=orderprepare.stock_id.product_id,stocks__product_attributes = orderprepare.stock_id.product_attributes,is_deleted=False).distinct()
+    warehouses = Warehouse.objects.filter(stocks__product_id=orderprepare.stock_id.product_id,stocks__product_attributes = orderprepare.stock_id.product_attributes,is_deleted=False,is_approved=True).distinct()
     return warehouses

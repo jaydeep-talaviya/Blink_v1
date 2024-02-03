@@ -8,7 +8,7 @@
     {%include '../partials/breadcrumbs.html'%}
   </div>
 <div class="container mb-5">
-    <h3 class="text-decoration-underline text-dark fw-bold text-center">Deleted Warehouses</h3>
+    <h3 class="text-decoration-underline text-dark fw-bold text-center">Approval Waiting Warehouses</h3>
 
         <div class="d-flex justify-content-around py-2">
             <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
@@ -41,18 +41,8 @@
                         <td>
                             <div class="d-flex justify-content-around align-items-center">
                                <div>
-                                <a href="{% url 'approve_or_cancel_warehouse' id=warehouse.id type='cancel' %}" class="btn-sm p-2 btn-primary text-decoration-none">Cancel</a>
+                                <a href="{% url 'approve_or_cancel_warehouse' id=warehouse.id type='approve' %}" class="btn-sm p-2 btn-primary text-decoration-none">Approve</a>
                                </div>
-                                    <div>
-                                     {% with idx=warehouse.id model_name='Warehouse' %}
-                                        {% with dynamic_url='delete_warehouse' %}
-                                            {% url dynamic_url id=idx as delete_url %}
-                                            {% include '../partials/common_delete.html' %}
-                                        {% endwith %}
-                                    {% endwith %}
-                               </div>
-
-
 
                             </div>
                         </td>

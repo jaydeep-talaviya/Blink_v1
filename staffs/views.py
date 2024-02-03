@@ -31,7 +31,7 @@ from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, 
     send_mail_to_all_managers, send_mail_to_delivery_person
 from itertools import chain
 from .models import OrderPrepare, Ledger
-from .wrapper import custom_staff_member_required, admin_or_manager_required
+from .wrapper import custom_staff_member_required, admin_or_manager_required, admin_required
 
 geolocator = Nominatim(user_agent="Blink")
 
@@ -816,20 +816,25 @@ def create_warehouse(request):
     forms = WarehouseForm(request.POST or None)
     if request.method=="POST":
         if forms.is_valid():
-            forms.save()
+            warehouse = forms.save()
             owner = forms.cleaned_data['owner']
             owner.is_active = True
             owner.save()
+
             # send email notification
             notify_to_warehouser_owner_email(request,owner)
             # send notification in websocket
-            admin = User.objects.get_admin()
-            related_url = get_related_url(request,'warehouse')
+            manager = Employee.objects.filter(type='manager', user=request.user)
+            if manager:
+                warehouse.is_approved = False
+                warehouse.save()
+                admin = User.objects.get_admin()
+                related_url = get_related_url(request,'warehouse')
 
-            Notification.objects.create(sender=request.user,receiver=admin,
-                                        message='New Warehouse has been created!',
-                                        related_url=related_url
-                                        )
+                Notification.objects.create(sender=request.user,receiver=admin,
+                                            message='New Warehouse has been created!',
+                                            related_url=related_url
+                                            )
             messages.success(request, f"Your Warehouse is Created")
             return redirect('list_warehouses')
         else:
@@ -840,7 +845,7 @@ def create_warehouse(request):
 @login_required
 @admin_or_manager_required
 def list_warehouses(request):
-    warehouses=Warehouse.objects.filter(is_deleted=False)
+    warehouses=Warehouse.objects.filter(is_deleted=False,is_approved=True)
     warehouses = get_pagination_records(request,warehouses)
     return render(request,'staffs/pages/warehouse_list.html',{'warehouses':warehouses})
 
@@ -863,6 +868,10 @@ def update_warehouse(request,id):
 @admin_or_manager_required
 def delete_warehouse(request, id):
     warehouse_instance = Warehouse.objects.filter(id=id)
+    if warehouse_instance.filter(stocks__isnull=False).exists():
+        messages.warning(request, f"Your Warehouse have available stock please remove it first!")
+        return redirect('list_warehouses')
+
     if not request.user.is_superuser:
         warehouse_instance.update(is_deleted=True)
     else:
@@ -871,11 +880,30 @@ def delete_warehouse(request, id):
     return redirect('list_warehouses')
 
 @login_required
-@admin_or_manager_required
+@admin_required
+def approve_or_cancel_warehouse(request,id,type):
+    warehouse_instance = Warehouse.objects.filter(id=id)
+    if type == 'approve':
+        warehouse_instance.update(is_approved=True)
+        return redirect('list_approval_need_warehouses')
+    else:
+        warehouse_instance.update(is_deleted=False)
+        return redirect('list_deleted_warehouses')
+
+
+@login_required
+@admin_required
 def list_deleted_warehouses(request):
     warehouses=Warehouse.objects.filter(is_deleted=True)
     warehouses = get_pagination_records(request,warehouses)
     return render(request,'staffs/pages/warehouse_deleted_list.html',{'warehouses':warehouses})
+
+@login_required
+@admin_required
+def list_approval_need_warehouses(request):
+    warehouses=Warehouse.objects.filter(is_deleted=False,is_approved=False)
+    warehouses = get_pagination_records(request,warehouses)
+    return render(request,'staffs/pages/warehouse_approval_list.html',{'warehouses':warehouses})
 
 
 ##################################################

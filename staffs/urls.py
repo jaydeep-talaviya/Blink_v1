@@ -3,21 +3,22 @@ from .views import (product_list, product_update, product_delete,
                     product_create, create_product_attribute, product_update_attribute,
                     create_attribute, update_attribute, remove_attribute,
                     create_attr_name, product_attribute_list,
-                    stock_list, stock_update, stock_create,stock_finish,inform_other_managers,
+                    stock_list, stock_update, stock_create, stock_finish, inform_other_managers,
                     orderlists, single_order, paymentlists,
                     create_attribute_names, update_attribute_names, remove_attribute_names, list_attribute_name,
                     get_attribute_values,
                     create_category, update_category, list_category, remove_category,
                     create_sub_category, update_sub_category, list_sub_category, remove_sub_category,
                     create_voucher, list_vouchers, update_voucher, delete_voucher, update_status_voucher,
-                    create_employee,list_employees,update_employee,delete_employee,
-                    create_employee_salary,employee_salary_list,update_employee_salary,delete_employee_salary,
-                    create_warehouse,list_warehouses,update_warehouse,delete_warehouse,list_deleted_warehouses,
-                    prepare_order,prepare_order_dynamic_content,
-                    get_product_by_warehouse,get_product_attrs_by_product_warehouse,
-                    list_prepare_orders,create_delivery,update_prepare_order,
-                    list_of_ledgers,create_other_ledgers,update_other_ledgers,
-                    custom_log_view,dashboard,get_employees_download
+                    create_employee, list_employees, update_employee, delete_employee,
+                    create_employee_salary, employee_salary_list, update_employee_salary, delete_employee_salary,
+                    create_warehouse, list_warehouses, update_warehouse, delete_warehouse, list_deleted_warehouses,
+                    approve_or_cancel_warehouse, list_approval_need_warehouses,
+                    prepare_order, prepare_order_dynamic_content,
+                    get_product_by_warehouse, get_product_attrs_by_product_warehouse,
+                    list_prepare_orders, create_delivery, update_prepare_order,
+                    list_of_ledgers, create_other_ledgers, update_other_ledgers,
+                    custom_log_view, dashboard, get_employees_download
                     )
 
 urlpatterns = [
@@ -101,6 +102,8 @@ urlpatterns = [
     path('warehouse/update/<int:id>', update_warehouse, name='update_warehouse'),
     path('warehouse/remove/<int:id>', delete_warehouse, name='delete_warehouse'),
     path('warehouse/deleted/', list_deleted_warehouses, name='list_deleted_warehouses'),
+    path('warehouse/approval/', list_approval_need_warehouses, name='list_approval_need_warehouses'),
+    path('warehouse/approvel/<int:id>/<str:type>', approve_or_cancel_warehouse, name='approve_or_cancel_warehouse'),
 
     #### prepare orders
     path('prepare_order/', list_prepare_orders, name='list_prepare_orders'),

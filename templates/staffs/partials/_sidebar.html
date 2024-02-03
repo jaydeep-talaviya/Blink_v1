@@ -57,6 +57,7 @@
                                             <a class="nav-link" href="{% url 'list_warehouses' %}">Warehouses</a>
                                             {% if request.user.is_superuser %}
                                             <a class="nav-link" href="{% url 'list_deleted_warehouses' %}">Deleted Warehouses</a>
+                                            <a class="nav-link" href="{% url 'list_approval_need_warehouses' %}">Approval Warehouses</a>
                                             {% endif %}
                                         </nav>
                                     </div>
