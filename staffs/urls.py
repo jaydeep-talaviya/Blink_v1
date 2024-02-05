@@ -18,7 +18,8 @@ from .views import (product_list, product_update, product_delete,
                     get_product_by_warehouse, get_product_attrs_by_product_warehouse,
                     list_prepare_orders, create_delivery, update_prepare_order,
                     list_of_ledgers, create_other_ledgers, update_other_ledgers,
-                    custom_log_view, dashboard, get_employees_download
+                    custom_log_view, dashboard, get_employees_download,
+                    product_verify_or_reject
                     )
 
 urlpatterns = [
@@ -34,6 +35,8 @@ urlpatterns = [
     path('product/edit/<int:id>/',product_update,name='product_update'),
     path('product/update/<int:id>/',product_update_by_product_maker,name='product_update_by_product_maker'),
     path('product/delete/<int:id>/', product_delete, name='product_delete'),
+
+    path('product/verify/<int:id>/<str:type>',product_verify_or_reject,name='product_verify_or_reject'),
     # path('product/update/<int:pid>/attribute/create/',create_product_attribute,name='create_product_attribute'),
     # path('product/update/<int:pid>/attribute/update/<int:id>/',product_update_attribute,name='product_update_attribute'),
 

@@ -41,6 +41,11 @@
                                    <a href="{% url 'product_update_by_product_maker' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                             {% elif request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' %}
                                    <a href="{% url 'product_update' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
+                           {% elif request.user|employee_type == 'qa' %}
+                                   {% if not product.is_qa_verified and product.is_product_finest %}
+                                       <a href="{% url 'product_verify_or_reject' id=product.id type='verified' %}" class="btn-sm p-2 btn-primary text-decoration-none">Verified</a>
+                                       <a href="{% url 'product_verify_or_reject' id=product.id type='reject' %}" class="btn-sm p-2 btn-danger text-decoration-none">Reject</a>
+                                    {% endif %}
                             {% endif %}
                                </div>
                             {% if request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' %}

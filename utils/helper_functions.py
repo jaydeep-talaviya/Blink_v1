@@ -234,7 +234,7 @@ def get_related_url(request,purpose,id=None):
         if id:
             base_url = request.build_absolute_uri(reverse('orderlists_with_status',kwargs={'status':'order_shipped'}))
     if purpose == 'product_qa':
-        base_url = request.build_absolute_uri(reverse('product_list'))
+        base_url = request.build_absolute_uri(reverse('product_list_with_type',kwargs={'type':'in_qa'}))
     return base_url
 
 def send_mail_to_all_managers(creater_manager,managers_emails):

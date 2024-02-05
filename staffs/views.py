@@ -58,7 +58,7 @@ def dashboard(request):
     product_sub_categories = Subcategory.objects.count()
     products = Products.objects.count()
 
-    product_in_qa = Products.objects.filter(is_qa_verified=False).count()
+    product_in_qa = Products.objects.filter(is_qa_verified=False,is_product_finest=True).count()
     product_qa_verified = Products.objects.filter(is_qa_verified=True).count()
     product_need_update = Products.objects.filter(is_product_finest=False).count()
 
@@ -399,7 +399,7 @@ def product_list(request,type=None):
     if type == None:
         products=Products.objects.all()
     elif type == 'in_qa':
-        products = Products.objects.filter(is_qa_verified=False)
+        products = Products.objects.filter(is_qa_verified=False,is_product_finest=True)
     elif type == 'qa_verified':
         products = Products.objects.filter(is_qa_verified=True)
     elif type == 'is_finest':
@@ -407,6 +407,26 @@ def product_list(request,type=None):
 
     products = get_pagination_records(request,products)
     return render(request,'staffs/pages/product_list.html',{'products':products})
+
+@login_required
+@admin_or_manager_required
+def product_verify_or_reject(request,id,type):
+    product_instance=get_object_or_404(Products,id=id)
+    if type == 'verified':
+        product_instance.is_qa_verified=True
+        product_instance.is_product_finest=True
+        product_instance.save()
+    else:
+        product_instance.is_qa_verified = False
+        product_instance.is_product_finest = False
+        product_instance.save()
+        # notify to Qa to product maker
+        related_url = get_related_url(request, 'product', id=product_instance.id)
+        Notification.objects.create(sender=request.user, receiver_id=product_instance.product_maker.id,
+                                    message=f'{product_instance.p_name} product has been Rejected!, Please check!',
+                                related_url=related_url
+                                )
+    return redirect(product_list,type='in_qa')
 
 
 def get_attribute_values(request):
@@ -464,16 +484,27 @@ def product_update(request,id):
             formset.instance = product_obj
             formset.save()
 
-            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
-            related_url = get_related_url(request, 'product',id=id)
 
             # notify to each manager.
-            for manager in managers:
-                Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
-                                            message=f'{product_obj.p_name} product has been Updated, Please check!',
-                                            related_url=related_url
-                                            )
+            if forms.has_changed():
+                product_obj.is_qa_verified=False
+                product_obj.is_product_finest=True
+                product_obj.save()
+                managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+                related_url = get_related_url(request, 'product', id=id)
 
+                for manager in managers:
+                    Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                                message=f'{product_obj.p_name} product has been Updated, Please check!',
+                                                related_url=related_url
+                                                )
+                qa_employees = Employee.objects.filter(type='qa').values('user')
+                related_url = get_related_url(request, 'product_qa')
+                for qa_employee in qa_employees:
+                    Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
+                                                message='New product has been Updated!Please Verify it',
+                                                related_url=related_url
+                                                )
 
             messages.success(request, f"Your Product is Updated")
             return redirect('product_list')
