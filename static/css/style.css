@@ -77,3 +77,14 @@ ul.pagination li a{
     border-radius: 3%;
 
 }
+
+body,html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.main_wrapper {
+flex:1;
+}

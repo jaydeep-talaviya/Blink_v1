@@ -2,24 +2,82 @@
 {% load static %}
 {% block title %}Payment Status{% endblock title %}
 {% block main-content %}
+
+
+{% if not response and not error %}
 <div class="container">
     <div class="row my-3">
         <div class="col-sm-6 offset-sm-3">
-            <h3>Your Order is Created But Payment Failed!</h3>
+            <h3>Something wrong happend! Please Try again</h3>
             <hr>
-            <div class="mb-3">
-                <h3>Payment status regarding your order Id {{response.ORDERID}}</h3>
-            </div>
-            {% if response.RESPCODE == '01' %}
-            <p class="text-dark text-center">Your Playment Is Successfully Received!</p>
-            {% endif%}
-            {% if response.RESPCODE == '402' %}
-            <p class="text-dark text-center">Your Playment Is Not Received! Due to {{response.RESPMSG}}</p>
-            {% endif%}
-            <a href="{% url 'orderviews' orderid=response.ORDERID %}" class="btn btn-primary mt-4">See Your Order</a>
-            <br>
         </div>
     </div>
 </div>
+{% endif %}
 
+{% if response.status == 'Success' %}
+<div class="container">
+    <div class="row my-3">
+        <div class="col-sm-6 offset-sm-3">
+            <h3>Your Order is Created!</h3>
+            <hr>
+            <div class="mb-3">
+                <h3>Payment has been successful for your order.</h3>
+                <h5><a href="{% url 'single_order' order_id=response.payment.order_id.orderid  %}" > Click here </a> , to check Your Order Details</h5>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if response.status == 'Failure' %}
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col-sm-6 offset-sm-3">
+            <h3>Your Order is Created! But Payment has been Failed!</h3>
+            <hr>
+            <div class="mb-3">
+                <h4>No Worry, You can do Repayment By <a href="{% url 'order_re_payment' orderid=response.payment.order_id.orderid %}"> Clicking Here. </a></h4>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Payment Error</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>Error Code:</strong> {{ error.code }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Error Description:</strong> {{ error.description }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Error Source:</strong> {{ error.source }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Error Step:</strong> {{ error.step }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Error Reason:</strong> {{ error.reason }}
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock main-content %}

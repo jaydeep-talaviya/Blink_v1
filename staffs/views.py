@@ -814,7 +814,7 @@ def single_order(request,order_id):
 
 @login_required
 @admin_or_manager_required
-def paymentlists(request,status='SUCCESS'):
+def paymentlists(request,status='Success'):
     payments=Payment.objects.filter(status=status)
     payments = get_pagination_records(request,payments)
     return render(request,'staffs/pages/paymentlists.html',{'paymentlist':payments,'Status':status})

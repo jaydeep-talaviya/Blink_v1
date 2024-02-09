@@ -18,7 +18,6 @@ from django.conf import settings
 MERCHANT_KEY = 'Z9uzcquqrxUuNErK'
 
 # import checksum generation utility
-# You can get this utility from https://developer.paytm.com/docs/checksum/
 from paytmchecksum import PaytmChecksum
 from staffs.middleware import get_current_user, get_request
 
@@ -80,7 +79,7 @@ def change_order_status(sender, instance, created, **kwargs):
         instance.order.save()
         if instance.order.payment_set.last().status == 'Pending':
             payment=instance.order.payment_set.last()
-            payment.status = 'SUCCESS'
+            payment.status = 'Success'
             payment.save()
         create_ledger = Ledger(ledger_type='order', order_id_id=instance.order.id)
         create_ledger.save()

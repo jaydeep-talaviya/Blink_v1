@@ -1,0 +1,53 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Payment Screening{% endblock title %}
+{% block main-content %}
+<h1>Redirecting you to the merchant....</h1>
+<h1>Please do not refresh your page....</h1>
+<form method="POST">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+    var options = {
+        key: "{{razorpay_key}}",
+        amount: "{{transaction.amount}}",
+        currency: "INR",
+        name: " {{order.order.first.product_id.p_name}} {% if order.order.count != 1 %} + {{order.order.count |add:"-1" }} others {% endif %}",
+        description: "Thank You For Your Transaction",
+        image: "{{logo}}",
+        order_id: "{{transaction.provider_order_id}}",
+        callback_url: "{{callback_url}}",
+        redirect: true,
+        prefill: {
+            "name": "{{request.user.username}}",
+            "email": "{{request.user.email}}",
+            "contact":  "{{request.user.phone_number}}"
+        },
+         "handler": function (response){
+            alert(response.razorpay_payment_id);
+            alert(response.razorpay_order_id);
+            alert(response.razorpay_signature)
+        },
+        notes: {
+            "address": "Razorpay Corporate Office"
+        },
+        theme: {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    console.log(">>>>>razor",rzp1)
+    rzp1.on('payment.failed', function (response){
+        console.log(response.error.code);
+        console.log(response.error.description);
+        console.log(response.error.source);
+        console.log(response.error.step);
+        console.log(response.error.reason);
+        console.log(response.error.metadata.order_id);
+        console.log(response.error.metadata.payment_id);
+});
+    rzp1.open();
+    </script>
+    <input type="hidden" custom="Hidden Element" name="hidden">
+</form>
+{% endblock main-content %}
+

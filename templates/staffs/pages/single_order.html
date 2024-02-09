@@ -10,9 +10,7 @@
 <link type="text/css" href="{% static 'css/orderviews.css' %}" rel="stylesheet" />
 
 <div class="container-fluid my-5 d-sm-flex justify-content-center">
-         <div class="d-flex justify-content-around py-2">
-            <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
-        </div>
+
 
     <div class="card px-2">
         <div class="card-header bg-white">
@@ -43,10 +41,15 @@
 
                 </div>
                 <div class="col my-auto">
-
-                    <h6 class="ml-auto mr-3"> <a class="btn-sm btn-success text-decoration-none p-2"
+                    <div class="d-flex justify-content-around py-2">
+                        <a href="#" onclick="window.history.back();" type="button" class="btn-sm text-decoration-none btn-danger">Go Back</a>
+                    </div>
+                    <h6 class="text-center py-2"> <a class="btn-sm btn-success text-decoration-none p-2"
                             href="{% url 'receipt' order.orderid %}">Generate Receipt</a> </h6>
-
+                    {% if request.user.id == order.user.id %}
+                    <h6 class="text-center"> <a class="btn-sm btn-danger text-decoration-none p-2"
+                            href="{% url 'order_re_payment' orderid=order.orderid %} ">Pay Again</a> </h6>
+                        {% endif %}
                 </div>
             </div>
         </div>

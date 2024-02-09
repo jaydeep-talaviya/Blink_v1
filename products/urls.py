@@ -6,10 +6,10 @@ from .views import (productlist,productdetail, return_policy,
                     orderviews,html_to_pdf_view,
                     productlist_sortby,search,
                     cancle_order,
-                    return_policy,terms_and_conditions,about,contact,createorder,
+                    return_policy,terms_and_conditions,about,contact,create_order,
                     handlerequest,order_re_payment,
                     send_otp,match_otp,otp_order_failed,verified_created_order,get_discounted_price,
-                    get_total_vouchers)
+                    get_total_vouchers,callback)
 
 urlpatterns = [
     path('search',search,name='search'),
@@ -43,7 +43,9 @@ urlpatterns = [
     path('about',about,name="about"),
     path('contact',contact,name="contact"),
 
-    path('createorder',createorder,name="createorder"),
+    path('create_order',create_order,name="create_order"),
+    path("razorpay/callback/", callback, name="callback"),
+
     path("handlerequest", handlerequest, name="HandleRequest"),
     path('order/repayment/<str:orderid>',order_re_payment,name="order_re_payment"),
 

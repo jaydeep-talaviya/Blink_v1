@@ -1,12 +1,15 @@
+import json
 from datetime import datetime
+
+import razorpay
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 
-from ecommerce_blink.settings import MERCHANT_KEY
+from ecommerce_blink.settings import MERCHANT_KEY, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
 from notifications_app.models import Notification
 from utils.helper_functions import get_voucher_discount, get_paginator, get_related_url
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
-    Vouchers
+    Vouchers, Transaction
 from django.db.models import Avg,Count,Max,Min
 from users.models import User, Employee
 from django.urls import reverse
@@ -33,6 +36,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib import messages
 from datetime import date
+from django.templatetags.static import static
+
 today = date.today()
 
 
@@ -362,16 +367,16 @@ def productcartupdateremove(request):
         return render(request, 'products/cart_temp.html', {'cart': cart})
 
 @login_required
-def createorder(request):
+def create_order(request):
     cart=Cart.objects.filter(user_id=request.user)
     checkout=request.user.checkout_set.last()
     if len(cart)!=0 and checkout.payment_type == 'paytm':
-        orders = Orders.objects.create(checkout=checkout, order_status='order_confirm', user=request.user, amount=0,
+        order = Orders.objects.create(checkout=checkout, order_status='order_confirm', user=request.user, amount=0,
                                        vouchers=cart.last().vouchers if cart.last().vouchers else None)
         amount=0
         for c in cart:
             OrderLines.objects.create(product_id=c.product_id, qty=c.qty, unit_price=c.price,
-                                      sub_total_amount=c.qty * c.price, order_id=orders,selected_product_varient=c.selected_product_varient)
+                                      sub_total_amount=c.qty * c.price, order_id=order,selected_product_varient=c.selected_product_varient)
             amount += c.qty * c.price
 
         voucher = cart.last().vouchers
@@ -382,45 +387,117 @@ def createorder(request):
             print('>> something went wrong')
         amount=amount-discount_amount
 
-        Payment.objects.create(user=orders.user, order_id=orders, payment_method='Online', status='Pending')
-        orders.amount = amount
-        orders.total_discount = discount_amount
-        orders.payment_failed = False
-        orders.save()
+        payment = Payment(user=order.user, order_id=order, payment_method='Online', status='Pending')
+        payment.save()
+        order.amount = amount
+        order.total_discount = discount_amount
+        order.payment_failed = False
+        order.save()
 
-        param_dict = {
-                'MID': settings.MID,
-                'ORDER_ID': str(orders.orderid),
-                'TXN_AMOUNT': str(orders.amount), #change after test
-                'CUST_ID': request.user.email, # check users mail
-                'INDUSTRY_TYPE_ID': settings.INDUSTRY_TYPE_ID,
-                'WEBSITE': settings.WEBSITE,
-                'CHANNEL_ID': settings.CHANNEL_ID,
-                'CALLBACK_URL': settings.CALLBACK_URL,
-                }
-        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, settings.MERCHANT_KEY)
-        return render(request, 'products/paytm.html', {'param_dict': param_dict})
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        razorpay_order = client.order.create(
+            {"amount": int(amount) * 100, "currency": "INR", "payment_capture": "1"}
+        )
+        print(">>>>>>>>>razorpay_order\n\n\n",razorpay_order)
+        transaction = Transaction.objects.create(
+            payment=payment, amount=amount, provider_order_id=razorpay_order.get('id')
+        )
+        transaction.save()
+        param_dict={
+                "callback_url": "http://" + "127.0.0.1:8000" + "/razorpay/callback/",
+                "razorpay_key": RAZORPAY_KEY_ID,
+                "transaction": transaction,
+                "order": order,
+                'logo' : static('images/kimchi.png')
+        }
+        cart.delete()
+        print(">>>>>>>>>>>\n\n\n",static('images/kimchi.png'))
+        return render(request,"products/payment.html",param_dict)
     else:
         messages.error(request, "Something Went Wrong! Please Try again, Thank You")
     return redirect('checkout')
-            
+
+
+@csrf_exempt
+def callback(request):
+    def verify_signature(response_data):
+        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        result = client.utility.verify_payment_signature(response_data)
+        print(">>>result",result)
+        return result
+    print(">>>>>>request",request.GET,request.POST)
+    if "razorpay_signature" in request.POST:
+        transaction_payment_id = request.POST.get("razorpay_payment_id", "")
+        provider_order_id = request.POST.get("razorpay_order_id", "")
+        signature_id = request.POST.get("razorpay_signature", "")
+        transaction = Transaction.objects.get(provider_order_id=provider_order_id)
+        transaction.transaction_payment_id = transaction_payment_id
+        transaction.signature_id = signature_id
+        transaction.save()
+        print(">>>>>step 1....",request.POST)
+        if verify_signature(request.POST):
+            print(">>>>>step 2....")
+            transaction.status = 'Success'
+            transaction.save()
+            payment=transaction.payment
+            payment.status = ""
+            print(">>>>>>>>request.user",request.user)
+            return render(request, 'products/paymentstatus.html', {'response': transaction})
+
+        else:
+            print(">>>>>step 3....",request.POST)
+
+            transaction.status = 'Failure'
+            transaction.save()
+            return render(request, 'products/paymentstatus.html', {'response': transaction})
+
+    else:
+        print(">>>>>step 4....",request.POST,type(request.POST))
+        if dict(request.POST) == {}:
+            messages.error(request,"Something Gets wrong!")
+            return render(request, 'products/paymentstatus.html',{"response":None,"error":None})
+        transaction_payment_id = json.loads(request.POST.get("error[metadata]")).get("payment_id")
+        provider_order_id = json.loads(request.POST.get("error[metadata]")).get(
+            "order_id"
+        )
+        transaction = Transaction.objects.get(provider_order_id=provider_order_id)
+        transaction.transaction_payment_id = transaction_payment_id
+        transaction.status = 'Failure'
+        transaction.save()
+        error = {
+            "code":request.POST.get("error[code]"),
+            "description":request.POST.get("error[description]"),
+            "source":request.POST.get("error[source]"),
+            "step":request.POST.get("error[step]"),
+            "reason":request.POST.get("error[reason]"),
+
+        }
+        return render(request, 'products/paymentstatus.html', {'response': transaction,'error':error})
+
+@login_required
 def order_re_payment(request,orderid):
     order=Orders.objects.get(orderid=orderid)
     order.orderid=uuid.uuid4()
     order.save()
-    param_dict = {
-                'MID': settings.MID,
-                'ORDER_ID': str(order.orderid),
-                'TXN_AMOUNT': str(order.amount), #change after test
-                'CUST_ID': request.user.email, # check users mail
-                'INDUSTRY_TYPE_ID': settings.INDUSTRY_TYPE_ID,
-                'WEBSITE': settings.WEBSITE,
-                'CHANNEL_ID': settings.CHANNEL_ID,
-                'CALLBACK_URL': settings.CALLBACK_URL,
-                }
+    payment = Payment(user=order.user, order_id=order, payment_method='Online', status='Pending')
+    payment.save()
 
-    param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)    
-    return render(request, 'products/paytm.html', {'param_dict': param_dict})
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    razorpay_order = client.order.create(
+        {"amount": int(order.amount) * 100, "currency": "INR", "payment_capture": "1"}
+    )
+    transaction = Transaction(
+        payment=payment, amount=order.amount, provider_order_id=razorpay_order.get('id')
+    )
+    transaction.save()
+    param_dict = {
+        "callback_url": "http://" + "127.0.0.1:8000" + "/razorpay/callback/",
+        "razorpay_key": RAZORPAY_KEY_ID,
+        "transaction": transaction,
+        "order": order,
+        'logo': static('images/kimchi.png')
+    }
+    return render(request, 'products/payment.html',  param_dict)
 
 @csrf_exempt
 def handlerequest(request):
@@ -441,7 +518,7 @@ def handlerequest(request):
                 orders.payment_failed=False
                 orders.order_status='order_confirm'
                 orders.save()
-                Payment.objects.create(user=orders.user,order_id=orders,payment_method='Online',status='SUCCESS',txnId=response_dict['TXNID'])
+                Payment.objects.create(user=orders.user,order_id=orders,payment_method='Online',status='Success',txnId=response_dict['TXNID'])
                 messages.success(request, "Your Order is Updated And Paid by You, Thanks for Purchasing!")
 
                 return redirect('orderviews',orderid=orders.orderid)
@@ -481,7 +558,7 @@ def checkout_details(request):
                     return redirect('send_otp')
             # save the form data to model
                 else:
-                    return redirect("createorder")
+                    return redirect("create_order")
                     # print("payment other types")
             else:
                 messages.error(request, "Invalid Creadentials,Try Again")
@@ -506,7 +583,7 @@ def checkout_details(request):
             else:
                 # messages.warning(request, "Please Try Again, Something Went Wrong!")
                 messages.info(request, "Updated Form With Your New Changes")
-                return redirect("createorder")
+                return redirect("create_order")
     else:
         try:
             checkoutform=CheckoutForm(instance=checkout[0])

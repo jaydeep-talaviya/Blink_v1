@@ -22,24 +22,24 @@
             <div class="card-body bg-dark">
                 <div class="row text-center">
                     <div class="col-sm-3">
-                      <a href="{% url 'orderlists_with_status' status='order_confirm' %}" class="text-decoration-none btn-sm {% if Status == 'order_confirm' %} btn-light {% else %} btn-primary {% endif %}">Order Confirmed</a>
+                      <a href="{% url 'orderlists_with_status' status='order_confirm' %}" class="text-decoration-none btn-sm btn {% if Status == 'order_confirm' %} btn-light {% else %} btn-primary {% endif %}">Order Confirmed</a>
                     </div>
                      <div class="col-sm-3">
-                      <a href="{% url 'orderlists_with_status' status='order_prepared' %}" class="text-decoration-none btn-sm {% if Status == 'order_prepared' %} btn-light {% else %} btn-primary {% endif %}">Order Prepared</a>
+                      <a href="{% url 'orderlists_with_status' status='order_prepared' %}" class="text-decoration-none btn-sm btn {% if Status == 'order_prepared' %} btn-light {% else %} btn-primary {% endif %}">Order Prepared</a>
                     </div>
                     <div class="col-sm-3">
-                        <a href="{% url 'orderlists_with_status' status='order_cancel' %}" class="text-decoration-none btn-sm {% if Status == 'order_cancel' %} btn-light {% else %} btn-primary {% endif %}">Order canceled</a>
+                        <a href="{% url 'orderlists_with_status' status='order_cancel' %}" class="text-decoration-none btn-sm btn {% if Status == 'order_cancel' %} btn-light {% else %} btn-primary {% endif %}">Order canceled</a>
 
                     </div>
                     <div class="col-sm-3">
-                        <a href="{% url 'orderlists_with_status' status='order_delivering' %}" class="text-decoration-none btn-sm {% if Status == 'order_delivering' %} btn-light {% else %} btn-primary {% endif %}">Order Delivering</a>
+                        <a href="{% url 'orderlists_with_status' status='order_delivering' %}" class="text-decoration-none btn-sm btn {% if Status == 'order_delivering' %} btn-light {% else %} btn-primary {% endif %}">Order Delivering</a>
 
                     </div>
 
                 </div>
                  <div class="row text-center py-2">
                      <div class="">
-                        <a href="{% url 'orderlists_with_status' status='order_shipped' %}" class="text-decoration-none btn-sm {% if Status == 'order_shipped' %} btn-light {% else %} btn-primary {% endif %}">Order Shipped</a>
+                        <a href="{% url 'orderlists_with_status' status='order_shipped' %}" class="text-decoration-none btn-sm btn {% if Status == 'order_shipped' %} btn-light {% else %} btn-primary {% endif %}">Order Shipped</a>
                     </div>
                  </div>
             </div>
@@ -73,11 +73,17 @@
                             <span class="fw-bold">Payment Status:</span> {{order.payment_set.last.status}} 
                         </div>
                         <div class="col-sm-4">
+                            <span class="fw-bold">Payment Status:</span> {{order.payment_set.last.payment_method}}
+                        </div>
+
+                        <div class="col-sm-4">
                             <a href="{% url 'single_order' order_id=order.orderid  %}"
                                 class="text-decoration-none btn-sm btn-primary">Check Order</a>
                             {% if not order.orderprepare_set.exists and order.order_status == 'order_confirm' %}
-                             <a href="{% url 'prepare_order' order_id=order.orderid  %}"
-                                class="text-decoration-none btn-sm btn-primary">Create Prepare Order</a>
+                                {% if order.payment_set.last.payment_method == 'Offline'  or order.payment_set.last.payment_method == 'Online' and order.payment_set.last.status == 'Success' %}
+                                    <a href="{% url 'prepare_order' order_id=order.orderid  %}"
+                                    class="text-decoration-none btn-sm btn-primary">Create Prepare Order</a>
+                                {% endif %}
                             {% endif %}
                         </div>
 

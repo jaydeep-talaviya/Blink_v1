@@ -10,6 +10,7 @@ from django.conf import settings
 import uuid
 
 from utils.helper_functions import get_voucher_discount
+from django.utils.translation import gettext_lazy as _
 
 
 class Warehouse(models.Model):
@@ -252,5 +253,34 @@ class Payment(models.Model):
     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     payment_method=models.CharField(max_length=100,choices=[('Online','Online'),('Offline','Offline')])
-    status=models.CharField(max_length=100,choices=(('SUCCESS','Success'),('Pending','Pending'),('Cancel','Cancel')))
+    status=models.CharField(max_length=100,choices=(('Success','Success'),('Pending','Pending'),('Cancel','Cancel')))
     txnId=models.CharField(max_length=150,null=True,blank=True)
+
+class Transaction(models.Model):
+    PaymentStatus = [
+        ('Success',"Success"),
+        ("Failure","Failure"),
+        ("Pending", "Pending")
+    ]
+
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    amount = models.FloatField(_("Amount"), null=False, blank=False)
+    status = models.CharField(
+        _("Payment Status"),
+        default="Pending",
+        max_length=254,
+        blank=False,
+        null=False,
+    )
+    provider_order_id = models.CharField(
+        _("Transaction Order ID"), max_length=40, null=False, blank=False
+    )
+    transaction_payment_id = models.CharField(
+        _("Transaction Payment ID"), max_length=36, null=True, blank=True
+    )
+    signature_id = models.CharField(
+        _("Transaction Signature ID"), max_length=128, null=True, blank=True
+    )
+
+    def __str__(self):
+        return f"{self.id}-{self.status}"
