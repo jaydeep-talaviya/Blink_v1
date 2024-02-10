@@ -40,6 +40,12 @@
   <link href="{% static 'plugins/jquery-nice-select/css/nice-select.css' %}" rel="stylesheet">
   <!-- CUSTOM CSS -->
   <link href="{% static 'css/mystyle.css' %}" rel="stylesheet">
+      <style>
+    .notification_scrollable{
+        height: 300px;
+         overflow-y: scroll;
+    }
+</style>
 <!--  <link rel="stylesheet" href="{% static 'css/city_changer.css' %}">-->
  {% block stylesheets %}
   {% endblock stylesheets %}
@@ -92,7 +98,7 @@
                     <span class="badge" id="notification-badge">{{read_notifications_count}}</span>
                   </a>
 
-                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <ul class="dropdown-menu notification_scrollable" aria-labelledby="navbarDropdown">
                     {% for i in notifications %}
                       <li >
                         <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">

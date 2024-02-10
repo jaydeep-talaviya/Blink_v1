@@ -22,7 +22,7 @@
                 
                 <div class="row text-center">
                     <div class="col-sm-4">
-                        <a href="{% url 'paymentlists_with_status' status='SUCCESS' %}" class="text-decoration-none btn-sm {% if Status == 'SUCCESS' %} btn-light {% else %} btn-primary {% endif %}">Success</a>
+                        <a href="{% url 'paymentlists_with_status' status='Success' %}" class="text-decoration-none btn-sm {% if Status == 'SUCCESS' %} btn-light {% else %} btn-primary {% endif %}">Success</a>
                     </div>
                     <div class="col-sm-4">
                       <a href="{% url 'paymentlists_with_status' status='Pending' %}" class="text-decoration-none btn-sm {% if Status == 'Pending' %} btn-light {% else %} btn-primary {% endif %}">Pending</a>

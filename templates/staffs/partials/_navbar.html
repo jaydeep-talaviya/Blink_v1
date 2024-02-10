@@ -1,5 +1,10 @@
 {% load static %}
-
+<style>
+    .notification_scrollable{
+        height: 300px;
+         overflow-y: scroll;
+    }
+</style>
  <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <!-- Navbar Brand-->
             <a class="navbar-brand ps-3" href="{% url 'dashboard' %}">{{request.user.username}}</a>
@@ -16,7 +21,7 @@
                         <span class="badge" id="notification-badge">{{read_admin_notifications_count}}</span>
                       </a>
 
-                      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <ul class="dropdown-menu notification_scrollable" aria-labelledby="navbarDropdown">
                         {% for i in notifications %}
                           <li >
                             <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">
