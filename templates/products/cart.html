@@ -72,7 +72,7 @@
         <div class="p-4">
             <ul class="list-group voucher_replacer">
                 {% for voucher in vouchers %}
-                <div class="{{voucher.voucher_type}}_element" {% if voucher.voucher_type == 'on_above_purchase' %}  style="display: none;" id={{voucher.on_above_purchase}} {% endif %}>
+                <div class="{{voucher.voucher_type}}_element" id={{voucher.on_above_purchase}}>
                     <li class="list-group-item d-flex justify-content-between align-items-center" >
                         <div class="form-check">
                           <input class="form-check-input" data-id="{{voucher.id}}" type="radio" name="flexRadioDefault" id="flexRadioDefault{{forloop.count}}"/>
@@ -123,6 +123,8 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 
 <script type="text/javascript">
+
+
     var x=$('.total_amount');
     var grand_total=0;
     for(var i=0;i<x.length;i++){
@@ -133,23 +135,10 @@
 
         $('.grandtotal')[0].innerText=grand_total;
        $('.grandtotal')[1].innerText=grand_total;
-       renderVoucher(grand_total)
     }
 
 
-    function renderVoucher(totalPrice) {
-    var voucherElement = $('.on_above_purchase_element');
-    // Check if the total price is above 1000
-        for(var i = 0; i < voucherElement.length; i++) {
-            if (totalPrice > 1000) {
-                voucherElement[i].style.display=""
 
-            } else {
-                voucherElement[i].style.display="none"
-            }
-         }
-
-    }
 
 
 
@@ -175,7 +164,6 @@
                             $('.grandtotal')[i].innerText=grand_total
                         }
 
-                       renderVoucher(grand_total)
 
                     }
                     else{

@@ -194,7 +194,7 @@ def get_total_vouchers(request):
                              stop=False,is_deleted=False)  # Add your other fixed conditions here
         expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
         user_used_conditions = ~Q(user_who_have_used=request.user.id)
-        combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+        combined_conditions = fixed_conditions & expirable_conditions & user_used_conditions
         promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
         total_vouchers = on_above_purchase_vouchers.union(product_together_voucher, promocodes_vouchers)
     return render(request, 'products/voucher_temp.html', {'vouchers': total_vouchers})
@@ -207,7 +207,7 @@ def productcart(request):
                          is_deleted=False)  # Add your other fixed conditions here
     expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
     user_used_conditions = ~Q(user_who_have_used=request.user.id)
-    combined_conditions = (user_used_conditions & fixed_conditions) | expirable_conditions
+    combined_conditions = fixed_conditions & expirable_conditions & user_used_conditions
     promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
     if request.method=="POST":
         requestdata=dict(request.POST)
@@ -440,8 +440,20 @@ def callback(request):
             transaction.status = 'Success'
             transaction.save()
             payment=transaction.payment
-            payment.status = ""
-            print(">>>>>>>>request.user",request.user)
+            payment.status = "Success"
+            payment.save()
+            # send information to Manager that someone have created new Order
+            if request.user.is_authenticated:
+                managers = Employee.objects.filter(type='manager').values('user')
+                related_url = get_related_url(request, 'product')
+
+                # notify to each manager.
+                for manager in managers:
+                    Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                                message='New Order has been created! Please Prepare Order.',
+                                                related_url=related_url
+                                                )
+            print(">>>>>>>>Notification Created On Order Payment success")
             return render(request, 'products/paymentstatus.html', {'response': transaction})
 
         else:

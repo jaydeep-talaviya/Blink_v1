@@ -724,10 +724,10 @@ def stock_create(request):
         forms=StocksForm(request.POST)
         if forms.is_valid():
             stock = forms.save()
+            related_url = get_related_url(request, 'stock')
 
             if not request.user.is_superuser:
                 admin = User.objects.get_admin()
-                related_url = get_related_url(request, 'stock')
 
                 Notification.objects.create(sender=request.user, receiver=admin,
                                             message='New Stock has been created!',
@@ -802,7 +802,10 @@ def stock_finish(request, id):
 @login_required
 @admin_or_manager_required
 def orderlists(request,status='order_confirm'):
-    orders = Orders.objects.filter(order_status=status)
+    if status == 'order_confirm':
+        orders = Orders.objects.filter(Q(order_status=status) & ((Q(payment__payment_method='Online') & Q(payment__status = 'Success')) | Q(payment__payment_method='Offline')))
+    else:
+        orders = Orders.objects.filter(order_status=status)
     orders = get_pagination_records(request,orders)
     return render(request,'staffs/pages/orderlists.html',{'orderlist':orders,'Status':status})
 
@@ -1082,6 +1085,7 @@ def prepare_order(request,order_id):
                     current_order.order_status = 'order_prepared'
                     current_order.save()
                     messages.success(request,"You have successfully Started Prepared Order")
+                    return redirect('list_prepare_orders')
                 else:
                     messages.warning(request, f"Please check if stock for the current data is available")
         except Exception as e:

@@ -106,6 +106,7 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             voucher = instance.vouchers
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.add(instance.user)
+                voucher.save()
         # notification to admin for create prepare order
         # Notification.objects.create(buyer=instance.user,seller=admin, user_order=instance,
         #                             message='Prepare Order for Order Id: ' + str(instance.orderid),
@@ -115,12 +116,14 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
         if instance.payment_set.all():
             instance.delivery_set.all().delete()
             payment=instance.payment_set.last()
-            payment.status='Cancel'
-            payment.save()
+            if payment.status == "Success":
+                payment.status='Cancel'
+                payment.save()
         if instance.vouchers:
             voucher = instance.vouchers
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.remove(instance.user)
+                voucher.save()
         # Notification.objects.create(buyer=instance.user, seller=admin, user_order=instance,
         #                             message='Order cancelled for Order Id: ' + str(instance.orderid),
         #                             for_admin=True)

@@ -47,6 +47,8 @@
 });
     rzp1.open();
     </script>
+    {% csrf_token %}
+
     <input type="hidden" custom="Hidden Element" name="hidden">
 </form>
 {% endblock main-content %}
