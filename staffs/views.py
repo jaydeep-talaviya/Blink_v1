@@ -1113,7 +1113,7 @@ def update_prepare_order(request,orderid):
 
 
 def list_prepare_orders(request):
-    orders = Orders.objects.all().order_by('-created_at')
+    orders = Orders.objects.filter(orderprepare__isnull=False).all().order_by('-created_at')
     orders = get_pagination_records(request,orders)
 
     return render(request,'staffs/pages/prepare_orders_list.html',{'orders':orders})
@@ -1133,7 +1133,7 @@ def create_delivery(request,orderid):
                                             message='Please Pick-up Items,Delivery has been Assigned to you!',
                                             related_url=related_url
                                             )
-                send_mail_to_delivery_person(delivery_person,order.delivery_set.all())
+                send_mail_to_delivery_person(delivery_person,order)
                 messages.success(request, f"Your Delivery is Started")
             else:
                 messages.warning(request, f"Already Your Delivery for the order is created")

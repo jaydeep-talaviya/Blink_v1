@@ -200,7 +200,7 @@ class DeliveryForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-select formset-field'
             if field == 'delivery_person':
-                self.fields[field].queryset = User.objects.filter(employee__type='warehouse_owner')
+                self.fields[field].queryset = User.objects.filter(employee__type='delivery_person')
 
 class LedgerForm(forms.ModelForm):
     class Meta:

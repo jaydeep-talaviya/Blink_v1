@@ -40,10 +40,9 @@
         <p>We are pleased to inform you that your order is currently in the process of being delivered.</p>
 
          <p><strong>Order Details:</strong></p>
-
-        {% for prepare_order in prepared_orders %}
+         {% for prepare_order in order.orderprepare_set.all %}
             <ul>
-                <li><strong>Product Name:</strong> {{ prepare_order.product.p_name }} - {{prepare_order.product.product_attribute.}} </li>
+                <li><strong>Product Name:</strong> {{prepare_order.stock_id.product_id.p_name}} ({{prepare_order.stock_id.product_attributes}}) </li>
                 <li><strong>Quantity:</strong> {{ prepare_order.purchase_qty }}</li>
             </ul>
         {% endfor %}

@@ -18,7 +18,7 @@
 
                 <tbody>
                     {% for order in orders %}
-
+                    {% if order.orderprepare_set.all %}
                     <tr class="table-light border-4">
                         <td><div class="card p-2">{{forloop.counter}}</div> </td>
                         <td colspan="6">
@@ -54,7 +54,7 @@
 
                         {% endfor %}
                             <div class="d-flex justify-content-around py-2">
-                                <a href="{% url 'update_prepare_order' orderid=order.orderid %}" type="button" class="btn btn-sm btn-primary">Edit</a>
+<!--                                <a href="{% url 'update_prepare_order' orderid=order.orderid %}" type="button" class="btn btn-sm btn-primary">Edit</a>-->
                                 {% if not order.delivery_set.exists %}
                                  <a href="{% url 'create_delivery' orderid=order.orderid %}" type="button" class="btn btn-sm btn-success">Delivery</a>
                                 {% endif %}
@@ -62,7 +62,7 @@
                         </td>
 
                     </tr>
-
+                    {% endif %}
                 {% endfor %}
 
                 </tbody>

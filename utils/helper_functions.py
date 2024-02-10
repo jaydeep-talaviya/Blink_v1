@@ -254,10 +254,10 @@ def send_mail_to_all_managers(creater_manager,managers_emails):
     email_message.send()
 
 
-def send_mail_to_delivery_person(delivery_person,prepared_orders):
+def send_mail_to_delivery_person(delivery_person,order):
     template = get_template('emails/notify_delivery_person.html')
     context = {
-        'prepared_orders': prepared_orders,
+        'order': order,
         'delivery_person':delivery_person
     }
     message = template.render(context)
@@ -271,11 +271,11 @@ def send_mail_to_delivery_person(delivery_person,prepared_orders):
     email_message.content_subtype = 'html'
     email_message.send()
 
-def send_email_to_notify_customer(customer,prepared_orders):
+def send_email_to_notify_customer(customer,order):
     template = get_template('emails/notify_customer_to_delivery.html')
     context = {
         'customer': customer,
-        'prepared_orders': prepared_orders,
+        'order': order,
 
     }
     message = template.render(context)
@@ -284,7 +284,7 @@ def send_email_to_notify_customer(customer,prepared_orders):
         subject='Notification to Pick up Delivery',
         body=message,
         from_email=settings.EMAIL_HOST_USER,
-        to=[delivery_person.email],
+        to=[customer.email],
     )
     email_message.content_subtype = 'html'
     email_message.send()

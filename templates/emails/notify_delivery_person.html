@@ -41,10 +41,10 @@
 
         <p><strong>Product Details:</strong></p>
 
-        {% for prepare_order in prepared_orders %}
+         {% for prepare_order in order.orderprepare_set.all %}
         <h5>Order No:- {{forloop.counter}}</h5>
             <ul>
-                <li><strong>Product Name:</strong> {{ prepare_order.product.p_name }} - {{prepare_order.product.product_attribute.}} </li>
+                <li><strong>Product Name:</strong> {{prepare_order.stock_id.product_id.p_name}} ({{prepare_order.stock_id.product_attributes}}) </li>
                 <li><strong>Quantity:</strong> {{ prepare_order.purchase_qty }}</li>
                 <li><strong>Warehouse Location:</strong> {{ prepare_order.warehouse_id.name }} - {{ prepare_order.warehouse_id.address }}</li>
             </ul>

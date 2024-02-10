@@ -43,8 +43,8 @@ def change_notifications_status(request,notification_id):
 def single_delivery(request,delivery_id):
 
     delivery=Delivery.objects.get(delivery_id=delivery_id)
-    customer = delivery.order
-    prepared_orders = delivery.order.orderprepare_set.all()
+    customer = delivery.order.user
+    order = delivery.order
 
     if request.method == 'POST':
         delivery_status=request.POST.get('delivery_status')
@@ -60,7 +60,7 @@ def single_delivery(request,delivery_id):
             delivery.state = delivery_status
             delivery.updated_at = datetime.datetime.now()
             delivery.save()
-            send_email_to_notify_customer(customer,prepared_orders)
+            send_email_to_notify_customer(customer,order)
         elif delivery_status == 'Shipped' and delivery.state not in ['Shipped'] and delivery.state == 'Delivering':
             delivery.state = delivery_status
             delivery.delivered_at = datetime.datetime.now()
