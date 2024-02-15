@@ -61,10 +61,10 @@ def search(request):
 def productlist(request,subcategory=None):
     page = request.GET.get('page',1)
     if subcategory == None:
-        all_products=Products.objects.all().order_by('price')
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True).distinct().order_by('price')
         subcategory='All'
     else:
-        all_products=Products.objects.filter(Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)).order_by('price')
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True).filter((Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)) & Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).distinct().order_by('price')
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
 
@@ -79,7 +79,7 @@ def productlist_sortby(request):
 
         sort_by=request.GET.get('sort_by',False)
         subcategory=request.GET.get('subcategory',False)
-        all_products=Products.objects.all()
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True)
 
         if subcategory == 'All' or None:
             all_products=all_products.order_by('price')
@@ -192,7 +192,7 @@ def get_total_vouchers(request):
         # promocode
         fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id,
                              stop=False,is_deleted=False)  # Add your other fixed conditions here
-        expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
+        expirable_conditions = Q(expirable=True, expire_at__gt=datetime.now())
         user_used_conditions = ~Q(user_who_have_used=request.user.id)
         combined_conditions = fixed_conditions & expirable_conditions & user_used_conditions
         promocodes_vouchers = Vouchers.objects.filter(combined_conditions)
@@ -205,7 +205,7 @@ def productcart(request):
     # promocode
     fixed_conditions = Q(voucher_type='promocode', users__id=request.user.id, stop=False,
                          is_deleted=False)  # Add your other fixed conditions here
-    expirable_conditions = Q(expirable=True, expire_at__lt=datetime.now())
+    expirable_conditions = Q(expirable=True, expire_at__gt=datetime.now())
     user_used_conditions = ~Q(user_who_have_used=request.user.id)
     combined_conditions = fixed_conditions & expirable_conditions & user_used_conditions
     promocodes_vouchers = Vouchers.objects.filter(combined_conditions)

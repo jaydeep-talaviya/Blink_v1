@@ -22,6 +22,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Category</th>
+                      <th scope="col">No. Attributes</th>
                     <th scope="col" class="text-center">Action</th>
 
                   </tr>
@@ -34,12 +35,17 @@
                         <td> {{product.price}} Rs.</td>
                         <td> {{product.p_category}}</td>
                         <td>
+                            {% for product_attr in product.productchangepriceattributes_set.all %}
+                            <span>{{product_attr}}</span> | Price : <span class="fw-bold"> {{product_attr.price}}</span><br/>
+                            {% endfor %}
+                        </td>
+                        <td>
                             <div class="d-flex justify-content-around align-items-center">
                                <div>
 
                            {% if request.user|employee_type == 'product_maker' %}
                                    <a href="{% url 'product_update_by_product_maker' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
-                            {% elif request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' %}
+                            {% elif request.user.is_authenticated and request.user.is_superuser or request.user|employee_type == 'manager' and product.is_qa_verified %}
                                    <a href="{% url 'product_update' id=product.id %}" class="btn-sm p-2 btn-primary text-decoration-none">Edit</a>
                            {% elif request.user|employee_type == 'qa' %}
                                    {% if not product.is_qa_verified and product.is_product_finest %}

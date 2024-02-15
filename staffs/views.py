@@ -535,7 +535,7 @@ def product_initialy_create(request):
             product_obj.save()
 
             managers = Employee.objects.filter(type = 'manager').values('user')
-            related_url = get_related_url(request, 'product',id=id)
+            related_url = get_related_url(request, 'product',id=product_obj.id)
 
             # notify to each manager.
             for manager in managers:
@@ -677,15 +677,15 @@ def get_product_by_warehouse(request):
         stocks = Stocks.objects.filter(warehouse_id=warehouse_id,finished=False)
         product_ids = stocks.values('product_id').distinct()
         ### product objects
-        warehouse_products = Products.objects.filter(id__in=product_ids)
+        warehouse_products = Products.objects.filter(id__in=product_ids,productchangepriceattributes__isnull=False,is_qa_verified=True)
         ## product with its attribute available
         total_product_attribute_ids = warehouse_products.values_list('productchangepriceattributes__id', flat=True)
         product_availble_from_stocks = [stock.product_id.productchangepriceattributes_set.filter(~Q(id=stock.product_attributes_id)) for stock in stocks]
         product_availble_from_stocks_ids = get_differenced_ids([i.id for i in list(chain(*product_availble_from_stocks))], list(total_product_attribute_ids))
         product_ids_from_warehouse = ProductChangePriceAttributes.objects.filter(id__in=product_availble_from_stocks_ids).values_list('p_id',
                                                                                                          flat=True)
-        products = Products.objects.filter(Q(id__in=product_ids_from_warehouse)).union(
-            Products.objects.filter(~Q(id__in=[i.p_id.id for i in list(chain(*product_availble_from_stocks))])))
+        products = Products.objects.filter(Q(id__in=product_ids_from_warehouse)&Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).union(
+            Products.objects.filter(~Q(id__in=[i.p_id.id for i in list(chain(*product_availble_from_stocks))],productchangepriceattributes__isnull=False,is_qa_verified=True)))
         # warehouse_products sent for div
         return JsonResponse({'products':list(products.values('p_name','id')),'warehouse_products':[]})
 

@@ -181,6 +181,17 @@ class Vouchers(models.Model):
     stop = models.BooleanField(null=True,blank=True,default=False) #on_above_purchase + #product_together +# promocode + #deals_of_day
     is_deleted = models.BooleanField(null=True,blank=True,default=False)
 
+    def get_name(self):
+        if self.voucher_type == 'promocode':
+            return "Promocode "+self.promocode_name
+        else:
+            if self.voucher_type == 'deals_of_day':
+                return f"Buy Today and get {self.percent_off} off"
+            if self.voucher_type == 'product_together':
+                return self.with_product.name + " and get " + f"{self.off_price} Rs Off "
+            if self.voucher.voucher_type == 'on_above_purchase':
+                return f"Buy Any products above {self.on_above_purchase} Rs. and get {self.off_price}"
+
 class Orders(models.Model):
     
     orderstatus=[

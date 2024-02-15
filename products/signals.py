@@ -94,7 +94,7 @@ def change_order_status(sender, instance, created, **kwargs):
                 LedgerLine.objects.create(ledger_id=create_ledger.id,
                                           type_of_transaction='debit',
                                           amount=discount_amount,
-                                          description=f'Transaction Debited for Order ID:{instance.order.orderid} for Voucher Discount {instance.order.vouchers}')
+                                          description=f'Transaction Debited for Order ID:{instance.order.orderid} for Voucher Discount {instance.order.get_name()}')
 
 
 @receiver(post_save, sender=Orders)
