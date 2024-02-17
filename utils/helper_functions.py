@@ -271,17 +271,33 @@ def send_mail_to_delivery_person(delivery_person,order):
     email_message.content_subtype = 'html'
     email_message.send()
 
-def send_email_to_notify_customer(customer,order):
+def send_email_to_notify_customer(customer,order,otp_code):
     template = get_template('emails/notify_customer_to_delivery.html')
     context = {
         'customer': customer,
         'order': order,
-
+        'otp_code':otp_code
     }
     message = template.render(context)
 
     email_message = EmailMessage(
         subject='Notification to Pick up Delivery',
+        body=message,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[customer.email],
+    )
+    email_message.content_subtype = 'html'
+    email_message.send()
+
+def send_email_to_notify_customer_for_refund(customer):
+    template = get_template('emails/notify_customer_to_refund.html')
+    context = {
+        'customer': customer
+    }
+    message = template.render(context)
+
+    email_message = EmailMessage(
+        subject='Notification to Refund For Order Cancellation',
         body=message,
         from_email=settings.EMAIL_HOST_USER,
         to=[customer.email],

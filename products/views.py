@@ -47,6 +47,7 @@ def search(request):
     subcategory="All"
 
     all_products=Products.objects.filter(Q(p_subcategory__subcategory_name__icontains=product_search)|Q(p_category__category_name__icontains=product_search) | Q(p_name__icontains=product_search))
+    all_products.filter(is_deleted = False)
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
     page = request.GET.get('page',1)   
@@ -61,10 +62,10 @@ def search(request):
 def productlist(request,subcategory=None):
     page = request.GET.get('page',1)
     if subcategory == None:
-        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True).distinct().order_by('price')
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False).distinct().order_by('price')
         subcategory='All'
     else:
-        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True).filter((Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)) & Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).distinct().order_by('price')
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False).filter((Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)) & Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).distinct().order_by('price')
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
 
@@ -79,7 +80,7 @@ def productlist_sortby(request):
 
         sort_by=request.GET.get('sort_by',False)
         subcategory=request.GET.get('subcategory',False)
-        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True)
+        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False)
 
         if subcategory == 'All' or None:
             all_products=all_products.order_by('price')
@@ -510,45 +511,6 @@ def order_re_payment(request,orderid):
         'logo': static('images/kimchi.png')
     }
     return render(request, 'products/payment.html',  param_dict)
-
-@csrf_exempt
-def handlerequest(request):
-    # paytm will send you post request here
-    form = request.POST
-    response_dict = {}
-    checksum=''
-    for i in form.keys():
-        response_dict[i] = form[i]
-        if i == 'CHECKSUMHASH':
-            checksum = form[i]
-    if checksum!='':
-        verify = Checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
-        if verify:
-            if response_dict['RESPCODE'] == '01':
-                print(response_dict,">>>>>>>>>>\n\n\n")
-                orders=Orders.objects.get(orderid=response_dict['ORDERID'])
-                orders.payment_failed=False
-                orders.order_status='order_confirm'
-                orders.save()
-                Payment.objects.create(user=orders.user,order_id=orders,payment_method='Online',status='Success',txnId=response_dict['TXNID'])
-                messages.success(request, "Your Order is Updated And Paid by You, Thanks for Purchasing!")
-
-                return redirect('orderviews',orderid=orders.orderid)
-              
-            else:
-                orders=Orders.objects.get(orderid=response_dict['ORDERID'])
-                orders.payment_failed=True
-                orders.order_status='order_cancel'
-                orders.save()
-                # orders.update(payment_failed=True,order_status='order_cancel')
-                Payment.objects.create(user=orders.user,order_id=orders,payment_method='Online',status='Failed')
-                messages.error(request, f"Order is Failed ,Payment Faild Due to {response_dict['RESPMSG']}")
-
-                return render(request, 'products/paymentstatus.html', {'response': response_dict})
-        else:
-            messages.error(request, "Verification is Faild Due to some reasons ,Please Try Again")
-            return render(request, 'products/paymentstatus.html', {'response': "something went Wrong with verification of your account! Please Try Again"})
-
 
 @login_required
 def checkout_details(request):

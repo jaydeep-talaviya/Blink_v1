@@ -117,6 +117,12 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Products
                             </a>
+                             {% elif request.user|employee_type == 'delivery_person' %}
+
+                             <div class="sb-sidenav-menu-heading">Delivery</div>
+                                <a class="nav-link" href="{% url 'delivery_list' %}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Delivery
                             {% endif %}
                         </div>
                     </div>

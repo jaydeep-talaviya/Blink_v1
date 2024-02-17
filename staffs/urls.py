@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (product_list, product_update, product_delete,
-                    product_create,product_initialy_create,product_update_by_product_maker,
+                    product_create, product_initialy_create, product_update_by_product_maker,
                     create_attribute, update_attribute, remove_attribute,
                     create_attr_name, product_attribute_list,
                     stock_list, stock_update, stock_create, stock_finish, inform_other_managers,
@@ -19,7 +19,7 @@ from .views import (product_list, product_update, product_delete,
                     list_prepare_orders, create_delivery, update_prepare_order,
                     list_of_ledgers, create_other_ledgers, update_other_ledgers,
                     custom_log_view, dashboard, get_employees_download,
-                    product_verify_or_reject
+                    product_verify_or_reject, delivery_orders, delivery_verify_otp,get_cancel_order_on_delivery
                     )
 
 urlpatterns = [
@@ -118,6 +118,9 @@ urlpatterns = [
     path('prepare_order/update/<str:orderid>',update_prepare_order,name='update_prepare_order'),
 
     path('prepare_order/delivery/create/<str:orderid>', create_delivery, name='create_delivery'),
+    path('order/delivery/', delivery_orders, name='delivery_orders'),
+    path('order/delivery/verify/<str:delivery_id>', delivery_verify_otp, name='delivery_verify_otp'),
+    path('order/delivery/cancel/<str:orderid>', get_cancel_order_on_delivery, name='get_cancel_order_on_delivery'),
 
     # get Product from Product maker and add to warehouse
     path('ledger/list/', list_of_ledgers, name='list_of_ledgers'),

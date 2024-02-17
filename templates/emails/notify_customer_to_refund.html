@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Delivery Notification</title>
+    <title>Order Cancellation Notification</title>
     <style>
         /* Add your custom styles here */
         body {
@@ -34,21 +34,11 @@
 </head>
 <body>
     <div class="container">
-        <h2>Order Delivery Notification</h2>
+        <h2>Order Cancellation Notification</h2>
         <p>Hello {{ customer.username }},</p>
 
-        <p>We are pleased to inform you that your order is currently in the process of being delivered.</p>
-        <p> Please Share this OTP to Delivery Person, In Order to Finish Delivery Status.</p>
-        <p>OTP : <strong>{{otp_code}}</strong></p>
-         <p><strong>Order Details:</strong></p>
-         {% for prepare_order in order.orderprepare_set.all %}
-            <ul>
-                <li><strong>Product Name:</strong> {{prepare_order.stock_id.product_id.p_name}} ({{prepare_order.stock_id.product_attributes}}) </li>
-                <li><strong>Quantity:</strong> {{ prepare_order.purchase_qty }}</li>
-            </ul>
-        {% endfor %}
-
-        <p>Your product is on its way to the specified delivery address. Please ensure that someone is available to receive the delivery.</p>
+        <p>We are sorry to inform you that your order has been cancelled and your refund for the order has been initialized.</p>
+        <p> Please None that it can take up-to 6-7 days to get the amount to be transferred with your respected bank.</p>
 
         <p>If you have any questions or concerns regarding your order, feel free to contact our customer support.</p>
 

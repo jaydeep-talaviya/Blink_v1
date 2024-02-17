@@ -1,16 +1,19 @@
 import csv
 
+import razorpay
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.shortcuts import render,get_object_or_404,redirect
 from easyaudit.models import CRUDEvent
 
+from ecommerce_blink import settings
 from notifications_app.models import Notification
 from products.forms import CategoryForm, CategoryFormSet, SubCategoryForm, SubCategoryFormSet
 from products.models import (Products, Category, Stocks,
                              AttributeName, AttributeValue, Payment,
-                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse, Delivery)
+                             ProductChangePriceAttributes, Orders, Subcategory, Vouchers, Warehouse, Delivery,
+                             Transaction)
 from users.forms import EmployeeSalaryForm
 from users.models import User, EmployeeSalary
 from datetime import date
@@ -28,7 +31,7 @@ from geopy.geocoders import Nominatim
 from django.contrib.admin.views.decorators import staff_member_required
 from utils.helper_functions import get_attribute_full_name, get_warehouse_dict, get_orders_count_by_date, \
     get_pagination_records, send_employee_join_email, notify_to_warehouser_owner_email, get_related_url, \
-    send_mail_to_all_managers, send_mail_to_delivery_person
+    send_mail_to_all_managers, send_mail_to_delivery_person, send_email_to_notify_customer_for_refund
 from itertools import chain
 from .models import OrderPrepare, Ledger
 from .wrapper import custom_staff_member_required, admin_or_manager_required, admin_required
@@ -56,12 +59,14 @@ def dashboard(request):
     product_attributes = AttributeValue.objects.count()
     product_categories = Category.objects.count()
     product_sub_categories = Subcategory.objects.count()
-    products = Products.objects.count()
+    products = Products.objects.filter(is_deleted=False).count()
 
-    product_in_qa = Products.objects.filter(is_qa_verified=False,is_product_finest=True).count()
-    product_qa_verified = Products.objects.filter(is_qa_verified=True).count()
-    product_need_update = Products.objects.filter(is_product_finest=False).count()
+    product_in_qa = Products.objects.filter(is_qa_verified=False,is_product_finest=True,is_deleted=False).count()
+    product_qa_verified = Products.objects.filter(is_qa_verified=True,is_deleted=False).count()
+    product_need_update = Products.objects.filter(is_product_finest=False,is_deleted=False).count()
 
+    deliveries = Delivery.objects.filter(delivery_person=request.user)
+    total_deliveries = deliveries.filter(state="Delivering").order_by('-created_at').count()
 
 
     # order chart
@@ -102,6 +107,8 @@ def dashboard(request):
         'delivery_confirm_by_date':delivery_confirm_by_date,
         'delivery_delivering_by_date':delivery_delivering_by_date,
         'delivery_shipped_by_date':delivery_shipped_by_date,
+        'total_deliveries':total_deliveries,
+        "deliveries":deliveries.count()
     })
 
 
@@ -397,13 +404,13 @@ def product_attribute_list(request):
 @admin_or_manager_required
 def product_list(request,type=None):
     if type == None:
-        products=Products.objects.all()
+        products=Products.objects.filter(is_deleted=False).all()
     elif type == 'in_qa':
-        products = Products.objects.filter(is_qa_verified=False,is_product_finest=True)
+        products = Products.objects.filter(is_qa_verified=False,is_product_finest=True,is_deleted=False)
     elif type == 'qa_verified':
-        products = Products.objects.filter(is_qa_verified=True)
+        products = Products.objects.filter(is_qa_verified=True,is_deleted=False)
     elif type == 'is_finest':
-        products = Products.objects.filter(is_product_finest=False)
+        products = Products.objects.filter(is_product_finest=False,is_deleted=False)
 
     products = get_pagination_records(request,products)
     return render(request,'staffs/pages/product_list.html',{'products':products})
@@ -517,8 +524,10 @@ def product_update(request,id):
 @login_required
 @admin_or_manager_required
 def product_delete(request, id):
-    product_instance = Products.objects.filter(id=id)
-    product_instance.delete()
+    product_instance = get_object_or_404(Products,id=id)
+    # product_instance.delete()
+    product_instance.is_deleted=True
+    product_instance.save()
     messages.success(request, f"Your Product has been removed")
     return redirect('product_list')
 
@@ -677,7 +686,7 @@ def get_product_by_warehouse(request):
         stocks = Stocks.objects.filter(warehouse_id=warehouse_id,finished=False)
         product_ids = stocks.values('product_id').distinct()
         ### product objects
-        warehouse_products = Products.objects.filter(id__in=product_ids,productchangepriceattributes__isnull=False,is_qa_verified=True)
+        warehouse_products = Products.objects.filter(id__in=product_ids,productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False)
         ## product with its attribute available
         total_product_attribute_ids = warehouse_products.values_list('productchangepriceattributes__id', flat=True)
         product_availble_from_stocks = [stock.product_id.productchangepriceattributes_set.filter(~Q(id=stock.product_attributes_id)) for stock in stocks]
@@ -686,6 +695,7 @@ def get_product_by_warehouse(request):
                                                                                                          flat=True)
         products = Products.objects.filter(Q(id__in=product_ids_from_warehouse)&Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).union(
             Products.objects.filter(~Q(id__in=[i.p_id.id for i in list(chain(*product_availble_from_stocks))],productchangepriceattributes__isnull=False,is_qa_verified=True)))
+        products= products.filter(is_deleted=False)
         # warehouse_products sent for div
         return JsonResponse({'products':list(products.values('p_name','id')),'warehouse_products':[]})
 
@@ -1221,4 +1231,64 @@ def get_employees_download(request,type=None):
 
     return response
 
+#########
 
+def delivery_orders(request):
+    total_deliveries = Delivery.objects.filter(delivery_person=request.user,state__in=["Delivering","Shipped"]).order_by('-created_at')
+    return render(request, 'staffs/pages/delivery_orders.html',{'total_deliveries':total_deliveries})
+
+def delivery_verify_otp(request,delivery_id):
+    delivery = get_object_or_404(Delivery,delivery_id=delivery_id)
+    if request.method == "POST":
+        otp_code = request.POST.get('otp_code')
+        print(">>otp_code",otp_code)
+        if otp_code == delivery.otp_code:
+            order=delivery.order
+            print(">>>>>>>>\n\n\n\n",order,otp_code,delivery.otp_code)
+            order.order_status='order_shipped'
+            order.save()
+            return redirect('delivery_orders')
+        else:
+            messages.warning(request,"Please Check OTP Again,Its Invalid OTP!. Try Again ")
+    return render(request,'staffs/pages/delivery_verify.html')
+
+def get_cancel_order_on_delivery(request,orderid):
+    order = get_object_or_404(Orders,orderid=orderid)
+    order.order_status = 'order_cancel'
+    order.save()
+    managers = Employee.objects.filter(type='manager').values('user')
+    related_url = get_related_url(request, 'order', id=orderid)
+
+    # notify to each manager.
+    for manager in managers:
+        Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
+                                    message='Order has been cancelled, Please check!',
+                                    related_url=related_url
+                                    )
+    # send refund for cancelation
+    # if order have payment as online only
+    payment = order.payment_set.last()
+    if payment.status == 'Success' and payment.payment_method == 'Online':
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        transaction = Transaction.objects.filter(payment=payment)
+        if transaction.exists() and transaction.first().transaction_payment_id:
+            transaction=transaction.first()
+            paymentId = transaction.transaction_payment_id
+            try:
+                razorpay_order_cancelation =client.payment.refund(paymentId, {
+                    "amount": transaction.amount *100,
+                    "speed": "normal",
+                    "notes": {
+                        "notes_key_1": "refund for order id "+str(orderid),
+                    },
+                    "receipt": f"#Receipt No. {orderid}"
+                })
+                if razorpay_order_cancelation.get("status",None) =="processed":
+                    send_email_to_notify_customer_for_refund(order.user)
+                    # send notification to end user that his/her order has been cancled and refund will be initialize in 2-3 days.
+            except Exception as e:
+                print(" getting error on refund",e)
+            send_email_to_notify_customer_for_refund(order.user)
+
+    messages.error(request, "Your Order is Canceled Successfully!")
+    return redirect('delivery_orders')

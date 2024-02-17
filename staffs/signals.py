@@ -23,7 +23,7 @@ def create_ledger_for_order(sender, instance, created, **kwargs):
                     LedgerLine.objects.create(ledger_id=create_ledger.id,
                                               type_of_transaction='debit',
                                               amount=discount_amount,
-                                              description=f'Transaction Debited for Order ID:{instance.order_id.orderid} for Voucher Discount {instance.order_id.get_name()}')
+                                              description=f'Transaction Debited for Order ID:{instance.order_id.orderid} for Voucher Discount {instance.order_id.vouchers.get_name()}')
             #send notification to his/her self to create delivery
             admin = User.objects.filter(is_superuser=True).first()
             # Notification.objects.create(seller=admin,user_order=instance.order_id,prepare_order=instance,message='Create Delivery for Order Id: '+ str(instance.order_id.orderid),for_admin=True)

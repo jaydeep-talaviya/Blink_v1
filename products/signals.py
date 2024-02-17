@@ -1,3 +1,5 @@
+import random
+
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
@@ -74,13 +76,15 @@ def change_order_status(sender, instance, created, **kwargs):
     if instance.state=='Delivering':
         instance.order.order_status='order_delivering'
         instance.order.save()
+
     if instance.state=='Shipped':
-        instance.order.order_status='order_shipped'
-        instance.order.save()
+        # instance.order.order_status='order_shipped'
+        # instance.order.save()
         if instance.order.payment_set.last().status == 'Pending':
             payment=instance.order.payment_set.last()
             payment.status = 'Success'
             payment.save()
+
         create_ledger = Ledger(ledger_type='order', order_id_id=instance.order.id)
         create_ledger.save()
         for orderline in instance.order.order.all():
@@ -94,12 +98,11 @@ def change_order_status(sender, instance, created, **kwargs):
                 LedgerLine.objects.create(ledger_id=create_ledger.id,
                                           type_of_transaction='debit',
                                           amount=discount_amount,
-                                          description=f'Transaction Debited for Order ID:{instance.order.orderid} for Voucher Discount {instance.order.get_name()}')
+                                          description=f'Transaction Debited for Order ID:{instance.order.orderid} for Voucher Discount {instance.order.vouchers.get_name()}')
 
 
 @receiver(post_save, sender=Orders)
 def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
-    admin = User.objects.filter(is_superuser=True).first()
 
     if instance.order_status == 'order_confirm':
         if instance.vouchers:
@@ -107,11 +110,6 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.add(instance.user)
                 voucher.save()
-        # notification to admin for create prepare order
-        # Notification.objects.create(buyer=instance.user,seller=admin, user_order=instance,
-        #                             message='Prepare Order for Order Id: ' + str(instance.orderid),
-        #                             for_admin=True)
-
     if instance.order_status == 'order_cancel':
         if instance.payment_set.all():
             instance.delivery_set.all().delete()
@@ -119,57 +117,77 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
             if payment.status == "Success":
                 payment.status='Cancel'
                 payment.save()
+
+        #       add product again to stock increase qty on cancle order
+        #         only if there is order prepared. and it will only happen if delivery not successed.
+                for order_prepare in instance.orderprepare_set.all():
+                    stock = order_prepare.stock_id
+                    orderline = OrderLines.objects.filter(order_id=order_prepare.order_id, product_id=order_prepare.product_id,
+                                                          qty=order_prepare.purchase_qty,
+                                                          selected_product_varient=",".join(
+                                                              order_prepare.product_attribute.attribute_values.values_list(
+                                                                  'a_value', flat=True)) + ',')
+
+                    stock.left_qty += orderline.first().qty
+                    stock.save()
+                if payment.payment_method == 'Online':
+                    # add ledger for cancle or refund the case
+                    create_ledger = Ledger(ledger_type='order', order_id_id=instance.id)
+                    create_ledger.save()
+                    if instance.payment_set.last().payment_method == 'Online':
+                        LedgerLine.objects.create(ledger_id=create_ledger.id,
+                                                  type_of_transaction='debit',
+                                                  amount=instance.amount,
+                                                  description=f'Transaction Debit for Order ID:{instance.orderid} cancelation ')
+
         if instance.vouchers:
             voucher = instance.vouchers
             if voucher.voucher_type == 'promocode':
                 voucher.user_who_have_used.remove(instance.user)
                 voucher.save()
-        # Notification.objects.create(buyer=instance.user, seller=admin, user_order=instance,
-        #                             message='Order cancelled for Order Id: ' + str(instance.orderid),
-        #                             for_admin=True)
 
-@receiver(post_save, sender=Payment)
-def on_payment_cancel(sender, instance, created, **kwargs):
-    if instance.status=='Cancel' and instance.payment_method == 'Online':
-        paytmParams = dict()
-        refund_amount=instance.order_id.amount-((instance.order_id.amount*10)/100)
-        if refund_amount > 0:
-            paytmParams["body"]= {
-                "mid"          : "iNqaaK84118094196288",
-                "txnType"      : "REFUND",
-                "orderId"      : str(instance.order_id.orderid),
-                "txnId"        : str(instance.txnId),
-                "refId"        : str(instance.order_id.orderid)+"abcz",
-                "refundAmount" : str(refund_amount),
-            }
-            checksum = PaytmChecksum.generateSignature(json.dumps(paytmParams["body"]), MERCHANT_KEY)
-            paytmParams["head"] = {
-                "signature"    : checksum
-            }
-            post_data = json.dumps(paytmParams)
-            # for Staging
-            url = "https://securegw-stage.paytm.in/refund/apply"
-            response = requests.post(url, data = post_data, headers = {"Content-type": "application/json"}).json()
-            print(response)
-            try:
-                if response['body']['resultInfo']['resultCode'] ==  '601':
-                    subject = f" Refund of Your Order "
-                    message = f"""
-                    Dear Customer {instance.order_id.user.username}, 
-                    Your Order {response['body']['orderId']} has been cancel. 
-                    Refund amount will be 10% less then origional order amount.
-                    Shortly Your refund amount {response['body']['refundAmount']} will be transfer to you.
-                    Thanks!.
-                    
-                    
-                    Note: it may take 2-3 days to get refund due to bank policy.
-                    """
-                    
-                    email_from = settings.EMAIL_HOST_USER
-                    recipient_list = [instance.order_id.user.email, ]
-                    send_mail( subject, message, email_from, recipient_list )
-            except Exception as e:
-                print(e)
+# @receiver(post_save, sender=Payment)
+# def on_payment_cancel(sender, instance, created, **kwargs):
+#     if instance.status=='Cancel' and instance.payment_method == 'Online':
+#         paytmParams = dict()
+#         refund_amount=instance.order_id.amount-((instance.order_id.amount*10)/100)
+#         if refund_amount > 0:
+#             paytmParams["body"]= {
+#                 "mid"          : "iNqaaK84118094196288",
+#                 "txnType"      : "REFUND",
+#                 "orderId"      : str(instance.order_id.orderid),
+#                 "txnId"        : str(instance.txnId),
+#                 "refId"        : str(instance.order_id.orderid)+"abcz",
+#                 "refundAmount" : str(refund_amount),
+#             }
+#             checksum = PaytmChecksum.generateSignature(json.dumps(paytmParams["body"]), MERCHANT_KEY)
+#             paytmParams["head"] = {
+#                 "signature"    : checksum
+#             }
+#             post_data = json.dumps(paytmParams)
+#             # for Staging
+#             url = "https://securegw-stage.paytm.in/refund/apply"
+#             response = requests.post(url, data = post_data, headers = {"Content-type": "application/json"}).json()
+#             print(response)
+#             try:
+#                 if response['body']['resultInfo']['resultCode'] ==  '601':
+#                     subject = f" Refund of Your Order "
+#                     message = f"""
+#                     Dear Customer {instance.order_id.user.username},
+#                     Your Order {response['body']['orderId']} has been cancel.
+#                     Refund amount will be 10% less then origional order amount.
+#                     Shortly Your refund amount {response['body']['refundAmount']} will be transfer to you.
+#                     Thanks!.
+#
+#
+#                     Note: it may take 2-3 days to get refund due to bank policy.
+#                     """
+#
+#                     email_from = settings.EMAIL_HOST_USER
+#                     recipient_list = [instance.order_id.user.email, ]
+#                     send_mail( subject, message, email_from, recipient_list )
+#             except Exception as e:
+#                 print(e)
 
 
 @receiver(post_save, sender=Stocks)

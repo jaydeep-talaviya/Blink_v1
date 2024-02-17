@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from users.models import User, State, Employee
 from django.core.validators import MaxValueValidator, MinValueValidator 
@@ -66,6 +68,7 @@ class Products(models.Model):
     product_maker = models.ForeignKey(User,on_delete=models.CASCADE,related_name='products')
     is_qa_verified = models.BooleanField(default=False)
     is_product_finest = models.BooleanField(default=True) # make it to false on product reject from Qa
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.p_name + " with "+ self.p_category.category_name
@@ -221,6 +224,7 @@ class OrderLines(models.Model):
     sub_total_amount=models.FloatField(validators=[MinValueValidator(0)])
     order_id=models.ForeignKey(Orders,on_delete=models.CASCADE,related_name='order')
     selected_product_varient = models.CharField(max_length=100)
+
 class Delivery(models.Model):
     delivery_state = (('Confirm','Confirm'),
                       ('Started', 'Started'),
@@ -233,9 +237,11 @@ class Delivery(models.Model):
     updated_at=models.DateTimeField(auto_now=True)
     created_at=models.DateTimeField(auto_now_add=datetime.now)
     delivered_at=models.DateTimeField(blank=True,null=True)
+    otp_code = models.CharField(max_length=6,blank=True,null=True)
 
 
     def save(self, *args, **kwargs):
+
         if self.pk:
             # If self.pk is not None then it's an update.
             cls = self.__class__

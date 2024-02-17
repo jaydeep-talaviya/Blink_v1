@@ -1,6 +1,8 @@
 {% extends '../staffs/base_layout.html' %}
 {% load static %}
 {% block title %} Delivery List {% endblock title %}
+{% load user_type %}
+
 {% block main-content %}
     <!-- Container Start -->
     <div class="container mt-5">
@@ -59,11 +61,12 @@
                         <div class="col-sm-4">
                             <span class="fw-bold">Order Total Amount:</span> {{delivery.order.amount|floatformat:"2"}} Rs.
                         </div>
-
+                        {% if request.user|employee_type == 'delivery_person' %}
                         <div class="offset-sm-4 col-sm-4">
                             <a href="{% url 'single_delivery' delivery_id=delivery.delivery_id  %}"
                                 class="text-decoration-none btn-sm btn-primary">Change Delivery Status</a>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, HttpResponse, redirect
@@ -51,6 +52,7 @@ def single_delivery(request,delivery_id):
         if delivery_status == 'Confirm' and delivery.state not in ['Confirm','Started','Delivering','Shipped']:
             delivery.state=delivery_status
             delivery.updated_at = datetime.datetime.now()
+            delivery.otp_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
             delivery.save()
         if delivery_status == 'Started' and delivery.state not in ['Started','Delivering','Shipped']:
             delivery.state=delivery_status
@@ -60,7 +62,7 @@ def single_delivery(request,delivery_id):
             delivery.state = delivery_status
             delivery.updated_at = datetime.datetime.now()
             delivery.save()
-            send_email_to_notify_customer(customer,order)
+            send_email_to_notify_customer(customer,order,delivery.otp_code)
         elif delivery_status == 'Shipped' and delivery.state not in ['Shipped'] and delivery.state == 'Delivering':
             delivery.state = delivery_status
             delivery.delivered_at = datetime.datetime.now()
@@ -70,14 +72,18 @@ def single_delivery(request,delivery_id):
                                         message='Please Check Yout Items,Your Order has been Shipped!',
                                         related_url=related_url
                                         )
+            if (request.user.is_authenticated and (hasattr(request.user, 'employee') and request.user.employee.type == 'delivery_person')):
+                return redirect('delivery_orders')
         else:
             messages.warning(request,('You must select Delivery status based on previous delivery'))
     return render(request,'notifications_app/single_delivery.html',{'delivery':delivery})
 
-def delivery_list(request,status='Confirm'):
+def delivery_list(request,status=None):
+    print(">>>\n\n\n",request.user.id)
     deliveries = Delivery.objects.filter(delivery_person=request.user)
-    if request.user.is_superuser or (hasattr(request.user, 'employee') and request.user.employee.type == 'manager'):
-        deliveries = Delivery.objects.filter(state=status)
+    # if request.user.is_superuser or (hasattr(request.user, 'employee') and request.user.employee.type == 'manager'):
+    if status:
+        deliveries = deliveries.filter(state=status)
 
     deliveries = get_pagination_records(request,deliveries)
 

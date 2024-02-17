@@ -1,0 +1,51 @@
+{% extends '../base_layout.html' %}
+{% load static %}
+{% block title %} Delivery {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5 col-md-8 offset-md-2">
+        <h3 class="text-center text-decoration-underline text-dark fw-bold">Create Delivery</h3>
+
+        <div class="card">
+            		<table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>#</th>
+                                <th>Customer</th>
+                                <th>Order Name</th>
+                                <th>Total products</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for delivery in total_deliveries %}
+                                <tr>
+                                    <td class="item">{{forloop.counter}}</td>
+                                    <td>{{delivery.order.user.username}}</td>
+                                    <td> {{delivery.order.order.first.product_id.p_name}}
+                                     {% if delivery.order.order.count != 1 %} + {{delivery.order.order.count |add:"-1" }}
+                                      others
+                                      {% endif %}
+                                    </td>
+                                    <td>
+                                        {{delivery.order.order.count}}
+                                    </td>
+                                    <td>
+                                        {% if delivery.state == 'Delivering' %}
+                                        <a href="{% url 'single_delivery' delivery_id=delivery.delivery_id  %}" class="btn btn-sm btn-danger">Shipped</a>
+                                        {% endif %}
+
+                                        <a href="{% url 'delivery_verify_otp' delivery_id=delivery.delivery_id %}" class="btn btn-sm btn-danger">Verify OTP</a>
+                                        <a href="{% url 'get_cancel_order_on_delivery' orderid=delivery.order.orderid %}" class="btn btn-sm btn-danger">Cancel Order</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                    </table>
+        </div>
+    </div>
+
+{% endblock main-content %}

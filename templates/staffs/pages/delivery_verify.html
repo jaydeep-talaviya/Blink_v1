@@ -1,0 +1,36 @@
+{% extends '../base_layout.html' %}
+{% load static %}
+{% block title %} Delivery {% endblock title %}
+{% block main-content %}
+<div class="my-5">
+    {%include '../partials/breadcrumbs.html'%}
+  </div>
+{%load crispy_forms_tags %}
+ <div class="container mt-5 col-md-8 offset-md-2">
+        <h3 class="text-center text-decoration-underline text-dark fw-bold">Verify Delivery</h3>
+        <div class="row my-3">
+          <div class="col-sm-6 offset-sm-3">
+
+           <form method="POST" id="otp_code_varify" novalidate class="shadow p-5">
+            {% csrf_token %}
+          <div class="mb-3">
+
+
+             <label for="id_otp_code" class="form-label">OTP</label>
+             <input type="number" name="otp_code" class="form-control" id="id_otp_code" />
+
+            </div>
+
+            <input type="submit" class="btn btn-primary mt-4 varify-btn" value="Varify">
+
+            <br>
+
+           </form>
+
+          </div>
+         </div>
+
+
+    </div>
+
+{% endblock main-content %}
