@@ -45,6 +45,7 @@
         );
 
         notificationSocket.onmessage = function(e) {
+            console.log(">>>>>>>eeee",e)
             const data = JSON.parse(e.data);
             document.getElementById("notifications-dropdown").innerHTML =
              "<li class='dropdown-item bg-gray'>"

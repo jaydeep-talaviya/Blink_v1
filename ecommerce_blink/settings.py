@@ -308,12 +308,6 @@ CELERY_BEAT_LOG_PATH = os.path.join(BASE_DIR,'logs','beat.log')
 
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-MERCHANT_KEY='Z9uzcquqrxUuNErK'
-MID="iNqaaK84118094196288"
-INDUSTRY_TYPE_ID="Retail"
-WEBSITE="WEBSTAGING"
-CHANNEL_ID="WEB"
-CALLBACK_URL="'http://127.0.0.1:8000/handlerequest"
 
 
 DJANGO_EASY_AUDIT_WATCH_REQUEST_EVENTS=False
@@ -327,7 +321,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR,'logs','django_celery.log'),
         },
@@ -335,7 +329,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },

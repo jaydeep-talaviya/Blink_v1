@@ -3,8 +3,9 @@ from django.db.models.signals import post_save
 from products.models import Delivery, Orders
 from users.models import User
 from django.dispatch import receiver
-from django_celery_beat.models import MINUTES, PeriodicTask, CrontabSchedule, PeriodicTasks
+from django_celery_beat.models import MINUTES, PeriodicTask, PeriodicTasks, ClockedSchedule
 import json
+from datetime import timedelta
 
 # Create your models here.
 class Notification(models.Model):
@@ -48,6 +49,6 @@ def notification_handler(sender,instance,created,**kwargs):
     #call group_send function directly to send notifications or you can create a dynamic task in celery beat
     print(">>>>>>>>>Notification Created\n\n\n",instance.created_at)
     if created:
-        schedule, created = CrontabSchedule.objects.get_or_create(hour = instance.created_at.hour, minute = int(instance.created_at.minute+1 % 60), day_of_month = instance.created_at.day, month_of_year = instance.created_at.month,timezone='UTC')
-        task = PeriodicTask.objects.create(crontab=schedule, name="broadcast-notification-"+str(instance.id), task="notifications_app.tasks.broadcast_notification", args=json.dumps((instance.id,)))
+        schedule, created = ClockedSchedule.objects.get_or_create(clocked_time= instance.created_at)
+        task = PeriodicTask.objects.create(clocked=schedule,name="broadcast-notification-"+str(instance.id), task="notifications_app.tasks.broadcast_notification", args=json.dumps((instance.id,)),one_off=True)
         

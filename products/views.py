@@ -5,7 +5,7 @@ import razorpay
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 
-from ecommerce_blink.settings import MERCHANT_KEY, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+from ecommerce_blink.settings import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
 from notifications_app.models import Notification
 from utils.helper_functions import get_voucher_discount, get_paginator, get_related_url
 from .models import Payment, Stocks, Checkout, OrderLines, Orders, Products, Rates, AttributeName, Cart, OtpModel, \
@@ -28,7 +28,6 @@ import smtplib
 import random
 
 from weasyprint import HTML
-from . import Checksum
 from django.views.decorators.csrf import csrf_exempt
 import uuid
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger

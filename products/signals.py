@@ -17,7 +17,6 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from django.conf import settings
 
-MERCHANT_KEY = 'Z9uzcquqrxUuNErK'
 
 # import checksum generation utility
 from paytmchecksum import PaytmChecksum

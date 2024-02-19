@@ -13,7 +13,7 @@ print("....aaaaaabbbbcc111111111............\n\n\n\n\n")
 
 @shared_task(bind = True)
 def broadcast_notification(self, data):
-    print(">>>>>>>>>step 11111111111111")
+    print(">>>>>>>>>step 11111111111111",data)
     try:
         notification = Notification.objects.filter(id = int(data))
         print(">>>>>>>>>step 2222222222",notification)
@@ -33,12 +33,12 @@ def broadcast_notification(self, data):
                     'type': 'send_notification',
                     'message': json.dumps(
                         {'message':notification.message,
-                        'delivery_id':notification.delivery.delivery_id
+                         "related_url":notification.related_url
                         }
                         ),
                 }
             )
-            notification.sent = True
+            # notification.sent = True
             notification.save()
             return 'Done'
 
@@ -50,7 +50,8 @@ def broadcast_notification(self, data):
 
             raise Ignore()
 
-    except:
+    except Exception as e:
+        print(e,">>>>>>>error\n\n\n")
         self.update_state(
                 state = 'FAILURE',
                 meta = {

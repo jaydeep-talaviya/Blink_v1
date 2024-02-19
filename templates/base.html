@@ -180,21 +180,25 @@
         );
 
         notificationSocket.onmessage = function(e) {
+             console.log(">>>>>>e",e)
             const data = JSON.parse(e.data);
-            document.getElementById("notifications-dropdown").innerHTML =
-             "<li class='dropdown-item bg-gray'>" 
-              +  
-              '<a class="text-decoration-none" href="staff/delivery/'
-              +
-              data.delivery_id
-              +'">'
-                +
-                data.message
-                +
-                '</a>'
-              + 
-              "</li><hr class='dropdown-divider'>"
-               + document.getElementById("notifications-dropdown").innerHTML;
+            const existed_notifications = document.getElementsByClassName("notification_scrollable")
+            if (existed_notifications.length > 0){
+
+
+            var htmlString ="<li><a class='dropdown-item' href="+data.related_url+">"
+                +"<div class='alert alert-danger' role='alert'>"+ data.message +"</div>"+
+                "</a>"
+                + "</li><hr class='dropdown-divider'>"
+              var tempDiv = document.createElement('div');
+
+              tempDiv.innerHTML = htmlString
+
+              var elements = tempDiv.childNodes;
+                elements.forEach(function(element) {
+                  existed_notifications[0].prepend(element)
+                });
+          }
             document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
 
           };
