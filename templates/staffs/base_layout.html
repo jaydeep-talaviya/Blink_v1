@@ -31,11 +31,12 @@
 
 
     <script>
+        {% if user.is_authenticated %}
+      if (document.getElementById('profileDropdown') !== null){
         {% with room_name=user %}
         const roomName = "{{ room_name|encrypt_value }}";
         console.log(">>>>>>>>>roomName",roomName)
         {% endwith %}
-
         const notificationSocket = new WebSocket(
             'ws://'
             + window.location.host
@@ -44,34 +45,59 @@
             + '/'
         );
 
+          // Send a heartbeat message every 10 minutes
+        const heartbeatInterval = 0.5 * 60 * 1000; // 10 minutes
+        let heartbeatTimer;
+
+        function sendHeartbeat() {
+            console.log(">>>>>>>",notificationSocket.readyState)
+          if (notificationSocket.readyState === WebSocket.OPEN) {
+            notificationSocket.send(JSON.stringify({ type: 'heartbeat' }));
+          }
+        }
+        sendHeartbeat()
+
+        notificationSocket.onopen = function() {
+            console.log(">>>open")
+          // Set up heartbeat interval
+          heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+        };
+
+
         notificationSocket.onmessage = function(e) {
-            console.log(">>>>>>>eeee",e)
+             console.log(">>>>>>e",e)
             const data = JSON.parse(e.data);
-            document.getElementById("notifications-dropdown").innerHTML =
-             "<li class='dropdown-item bg-gray'>"
-              +
-              '<a class="text-decoration-none" href="staff/delivery/'
-              +
-              data.delivery_id
-              +'">'
-                +
-                data.message
-                +
-                '</a>'
-              +
-              "</li><hr class='dropdown-divider'>"
-               + document.getElementById("notifications-dropdown").innerHTML;
+            const existed_notifications = document.getElementsByClassName("notification_scrollable")
+            if (existed_notifications.length > 0){
+
+
+            var htmlString ="<li><a class='dropdown-item' href="+data.related_url+">"
+                +"<div class='alert alert-danger' role='alert'>"+ data.message +"</div>"+
+                "</a>"
+                + "</li><hr class='dropdown-divider'>"
+              var tempDiv = document.createElement('div');
+
+              tempDiv.innerHTML = htmlString
+
+              var elements = tempDiv.childNodes;
+                elements.forEach(function(element) {
+                  existed_notifications[0].prepend(element)
+                });
+          }
             document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
 
           };
 
 
         notificationSocket.onclose = function(e) {
-            console.log('Chat socket closed unexpectedly',e);
+            console.error('Chat socket closed unexpectedly');
+            clearInterval(heartbeatTimer); // Clear the heartbeat interval
+
         };
 
+      }
+        {% endif %}
     </script>
-
     {%include './partials/_footer.html'%}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

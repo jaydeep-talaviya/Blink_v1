@@ -164,7 +164,7 @@
     </nav>
   {% endblock navbar %}
     {{ room_name|json_script:"room-name" }}
-    <script>
+      <script>
         {% if user.is_authenticated %}
       if (document.getElementById('profileDropdown') !== null){
         {% with room_name=user %}
@@ -178,6 +178,25 @@
             + roomName
             + '/'
         );
+
+          // Send a heartbeat message every 10 minutes
+        const heartbeatInterval = 0.1 * 60 * 1000; // 10 minutes
+        let heartbeatTimer;
+
+        function sendHeartbeat() {
+            console.log(">>>>>>>",notificationSocket.readyState,WebSocket.OPEN)
+          if (notificationSocket.readyState === WebSocket.OPEN) {
+            console.log(">>>> step 2",notificationSocket)
+            notificationSocket.send(JSON.stringify({ type: 'heartbeat' }));
+          }
+        }
+
+        notificationSocket.onopen = function() {
+            console.log(">>>open")
+          // Set up heartbeat interval
+          heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+        };
+
 
         notificationSocket.onmessage = function(e) {
              console.log(">>>>>>e",e)
@@ -203,11 +222,16 @@
 
           };
 
+        notificationSocket.onerror = function(e) {
+            console.log(">>>error",e)
+        }
 
         notificationSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
+            clearInterval(heartbeatTimer); // Clear the heartbeat interval
+
         };
-      
+
       }
         {% endif %}
     </script>
