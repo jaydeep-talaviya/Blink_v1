@@ -180,14 +180,15 @@
         );
 
           // Send a heartbeat message every 10 minutes
-        const heartbeatInterval = 0.1 * 60 * 1000; // 10 minutes
+        const heartbeatInterval = 5 * 60 * 1000; // 5 minutes
         let heartbeatTimer;
 
         function sendHeartbeat() {
             console.log(">>>>>>>",notificationSocket.readyState,WebSocket.OPEN)
           if (notificationSocket.readyState === WebSocket.OPEN) {
-            console.log(">>>> step 2",notificationSocket)
-            notificationSocket.send(JSON.stringify({ type: 'heartbeat' }));
+<!--            console.log(">>>> step 2",notificationSocket)-->
+            notificationSocket.send(JSON.stringify({ message: 'heartbeat' }));
+<!--            console.log(">>>>notificationSocket",notificationSocket)-->
           }
         }
 
@@ -199,10 +200,13 @@
 
 
         notificationSocket.onmessage = function(e) {
-             console.log(">>>>>>e",e)
+             console.log(">>>sdssds>>>e",e)
             const data = JSON.parse(e.data);
+           if (data.message != 'heartbeat'){
+
             const existed_notifications = document.getElementsByClassName("notification_scrollable")
-            if (existed_notifications.length > 0){
+
+            if (existed_notifications.length > 0 ){
 
 
             var htmlString ="<li><a class='dropdown-item' href="+data.related_url+">"
@@ -219,7 +223,7 @@
                 });
           }
             document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
-
+            }
           };
 
         notificationSocket.onerror = function(e) {

@@ -24,18 +24,18 @@ class NotificationChatConsumer(AsyncWebsocketConsumer):
         )
 
     # Receive message from WebSocket
-    # async def receive(self, text_data):
-    #     text_data_json = json.loads(text_data)
-    #     message = text_data_json['message']
-    #     print(">>>>>>>comming",message)
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        # message = text_data_json['type']
+        print(">>>>>>>comming",text_data)
     #     # Send message to room group
-    #     await self.channel_layer.group_send(
-    #         self.room_group_name,
-    #         {
-    #             'type': 'chat_message',
-    #             'message': message
-    #         }
-    #     )
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'send_notification',
+                'message': text_data
+            }
+        )
 
     # Receive message from room group
     async def send_notification(self, event):
