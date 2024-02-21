@@ -102,7 +102,7 @@
                     {% for i in notifications %}
                       <li >
                         <a class="dropdown-item " href="{% url 'change_notifications_status' notification_id=i.id %}">
-                           <div class="alert {% if i.is_read %} alert-success {% else %} alert-danger {% endif %}" role="alert">
+                           <div class="alert  {% if i.is_read %} alert-success {% else %} alert-danger {% endif %}" role="alert">
                            {{i.message}}
                         </div>
                         </a>
@@ -210,7 +210,7 @@
 
 
             var htmlString ="<li><a class='dropdown-item' href="+data.related_url+">"
-                +"<div class='alert alert-danger' role='alert'>"+ data.message +"</div>"+
+                +"<div class='alert  alert-danger' role='alert'>"+ data.message +"</div>"+
                 "</a>"
                 + "</li><hr class='dropdown-divider'>"
               var tempDiv = document.createElement('div');

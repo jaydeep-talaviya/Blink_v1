@@ -88,3 +88,14 @@ body,html {
 .main_wrapper {
 flex:1;
 }
+
+.notification_scrollable{
+    height: 300px;
+     overflow-y: scroll;
+}
+
+@media (max-width: 576px) {
+     .notification_scrollable .alert{
+        white-space: initial;
+    }
+}
