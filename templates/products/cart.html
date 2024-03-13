@@ -5,6 +5,7 @@
 {% block title %}Product Cart{% endblock title %}
 {% block main-content %}
 {% load voucher_type_render %}
+{% load multiply %}
 
 <link type="text/css" href="{% static 'css/cart.css' %}" rel="stylesheet" />
 
@@ -49,7 +50,9 @@
                                 <input type="text" value="{{product.price}}" class="price form-control" disabled>
                             </td>
                             <td align="right">$ <span id="amount" class="amount total_amount">
-                                {% widthratio product.price 1 product.qty %}
+                                {% with total_price=product.price|floatformat:2|multiply:product.qty %}
+                                    {{ total_price }}
+                                {% endwith %}
                             </span></td>
                         </tr>
                         {% endfor %}

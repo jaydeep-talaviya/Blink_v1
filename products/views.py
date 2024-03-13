@@ -45,8 +45,8 @@ def search(request):
         product_search =  request.GET.get('search') # do some research what it does    
     subcategory="All"
 
-    all_products=Products.objects.filter(Q(p_subcategory__subcategory_name__icontains=product_search)|Q(p_category__category_name__icontains=product_search) | Q(p_name__icontains=product_search))
-    all_products.filter(is_deleted = False)
+    all_products=Products.objects.filter(Q(p_subcategory__subcategory_name__icontains=product_search)|Q(p_category__category_name__icontains=product_search) | Q(p_name__icontains=product_search)).distinct()
+    all_products = all_products.filter(is_deleted = False,is_qa_verified=True,productchangepriceattributes__isnull=False)
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
     page = request.GET.get('page',1)   
@@ -64,7 +64,7 @@ def productlist(request,subcategory=None):
         all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False).distinct().order_by('price')
         subcategory='All'
     else:
-        all_products=Products.objects.filter(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False).filter((Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)) & Q(productchangepriceattributes__isnull=False,is_qa_verified=True)).distinct().order_by('price')
+        all_products=Products.objects.filter((Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)) & Q(productchangepriceattributes__isnull=False,is_qa_verified=True,is_deleted=False)).distinct().order_by('price')
     minvalue=all_products.aggregate(Min('price'))
     maxvalue=all_products.aggregate(Max('price'))
 
@@ -83,21 +83,20 @@ def productlist_sortby(request):
 
         if subcategory == 'All' or None:
             all_products=all_products.order_by('price')
-            subcategory='All'
         else:
             all_products=all_products.filter(Q(p_subcategory__subcategory_name=subcategory)|Q(p_category__category_name=subcategory)).order_by('price')
 
         if sort_by != False:
             if sort_by == 'avg_rating':
-                all_products=all_products.annotate(avg_rating=Avg('rates__rate')).order_by('-avg_rating')
+                all_products=all_products.annotate(avg_rating=Avg('rates__rate')).distinct().order_by('-avg_rating')
             elif sort_by == 'popularity':
-                all_products=all_products.annotate(rating_count=Count('rates__rate')).order_by('-rating_count')
+                all_products=all_products.annotate(rating_count=Count('rates__rate')).distinct().order_by('-rating_count')
             else:
-                all_products=all_products.order_by(sort_by)
+                all_products=all_products.distinct().order_by(sort_by)
         else:
             minvalue=request.GET.get('minvalue',False)
             maxvalue=request.GET.get('maxvalue',False)
-            all_products=all_products.filter(price__range=(minvalue, maxvalue))
+            all_products=all_products.distinct().filter(price__range=(minvalue, maxvalue))
         paginator = Paginator(all_products,10 )
         all_products = get_paginator(paginator, page)
 

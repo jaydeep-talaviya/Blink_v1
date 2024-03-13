@@ -8,3 +8,4 @@ def voucher_type_render(voucher):
     # Declare a empty list
     print(">>>>>>\n\n\n\n\n\n\n\n\n\n\n\n",voucher)
     return {"voucher":voucher}
+
