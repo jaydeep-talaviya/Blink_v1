@@ -161,9 +161,10 @@ def update_category(request,id):
 @login_required
 @admin_or_manager_required
 def remove_category(request,id):
-    category_instance=Category.objects.filter(id=id)
+    category_instance = get_object_or_404(Category,id=id)
     if not Products.objects.filter(p_category__id=id).exists():
-        category_instance.delete()
+        category_instance.is_deleted=True
+        category_instance.save()
         messages.success(request, f"Your Category has been removed")
     else:
         messages.error(request, f"Please delete Products first")
@@ -218,9 +219,10 @@ def update_sub_category(request,id):
 @login_required
 @admin_or_manager_required
 def remove_sub_category(request,id):
-    subcategory_instance=Subcategory.objects.filter(id=id)
+    subcategory_instance = get_object_or_404(Subcategory,id=id)
     if not Products.objects.filter(p_subcategory__id=id).exists():
-        subcategory_instance.delete()
+        subcategory_instance.is_deleted = True
+        subcategory_instance.save()
         messages.success(request, f"Your Sub Category has been removed")
     else:
         messages.error(request, f"Please delete Products first")
@@ -292,9 +294,10 @@ def list_attribute_name(request):
 @login_required
 @admin_or_manager_required
 def remove_attribute_names(request,id):
-    attribute_name_instance=AttributeName.objects.filter(id=id)
-    if not attribute_name_instance.first().attributevalue_set.exists():
-        attribute_name_instance.delete()
+    attribute_name_instance = get_object_or_404(AttributeName,id=id)
+    if not attribute_name_instance.attributevalue_set.exists():
+        attribute_name_instance.is_deleted = True
+        attribute_name_instance.save()
         messages.success(request, f"Your Attribute Name has been removed")
     else:
         messages.error(request, f"Please Remove First Your Attribute Values with this Attribute Name!")
@@ -347,8 +350,9 @@ def update_attribute(request,id):
 @login_required
 @admin_or_manager_required
 def remove_attribute(request,id):
-    attribute_instance=AttributeValue.objects.filter(id=id)
-    attribute_instance.delete()
+    attribute_instance = get_object_or_404(AttributeValue,id=id)
+    attribute_instance.is_deleted = True
+    attribute_instance.save()
     messages.success(request, f"Your Attribute has been removed")
     return redirect('product_attribute_list')
 
@@ -780,10 +784,11 @@ def stock_update(request,id):
         forms=StocksForm(request.POST,instance=stock_instance)
         if forms.is_valid():
             forms.save()
+            related_url = get_related_url(request, 'stock', id=id)
+
             if not request.user.is_superuser:
 
                 admin = User.objects.get_admin()
-                related_url = get_related_url(request, 'stock',id=id)
                 Notification.objects.create(sender=request.user, receiver=admin,
                                             message='Stock has been Updated!',
                                             related_url=related_url
@@ -954,10 +959,10 @@ def update_employee_salary(request,id):
 @login_required
 @admin_or_manager_required
 def delete_employee_salary(request,id):
-    employee_instance = EmployeeSalary.objects.filter(id=id)
-    employee_id = employee_instance.first().employee_id
-
-    employee_instance.delete()
+    employee_instance = get_object_or_404(EmployeeSalary,id=id)
+    employee_id = employee_instance.employee_id
+    employee_instance.is_deleted = False
+    employee_instance.save()
     messages.success(request, f"Your Employee has been removed")
     return redirect('employee_salary_list',id=employee_id)
 
@@ -1030,7 +1035,7 @@ def delete_warehouse(request, id):
     if not request.user.is_superuser:
         warehouse_instance.update(is_deleted=True)
     else:
-        warehouse_instance.delete()
+        warehouse_instance.update(is_deleted=True)
     messages.success(request, f"Your Warehouse has been removed")
     return redirect('list_warehouses')
 

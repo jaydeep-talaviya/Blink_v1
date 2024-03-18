@@ -22,6 +22,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Category</th>
+                      <th scope="col">status</th>
                       <th scope="col">No. Attributes</th>
                     <th scope="col" class="text-center">Action</th>
 
@@ -34,6 +35,10 @@
                         <td> {{product.p_name}}</td>
                         <td> {{product.price}} Rs.</td>
                         <td> {{product.p_category}}</td>
+                        <td>
+                            <span class="fw-bold">is Verified:</span> {{product.is_qa_verified}}<br/>
+                            <span class="fw-bold">is Deleted : </span> {{product.is_deleted}}
+                        </td>
                         <td>
                             {% for product_attr in product.productchangepriceattributes_set.all %}
                             <span>{{product_attr}}</span> | Price : <span class="fw-bold"> {{product_attr.price}}</span><br/>

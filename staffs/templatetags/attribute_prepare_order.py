@@ -12,4 +12,5 @@ def get_price_from_prepare_order(record):
     orderline=OrderLines.objects.filter(order_id=record.order_id, product_id=record.product_id, qty=record.purchase_qty,
                               selected_product_varient=",".join(
                                   record.product_attribute.attribute_values.values_list('a_value',flat=True)) + ',')
+    print(">>>>>>orderline\n\n",orderline.exists())
     return orderline.first()

@@ -191,7 +191,7 @@ def on_cancel_order_remove_delivery(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Stocks)
 def check_finished_or_not(sender, instance, created, **kwargs):
-    if instance.left_qty == 0:
+    if instance.left_qty == 0 and not instance.finished:
         instance.finished = True
         instance.save()
         managers = Employee.objects.filter(type='manager',is_deleted=False).values('user')

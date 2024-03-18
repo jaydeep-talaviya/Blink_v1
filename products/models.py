@@ -15,6 +15,13 @@ from utils.helper_functions import get_voucher_discount
 from django.utils.translation import gettext_lazy as _
 
 
+class SoftDeleteManager(models.Manager):
+    def get_queryset(self):
+        if hasattr(self.model,'is_deleted'):
+            return super().get_queryset().filter(is_deleted=False)
+        else:
+            return super().get_queryset()
+
 class Warehouse(models.Model):
     owner=models.ForeignKey(User,on_delete=models.CASCADE)
     address=models.TextField()
@@ -23,29 +30,47 @@ class Warehouse(models.Model):
     name=models.CharField(max_length=100)
     is_deleted = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
+
+
     def __str__(self):
         return self.name + " owned by " + self.owner.username
 class Category(models.Model):
     category_name=models.CharField(max_length=50)
-    
+    is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
+
     def __str__(self):
         return self.category_name
 
 class Subcategory(models.Model):
     subcategory_name=models.CharField(max_length=50)
     category=models.ForeignKey(Category, on_delete=models.CASCADE)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
+
     def __str__(self):
         return self.subcategory_name
 
 class AttributeName(models.Model):
     a_name=models.CharField(max_length=50)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
+
     def __str__(self):
         return self.a_name
 
 class AttributeValue(models.Model):
     a_value=models.CharField(max_length=50)
     a_name=models.ForeignKey(AttributeName,on_delete=models.CASCADE)
-    
+    is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
+
     def __str__(self):
         return self.a_name.a_name +" - "+self.a_value
 
@@ -69,6 +94,8 @@ class Products(models.Model):
     is_qa_verified = models.BooleanField(default=False)
     is_product_finest = models.BooleanField(default=True) # make it to false on product reject from Qa
     is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
 
     def __str__(self):
         return self.p_name + " with "+ self.p_category.category_name
@@ -99,6 +126,9 @@ class ProductChangePriceAttributes(models.Model):
     attribute_values=models.ManyToManyField(AttributeValue)
     p_id= models.ForeignKey(Products,on_delete=models.CASCADE)
     price=models.FloatField(validators=[MinValueValidator(1)])
+    is_deleted = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
 
     def __str__(self):
         return ','.join([str(attribute_value) for attribute_value in self.attribute_values.all()])
@@ -109,6 +139,8 @@ class Rates(models.Model):
     rate = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)])
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     p_id= models.ForeignKey(Products,on_delete=models.CASCADE,blank=False,null=True)
+
+    objects = SoftDeleteManager()
 
     class Meta:
         constraints = [
@@ -128,6 +160,8 @@ class Stocks(models.Model):
     left_qty=models.IntegerField(validators=[MinValueValidator(1)])
     on_alert_qty=models.IntegerField(validators=[MinValueValidator(1)])
     finished = models.BooleanField(default=False)
+
+    objects = SoftDeleteManager()
 
     def __str__(self):
         return self.product_id.p_name + " At "+ self.warehouse_id.name + " with "+str(self.left_qty)
@@ -183,6 +217,7 @@ class Vouchers(models.Model):
     expire_at=models.DateTimeField(null=True,blank=True)# promocode
     stop = models.BooleanField(null=True,blank=True,default=False) #on_above_purchase + #product_together +# promocode + #deals_of_day
     is_deleted = models.BooleanField(null=True,blank=True,default=False)
+    objects = SoftDeleteManager()
 
     def get_name(self):
         if self.voucher_type == 'promocode':

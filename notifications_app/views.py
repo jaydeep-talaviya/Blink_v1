@@ -81,7 +81,8 @@ def single_delivery(request,delivery_id):
 def delivery_list(request,status=None):
     print(">>>\n\n\n",request.user.id)
     deliveries = Delivery.objects.filter(delivery_person=request.user)
-    # if request.user.is_superuser or (hasattr(request.user, 'employee') and request.user.employee.type == 'manager'):
+    if request.user.is_superuser or (hasattr(request.user, 'employee') and request.user.employee.type == 'manager'):
+        deliveries = Delivery.objects.all()
     if status:
         deliveries = deliveries.filter(state=status)
 

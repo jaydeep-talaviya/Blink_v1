@@ -28,7 +28,7 @@ def get_attribute_id_from_orderline(record):
     for queryset in querysets[1:]:
         filtered_records = filtered_records.intersection(queryset)
     print(">>>>>>>>>>intersection\n\n\n\n",filtered_records)
-    return filtered_records.first().id
+    return filtered_records.first().id if filtered_records.exists() else 0
 
 @register.filter(name='get_left_qty_in_warehouse_for_product')
 def get_left_qty_in_warehouse_for_product(orderline,warehouse):
