@@ -51,7 +51,7 @@ def create_otp(sender, instance, created, **kwargs):
             cart.delete() 
             instance.times=0
 
-            managers = Employee.objects.filter(Q(type='manager')).values('user')
+            managers = Employee.objects.filter(Q(type='manager',is_deleted=False)).values('user')
             request = get_request()
             related_url = get_related_url(request, 'order')
 
@@ -194,7 +194,7 @@ def check_finished_or_not(sender, instance, created, **kwargs):
     if instance.left_qty == 0:
         instance.finished = True
         instance.save()
-        managers = Employee.objects.filter(type='manager').values('user')
+        managers = Employee.objects.filter(type='manager',is_deleted=False).values('user')
         current_user = get_current_user()
         # notify to each manager.
         for manager in managers:

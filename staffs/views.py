@@ -48,7 +48,7 @@ today = date.today()
 def dashboard(request):
     stocks = Stocks.objects.count()
     warehouses = Warehouse.objects.count()
-    employees = Employee.objects.count()
+    employees = Employee.objects.filter(is_deleted=False).count()
     user_orders = Orders.objects.count()
     prepare_orders = OrderPrepare.objects.count()
     vouchers = Vouchers.objects.filter(is_deleted=False).count()
@@ -162,8 +162,11 @@ def update_category(request,id):
 @admin_or_manager_required
 def remove_category(request,id):
     category_instance=Category.objects.filter(id=id)
-    category_instance.delete()
-    messages.success(request, f"Your Category has been removed")
+    if not Products.objects.filter(p_category__id=id).exists():
+        category_instance.delete()
+        messages.success(request, f"Your Category has been removed")
+    else:
+        messages.error(request, f"Please delete Products first")
     return redirect('list_category')
 
 ########### Product Sub Category #########
@@ -216,8 +219,11 @@ def update_sub_category(request,id):
 @admin_or_manager_required
 def remove_sub_category(request,id):
     subcategory_instance=Subcategory.objects.filter(id=id)
-    subcategory_instance.delete()
-    messages.success(request, f"Your Sub Category has been removed")
+    if not Products.objects.filter(p_subcategory__id=id).exists():
+        subcategory_instance.delete()
+        messages.success(request, f"Your Sub Category has been removed")
+    else:
+        messages.error(request, f"Please delete Products first")
     return redirect('list_sub_category')
 
 
@@ -244,6 +250,7 @@ def create_attribute_names(request):
                     for attribute in formset:
                         attribute.save()
                 messages.success(request, f"Your Attribute Name is Created")
+                return redirect('list_attribute_name')
             except Exception as e:
                 print(">>>>e",e)
                 messages.warning(request, f"Please Check Again,Invalid Data")
@@ -286,8 +293,11 @@ def list_attribute_name(request):
 @admin_or_manager_required
 def remove_attribute_names(request,id):
     attribute_name_instance=AttributeName.objects.filter(id=id)
-    attribute_name_instance.delete()
-    messages.success(request, f"Your Attribute Name has been removed")
+    if not attribute_name_instance.first().attributevalue_set.exists():
+        attribute_name_instance.delete()
+        messages.success(request, f"Your Attribute Name has been removed")
+    else:
+        messages.error(request, f"Please Remove First Your Attribute Values with this Attribute Name!")
     return redirect('list_attribute_name')
 
 
@@ -456,7 +466,7 @@ def product_create(request):
             product_obj.product_maker = request.user
             product_obj.save()
 
-            managers = Employee.objects.filter(type = 'manager').values('user')
+            managers = Employee.objects.filter(type = 'manager',is_deleted=False).values('user')
             related_url = get_related_url(request, 'product')
 
             # notify to each manager.
@@ -497,7 +507,7 @@ def product_update(request,id):
                 product_obj.is_qa_verified=False
                 product_obj.is_product_finest=True
                 product_obj.save()
-                managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+                managers = Employee.objects.filter(Q(type='manager',is_deleted=False) & ~Q(user=request.user)).values('user')
                 related_url = get_related_url(request, 'product', id=id)
 
                 for manager in managers:
@@ -505,7 +515,7 @@ def product_update(request,id):
                                                 message=f'{product_obj.p_name} product has been Updated, Please check!',
                                                 related_url=related_url
                                                 )
-                qa_employees = Employee.objects.filter(type='qa').values('user')
+                qa_employees = Employee.objects.filter(type='qa',is_deleted=False).values('user')
                 related_url = get_related_url(request, 'product_qa')
                 for qa_employee in qa_employees:
                     Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
@@ -525,7 +535,6 @@ def product_update(request,id):
 @admin_or_manager_required
 def product_delete(request, id):
     product_instance = get_object_or_404(Products,id=id)
-    # product_instance.delete()
     product_instance.is_deleted=True
     product_instance.save()
     messages.success(request, f"Your Product has been removed")
@@ -543,7 +552,7 @@ def product_initialy_create(request):
             product_obj.product_maker = request.user
             product_obj.save()
 
-            managers = Employee.objects.filter(type = 'manager').values('user')
+            managers = Employee.objects.filter(type = 'manager',is_deleted=False).values('user')
             related_url = get_related_url(request, 'product',id=product_obj.id)
 
             # notify to each manager.
@@ -553,7 +562,7 @@ def product_initialy_create(request):
                                             related_url=related_url
                                             )
 
-            qa_employees = Employee.objects.filter(type = 'qa').values('user')
+            qa_employees = Employee.objects.filter(type = 'qa',is_deleted=False).values('user')
             related_url = get_related_url(request, 'product_qa')
             for qa_employee in qa_employees:
                 Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
@@ -583,7 +592,7 @@ def product_update_by_product_maker(request,id):
             product_obj.is_product_finest=True
             product_obj.save()
 
-            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            managers = Employee.objects.filter(Q(type='manager',is_deleted=False) & ~Q(user=request.user)).values('user')
             related_url = get_related_url(request, 'product',id=id)
 
             # notify to each manager.
@@ -593,7 +602,7 @@ def product_update_by_product_maker(request,id):
                                             related_url=related_url
                                             )
 
-            qa_employees = Employee.objects.filter(type='qa').values('user')
+            qa_employees = Employee.objects.filter(type='qa',is_deleted=False).values('user')
             related_url = get_related_url(request, 'product_qa')
             for qa_employee in qa_employees:
                 Notification.objects.create(sender=request.user, receiver_id=qa_employee.get('user'),
@@ -722,7 +731,7 @@ def get_product_attrs_by_product_warehouse(request):
 
 @login_required
 def inform_other_managers(request):
-    managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+    managers = Employee.objects.filter(Q(type='manager',is_deleted=False) & ~Q(user=request.user)).values('user')
     emails = list(managers.values_list('user__email',flat=True))
     send_mail_to_all_managers(request.user,emails)
     return redirect('stock_create')
@@ -743,7 +752,7 @@ def stock_create(request):
                                             message='New Stock has been created!',
                                             related_url=related_url
                                             )
-            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            managers = Employee.objects.filter(Q(type='manager',is_deleted=False) & ~Q(user=request.user)).values('user')
 
             # notify to each manager.
             for manager in managers:
@@ -779,7 +788,7 @@ def stock_update(request,id):
                                             message='Stock has been Updated!',
                                             related_url=related_url
                                             )
-            managers = Employee.objects.filter(Q(type='manager') & ~Q(user=request.user)).values('user')
+            managers = Employee.objects.filter(Q(type='manager',is_deleted=False) & ~Q(user=request.user)).values('user')
             # notify to each manager.
             for manager in managers:
                 Notification.objects.create(sender=request.user, receiver_id=manager.get('user'),
@@ -861,7 +870,7 @@ def create_employee(request):
 @login_required
 @admin_or_manager_required
 def list_employees(request):
-    employees=Employee.objects.all()
+    employees=Employee.objects.filter(is_deleted=False).all()
     employees = get_pagination_records(request,employees)
 
     return render(request,'staffs/pages/employee_list.html',{'employees':employees})
@@ -890,8 +899,10 @@ def update_employee(request,id):
 @login_required
 @admin_or_manager_required
 def delete_employee(request, id):
-    employee_instance = Employee.objects.filter(id=id)
-    employee_instance.delete()
+    # employee_instance = Employee.objects.get(id=id,is_deleted=False)
+    employee_instance = get_object_or_404(Employee,id=id)
+    employee_instance.is_deleted = True
+    employee_instance.save()
     messages.success(request, f"Your Employee has been removed")
     return redirect('list_employees')
 
@@ -900,7 +911,7 @@ def delete_employee(request, id):
 @login_required
 @admin_or_manager_required
 def create_employee_salary(request,id):
-    employee = Employee.objects.get(id=id)
+    employee = Employee.objects.get(id=id,is_deleted=False)
     forms = EmployeeSalaryForm(request.POST or None)
     forms.instance.employee_id = employee.id
 
@@ -916,14 +927,14 @@ def create_employee_salary(request,id):
 @login_required
 @admin_or_manager_required
 def employee_salary_list(request,id):
-    employee_salary = EmployeeSalary.objects.filter(employee_id=id)
+    employee_salary = EmployeeSalary.objects.filter(employee_id=id,employee_is_deleted=False)
     employee_salary = get_pagination_records(request,employee_salary)
     return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary,'employee_id':id})
 @login_required
 @admin_or_manager_required
 def update_employee_salary(request,id):
     employee_salary = get_object_or_404(EmployeeSalary,id=id)
-    employee = Employee.objects.get(id=employee_salary.employee_id)
+    employee = Employee.objects.get(id=employee_salary.employee_id,is_deleted=False)
     forms = EmployeeSalaryForm(instance=employee_salary)
 
     forms.instance.employee_id = employee.id
@@ -1160,6 +1171,8 @@ def list_of_ledgers(request,type=None):
 
     if type is not None:
         ledgers=ledgers.filter(ledger_type=type)
+    if type == 'employee_salary':
+        ledgers = ledgers.filter(ledger_line__employee_id__is_deleted=False)
     ledgers = get_pagination_records(request,ledgers)
 
     return render(request,'staffs/pages/list_of_ledgers.html',{'ledgers':ledgers,'type':type})
@@ -1207,7 +1220,7 @@ def custom_log_view(request):
 
 
 def get_employees_download(request,type=None):
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.filter(is_deleted=False).all()
     if type is not None:
         queryset = queryset.filter(type=type)
         # Assuming you have filtered out the records you want
@@ -1256,7 +1269,7 @@ def get_cancel_order_on_delivery(request,orderid):
     order = get_object_or_404(Orders,orderid=orderid)
     order.order_status = 'order_cancel'
     order.save()
-    managers = Employee.objects.filter(type='manager').values('user')
+    managers = Employee.objects.filter(type='manager',is_deleted=False).values('user')
     related_url = get_related_url(request, 'order', id=orderid)
 
     # notify to each manager.

@@ -173,7 +173,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS=[
 STATIC_DIR,
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
@@ -338,4 +338,4 @@ LOGGING = {
 RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET')
 
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',"http://blink_ecom.com","blink_ecom.com"]
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',"http://blink_ecom.com"]

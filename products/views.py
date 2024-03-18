@@ -443,7 +443,7 @@ def callback(request):
             payment.save()
             # send information to Manager that someone have created new Order
             if request.user.is_authenticated:
-                managers = Employee.objects.filter(type='manager').values('user')
+                managers = Employee.objects.filter(type='manager',is_deleted=False).values('user')
                 related_url = get_related_url(request, 'product')
 
                 # notify to each manager.
@@ -594,7 +594,7 @@ def cancle_order(request,orderid):
     order=Orders.objects.get(orderid=orderid)
     order.order_status='order_cancel'
     order.save()
-    managers = Employee.objects.filter(type='manager').values('user')
+    managers = Employee.objects.filter(type='manager',is_deleted=False).values('user')
     related_url = get_related_url(request, 'order', id=orderid)
 
     # notify to each manager.
