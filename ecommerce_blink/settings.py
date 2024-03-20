@@ -33,7 +33,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*","http://blink_ecom.com","blink_ecom.com"]
+ALLOWED_HOSTS = ["*","http://blink_ecom.com","blink_ecom.com",'127.0.0.1']
 
 
 # Application definition
@@ -187,7 +187,7 @@ AUTH_USER_MODEL = 'users.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # During development only
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'

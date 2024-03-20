@@ -932,9 +932,10 @@ def create_employee_salary(request,id):
 @login_required
 @admin_or_manager_required
 def employee_salary_list(request,id):
-    employee_salary = EmployeeSalary.objects.filter(employee_id=id,employee_is_deleted=False)
+    employee_salary = EmployeeSalary.objects.filter(employee_id=id,employee__is_deleted=False)
     employee_salary = get_pagination_records(request,employee_salary)
     return render(request,'staffs/pages/employee_salary_list.html',{'employee_salary':employee_salary,'employee_id':id})
+
 @login_required
 @admin_or_manager_required
 def update_employee_salary(request,id):

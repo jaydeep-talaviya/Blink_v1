@@ -19,7 +19,7 @@ def admin_or_manager_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         # Check if the user is an admin or an employee with type 'manager'
-        if request.user.is_superuser or (request.user.is_authenticated and (hasattr(request.user, 'employee') and request.user.employee.type != 'other')):
+        if request.user.is_superuser or (request.user.is_authenticated and (hasattr(request.user, 'employee') and request.user.employee.type not in ['other','warehouse_owner'])):
             return view_func(request, *args, **kwargs)
         else:
             messages.error(request, "You do not have permission to access this page.")

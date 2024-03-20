@@ -7,3 +7,11 @@
 https://docs.google.com/spreadsheets/d/1-o7KIyzILiTkdL2W-5vtvBnvsVJGQ93pHBjymeZBqFk/edit?usp=sharing
 
 
+## Setup for new database
+
+# run fixtures 
+
+#### python manage.py loaddata admin_fixture.json
+#### python manage.py loaddata states.json
+
+

@@ -6,7 +6,7 @@ register = template.Library()
 
 @register.filter(name='get_item')
 def get_item(dictionary, key):
-    return dictionary.get(key, None)
+    return dictionary.get(key, None) if dictionary and key in dictionary else key
 
 @register.filter(name='get_changed_fields')
 def get_changed_fields(changed_fields):
